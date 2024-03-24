@@ -1,0 +1,11 @@
+# Backend
+# MongoDB
+backend/node_modules/*
+
+
+# Frontend
+# Mongodb
+frontend/node_modules/*
+
+# Others
+*/.DS_Store
