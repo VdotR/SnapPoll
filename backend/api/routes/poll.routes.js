@@ -16,7 +16,41 @@ mongoose.connect(process.env.CONNECTION_STRING, {
 
 router.patch('/vote/:id', async (req, res) => {
     const _id = req.params.id;
+    try {
+        const poll = await Poll.findById(_id);
+        const user = await User.findById(req.body.user_id);
 
+        if (!poll.available) {
+            res.status(400).send({ message: "Poll is not accepting responses" });
+        }
+
+        user.answered_poll_id.push(_id);
+
+        // TODO: find a better way that does not involve looping?
+        // Update existing response from user if already responded
+        let responded = false;
+        for (let i = 0; i < poll.responses.length; i++) {
+            let r = poll.responses[i];
+            if (r.user == req.body.user_id) {
+                r.answer = req.body.answer;
+                responded = true;
+                updatedAt = Date.now;
+            }
+        }
+        if (!responded) {
+            poll.responses.push({
+                user: req.body.user_id,
+                answer: req.body.answer
+            });
+        }
+        
+        await user.save();
+        await poll.save();
+        res.json(poll);
+    }
+    catch (error) {
+        res.status(500).send({ message: error.message });
+    }
 })
 
 router.patch('/open/:id', async (req, res) => {
