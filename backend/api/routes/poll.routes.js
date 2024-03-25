@@ -14,20 +14,50 @@ mongoose.connect(process.env.CONNECTION_STRING, {
   }).then(() => console.log('Connected to MongoDB'))
     .catch(err => console.error('Could not connect to MongoDB...', err));
 
-router.patch('/vote/', (req, res) => {
+router.patch('/vote/:id', async (req, res) => {
+    const _id = req.params.id;
 
 })
 
-router.patch('/open/:id', (req, res) => {
-    
+router.patch('/open/:id', async (req, res) => {
+    const _id = req.params.id;
+    try {
+        const poll = await Poll.findById(_id);
+        poll.available = true;
+        const newPoll = await poll.save();
+        res.send(newPoll);
+    }
+    catch (error) {
+        res.status(500).send({ message: error.message });
+    }
 })
 
-router.patch('/close/:id', (req, res) => {
-    
+router.patch('/close/:id', async (req, res) => {
+    const _id = req.params.id;
+    try {
+        const poll = await Poll.findById(_id);
+        poll.available = false;
+        const newPoll = await poll.save();
+        res.send(newPoll);
+    }
+    catch (error) {
+        res.status(500).send({ message: error.message });
+    }
 })
 
-router.post('/', (req, res) => {
-    
+router.post('/', async (req, res) => {
+    try {
+        const poll = new Poll({
+            question: req.body.question,
+            correct_option: req.body.correct_option,
+            options: req.body.options
+        });
+        await poll.save();
+        res.json(poll);
+    }
+    catch (error) {
+        res.status(500).send({ message: error.message });
+    }
 })
 
 router.get('/:id', async (req, res) => {
