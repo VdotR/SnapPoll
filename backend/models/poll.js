@@ -4,7 +4,8 @@ const Schema = mongoose.Schema;
 
 const responseSchema = new Schema({
     user: {type: Schema.Types.ObjectId, ref: "User"},
-    answer: Number
+    answer: Number,
+    updatedAt: { type: Date, default: Date.now }
 });
 
 const pollSchema = new Schema({
