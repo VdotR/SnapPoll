@@ -4,6 +4,7 @@ require('dotenv').config();
 const User = require("../../models/user.js");
 const Poll = require("../../models/poll.js")
 const express = require("express");
+const { ObjectId } = require('mongodb');
 const router = express.Router();
 
 
@@ -23,8 +24,11 @@ router.patch('/vote/:id', async (req, res) => {
         if (!poll.available) {
             res.status(400).send({ message: "Poll is not accepting responses" });
         }
-
-        user.answered_poll_id.push(_id);
+        
+        // Add poll to answered_poll_id if user has not answered the poll
+        if (!(user.answered_poll_id.includes(_id))){
+            user.answered_poll_id.push(_id);
+        }
 
         // TODO: find a better way that does not involve looping?
         // Update existing response from user if already responded
