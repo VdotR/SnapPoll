@@ -1,11 +1,14 @@
 # Backend
 # MongoDB
 backend/node_modules/*
+backend/.env
 
 
 # Frontend
 # Mongodb
 frontend/node_modules/*
+frontend/.env
+
 
 # Others
 */.DS_Store
