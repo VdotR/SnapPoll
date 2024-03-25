@@ -18,44 +18,41 @@ mongoose.connect(process.env.CONNECTION_STRING, {
 router.patch('/vote/:id', async (req, res) => {
     const _id = req.params.id;
     try {
+        // Check if the poll is available directly
         const poll = await Poll.findById(_id);
-        const user = await User.findById(req.body.user_id);
-
-        if (!poll.available) {
-            res.status(400).send({ message: "Poll is not accepting responses" });
+        if (!poll) {
+            return res.status(400).json({ message: "Poll is not available" });
+        } else if (!poll.available){
+            return res.status(400).json({ message: "Poll is not accepting responses" });
         }
         
-        // Add poll to answered_poll_id if user has not answered the poll
-        if (!(user.answered_poll_id.includes(_id))){
-            user.answered_poll_id.push(_id);
-        }
+        // Update user's answered_poll_id without adding duplicates (like adding to a set)
+        await User.updateOne(
+            { _id: req.body.user_id },
+            { $addToSet: { answered_poll_id: _id } }
+        );
 
-        // TODO: find a better way that does not involve looping?
-        // Update existing response from user if already responded
-        let responded = false;
-        for (let i = 0; i < poll.responses.length; i++) {
-            let r = poll.responses[i];
-            if (r.user == req.body.user_id) {
-                r.answer = req.body.answer;
-                responded = true;
-                updatedAt = Date.now;
-            }
-        }
-        if (!responded) {
+        // Check if user already responded
+        let existingResponse = poll.responses.find(r => r.user.toString() === req.body.user_id);
+        
+        if (existingResponse) {
+            // Update the existing response
+            existingResponse.answer = req.body.answer;
+        } else {
+            // Add new response
             poll.responses.push({
                 user: req.body.user_id,
                 answer: req.body.answer
             });
         }
         
-        await user.save();
-        await poll.save();
-        res.json(poll);
+        const newPoll = await poll.save();
+        res.send(newPoll);
+        
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-    catch (error) {
-        res.status(500).send({ message: error.message });
-    }
-})
+});
 
 router.patch('/open/:id', async (req, res) => {
     const _id = req.params.id;
