@@ -11,6 +11,7 @@ const pollSchema = new Schema({
     question: {type: String, required: true},
     options:  [{type: String, default: []}],
     correct_option: {type: Number, default: -1},
+    available: {type: Boolean, default: false},
     date_created: { type: Date, default: Date.now },
     responses: {type: [responseSchema], default: []}
 });
