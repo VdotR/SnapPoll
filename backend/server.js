@@ -6,6 +6,7 @@ const port = 3000;
 require('dotenv').config();
 
 const pollRoutes = require('./api/routes/poll.routes');
+const userRoutes = require('./api/routes/user.routes');
 
 // Middleware
 app.use(express.json()); 
@@ -18,6 +19,7 @@ mongoose.connect(process.env.CONNECTION_STRING, {
     .catch(err => console.error('Could not connect to MongoDB...', err));
 
 app.use('/api/poll', pollRoutes);
+app.use('/api/user', userRoutes);
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
