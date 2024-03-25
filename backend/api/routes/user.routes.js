@@ -4,6 +4,17 @@ const User = require("../../models/user.js");
 const express = require("express");
 const router = express.Router();
 
+router.get('/:id', async (req, res) => {
+    try{
+        const existingUser = await User.findById(req.params.id).select('-password');
+        if(!existingUser) res.status(404).send("User not found.");
+        else res.status(200).send(existingUser);
+    }
+    catch (error) {
+        res.status(500).send("Something went wrong");
+    }
+});
+
 router.get('/lookup/:email_username', async (req, res) => {
     const identifier = req.params.email_username;
     try{
@@ -43,11 +54,13 @@ router.post('/signup/', async (req, res) => {
 });
 
 router.post('/login/', async (req, res) => {}); //TODO
+router.post('/logout/', async (req, res) => {}); //TODO
 
 router.delete('/:id', async (req, res) => {
     try {
-        await User.findOneAndDelete({ _id: req.params.id });
-        res.status(200).send("Deleted user.")
+        const deletedUser = await User.findOneAndDelete({ _id: req.params.id });
+        if(deletedUser) res.status(200).send("Deleted user.");
+        else res.status(404).send("User not found.");
     } catch(error) {   
         res.status(400).send("Error");
         console.log("Failed" + error);
