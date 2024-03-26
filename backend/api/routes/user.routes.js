@@ -63,13 +63,28 @@ router.get('/:id', async (req, res) => {
 });
 
 //Creates new user with given information
+//@ char restriciton placed on email/username to prevent case where email and username are the same 
+//TODO: Password restrictions (minimum strength) 
 router.post('/signup/', async (req, res) => {
     try {
+        const { email, username, password } = req.body;
+
+        // Check if email contains '@'
+        if (!email.includes('@')) {
+            return res.status(400).send('Email must contain an @ symbol.');
+        }
+
+        // Check if username contains '@'
+        if (username.includes('@')) {
+            return res.status(400).send('Username must not contain an @ symbol.');
+        }
+
         const newUser = new User({
-            email: req.body.email,
-            username: req.body.username,
-            password: req.body.password
+            email: email,
+            username: username,
+            password: password
         });
+
         await newUser.save();
         res.send("User registration successful.")
     }
@@ -92,7 +107,7 @@ router.post('/signup/', async (req, res) => {
 //Deletes user if authorized (session has same userId), destroys session
 router.delete('/:id', checkSession, async (req, res) => {
     try {
-        if(req.session.userId != req.params.id) {
+        if (req.session.userId != req.params.id) {
             res.status(401).send("Unauthorized");
             return;
         }
@@ -103,7 +118,7 @@ router.delete('/:id', checkSession, async (req, res) => {
                 if (err) {
                     // Handle error
                     console.error("Session destruction error:", err);
-                } 
+                }
             });
         }
         else res.status(404).send("User not found.");
