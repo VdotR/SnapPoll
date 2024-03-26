@@ -30,8 +30,8 @@ function Login() {
     return (
         <Page title='Login'>
             <form id='login-form'>
-                <input name='identifier' type='text' onInput={e => setIdentifier(e.target.value)} placeholder='Username or email'></input>
-                <input type='password' onInput={e => setPassword(e.target.value)} placeholder='Password'></input>
+                <input name='identifier' type='text' onInput={e => setIdentifier(e.target.value)} placeholder='Username or email' required></input>
+                <input type='password' onInput={e => setPassword(e.target.value)} placeholder='Password' required></input>
                 <button onClick={handleLogin} type='button'>
                     Login
                 </button>
