@@ -3,9 +3,9 @@ const bcrypt = require('bcrypt');
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
-    email: {type: String, required: true, unique: true},
-    password: {type: String, required: true},
-    username: {type: String, required: true, unique: true},
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    username: { type: String, required: true, unique: true },
     date_joined: { type: Date, default: Date.now },
     created_poll_id: [{
         type: Schema.Types.ObjectId,
@@ -20,7 +20,7 @@ const userSchema = new Schema({
 });
 
 // Password encryption middleware
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function (next) {
     // Check if the password is modified or if it's a new user
     if (this.isModified('password') || this.isNew) {
         const salt = await bcrypt.genSalt(10); // Generate a salt

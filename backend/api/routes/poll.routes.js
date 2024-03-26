@@ -4,9 +4,8 @@ require('dotenv').config();
 const User = require("../../models/user.js");
 const Poll = require("../../models/poll.js")
 const express = require("express");
-const { ObjectId } = require('mongodb');
 const router = express.Router();
-
+const { checkSession } = require('../middleware.js')
 
 // Connect to mongodb
 mongoose.connect(process.env.CONNECTION_STRING, {
@@ -15,7 +14,7 @@ mongoose.connect(process.env.CONNECTION_STRING, {
   }).then(() => console.log('Connected to MongoDB'))
     .catch(err => console.error('Could not connect to MongoDB...', err));
 
-router.patch('/vote/:id', async (req, res) => {
+router.patch('/vote/:id', checkSession, async (req, res) => {
     const _id = req.params.id;
     try {
         // Check if the poll is available directly
@@ -38,6 +37,7 @@ router.patch('/vote/:id', async (req, res) => {
         if (existingResponse) {
             // Update the existing response
             existingResponse.answer = req.body.answer;
+            existingResponse.updatedAt = Date.now();
         } else {
             // Add new response
             poll.responses.push({
@@ -54,7 +54,7 @@ router.patch('/vote/:id', async (req, res) => {
     }
 });
 
-router.patch('/open/:id', async (req, res) => {
+router.patch('/open/:id', checkSession, async (req, res) => {
     const _id = req.params.id;
     try {
         const poll = await Poll.findById(_id);
@@ -67,7 +67,7 @@ router.patch('/open/:id', async (req, res) => {
     }
 })
 
-router.patch('/close/:id', async (req, res) => {
+router.patch('/close/:id', checkSession, async (req, res) => {
     const _id = req.params.id;
     try {
         const poll = await Poll.findById(_id);
@@ -80,7 +80,7 @@ router.patch('/close/:id', async (req, res) => {
     }
 })
 
-router.post('/', async (req, res) => {
+router.post('/', checkSession, async (req, res) => {
     try {
         const poll = new Poll({
             question: req.body.question,
@@ -95,7 +95,7 @@ router.post('/', async (req, res) => {
     }
 })
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', checkSession, async (req, res) => {
     const _id = req.params.id;
     try{
         const poll = await Poll.findById(_id);

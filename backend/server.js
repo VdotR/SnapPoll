@@ -10,7 +10,7 @@ const pollRoutes = require('./api/routes/poll.routes');
 const userRoutes = require('./api/routes/user.routes');
 
 // Middleware
-app.use(express.json()); 
+app.use(express.json());
 app.use(session({
   secret: 'secret', //TODO: change
   resave: false,
@@ -19,10 +19,10 @@ app.use(session({
 
 // Connect to mongodb
 mongoose.connect(process.env.CONNECTION_STRING, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }).then(() => console.log('Connected to MongoDB'))
-    .catch(err => console.error('Could not connect to MongoDB...', err));
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+}).then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('Could not connect to MongoDB...', err));
 
 app.use('/api/poll', pollRoutes);
 app.use('/api/user', userRoutes);
