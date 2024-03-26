@@ -1,5 +1,5 @@
 import Page from '../components/page'
-import { useState, useRef, useSyncExternalStore } from 'react';
+import { useState } from 'react';
 
 function Login() {
     const [identifier, setIdentifier] = useState("");
