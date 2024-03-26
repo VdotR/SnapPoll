@@ -32,7 +32,7 @@ function Login() {
             <form id='login-form'>
                 <input name='identifier' type='text' onInput={e => setIdentifier(e.target.value)} placeholder='Username or email'></input>
                 <input type='password' onInput={e => setPassword(e.target.value)} placeholder='Password'></input>
-                <button onClick={handleLogin} type='submit'>
+                <button onClick={handleLogin} type='button'>
                     Login
                 </button>
             </form>

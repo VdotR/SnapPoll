@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const app = express();
+const cors = require('cors');
 const port = 3000;
 require('dotenv').config();
 
@@ -11,6 +12,9 @@ const userRoutes = require('./api/routes/user.routes');
 
 // Middleware
 app.use(express.json());
+app.use(cors({
+  origin: 'http://localhost:5173'
+}));
 app.use(session({
   secret: 'secret', //TODO: change
   resave: false,
