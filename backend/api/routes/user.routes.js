@@ -10,8 +10,6 @@ const { checkSession } = require('../middleware.js')
 router.post('/login/', async (req, res) => {
     try {
         const { identifier, password } = req.body;
-        console.log(identifier);
-        console.log(password);
         const user = await User.findOne({ $or: [{ username: identifier }, { email: identifier }] });
         if (!user || !await bcrypt.compare(password, user.password)) {
             return res.status(400).send('Invalid credentials');
@@ -37,7 +35,7 @@ router.get('/logout/', checkSession, async (req, res) => {
     });
 });
 
-// Returns information (excluding password hash) about the user matching email or password
+// Returns information (excluding password hash) about the user matching email or username
 router.get('/lookup/:email_username', async (req, res) => {
     const identifier = req.params.email_username;
     try {
