@@ -12,17 +12,17 @@ mongoose.connect(process.env.CONNECTION_STRING, {
   }).then(() => console.log('Connected to MongoDB'))
     .catch(err => console.error('Could not connect to MongoDB...', err));
 
-// Construct sample data
+//Construct sample data
 const sampleUser = new User({
-    email : "sampleUser@ucsd.edu",
-    password : "sample",
-    username : "sample_user",
+    email : "sampleUser2@ucsd.edu",
+    password : "sample2",
+    username : "sample_user2",
 });
 
 const samplePoll = new Poll({
-    question : "A sample question???",
+    question : "A sample question????__?",
     options: ['A', 'B', 'C', 'D'],
-    correct_option : 0,
+    correct_option : 2,
     responses : {
         user: sampleUser._id,
         answer : 0

@@ -26,6 +26,7 @@ userSchema.pre('save', async function (next) {
         const salt = await bcrypt.genSalt(10); // Generate a salt
         this.password = await bcrypt.hash(this.password, salt); // Hash the password with the salt
     }
+
     next(); // Proceed to the next middleware or save the document
 });
 
