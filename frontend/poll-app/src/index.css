@@ -3,11 +3,12 @@
 /* Global fonts */
 html * {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  height: 100%;
 }
 
 body {
   margin: 0;
-  height: 100vh;
+  min-height: 100%;
 }
 
 #root {
@@ -24,11 +25,13 @@ body {
   flex-grow: 1;
 }
 
+/* Header and page */
 nav {
   padding: 0 5%;
   display: flex;
   border-bottom: 2px solid black;
   align-content: space-between;
+  font-size: 1rem;
 }
 
 nav .nav-links {
@@ -37,33 +40,47 @@ nav .nav-links {
   margin-left: auto;
 }
 
-nav span {
-  padding: 10px 20px;
-  padding-left: 0px;
+nav span, nav a {
+  padding: 1rem;
+  padding-left: 0;
+  color: black;
 }
 
 nav #greet-user {
-  margin-left: 10px;
+  margin-left: 1.5rem;
 }
 
+.content .title {
+  width: 100%;
+}
+
+.center {
+  text-align: center;
+}
+
+/* Form used on signup and login pages */
 #login-form {
   flex-grow: auto;
 }
 
 #login-form input {
   display: block;
-  margin-bottom: 20px;
+  margin-bottom: 1rem;
   height: 1rem;
-  font-size: 18px;
-  padding: 10px;
+  font-size: 1rem;
+  padding: 0.5rem;
   border: 1px solid black;
 }
 
 button {
-  font-size: 18px;
+  font-size: 1rem;
   background-color: white;
   border: 1px solid black;
-  padding: 5px;
+  padding: 0.25rem 0.5em;
   display: block;
   margin: 0 auto;
+}
+
+button:hover {
+  cursor: pointer;
 }

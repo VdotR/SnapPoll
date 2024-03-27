@@ -1,11 +1,34 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import React, { useState, useEffect } from 'react';
-import Login from './pages/Login';
-import SignUp from './pages/SignUp';
-import Dashboard from './pages/Dashboard';
-import './App.css';
+import Login from './pages/Login'
+import SignUp from './pages/SignUp'
+import MyPolls from './pages/MyPolls'
+import './App.css'
 
 // TODO: route between different pages
+// https://reactrouter.com/en/main/start/tutorial
+import {
+  createBrowserRouter,
+  RouterProvider
+} from "react-router-dom"
+
+// Routes page URL to page components (can use regex)
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: isLoggedIn ? <Dashboard /> : <Login />, // root is dashboard or login
+  }, 
+  {
+    path: "/login",
+    element: <Login></Login>,
+  },
+  {
+    path: "/signup",
+    element: <SignUp></SignUp>
+  },
+  {
+    path: "/polls",
+    element: <MyPolls></MyPolls>
+  }
+]);
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -39,6 +62,9 @@ function App() {
 
     </Router>
   );
+  return (
+    <RouterProvider router={router} />
+  )
 }
 
 export default App

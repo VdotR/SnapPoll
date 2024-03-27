@@ -87,8 +87,15 @@ router.post('/', checkSession, async (req, res) => {
             correct_option: req.body.correct_option,
             options: req.body.options
         });
-        await poll.save();
-        res.json(poll);
+        const newPoll = await poll.save();
+
+        // Update user's created_poll_id
+        await User.updateOne(
+            { _id: req.session.userId},
+            { $push: { created_poll_id: newPoll._id } }
+        );
+
+        res.json(newPoll);
     }
     catch (error) {
         res.status(500).send({ message: error.message });

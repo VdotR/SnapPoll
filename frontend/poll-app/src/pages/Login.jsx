@@ -1,5 +1,6 @@
 import Page from '../components/page'
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 
 function Login() {
@@ -8,7 +9,6 @@ function Login() {
 
     async function handleLogin() {
         try {
-            console.log("fetch")
             const res = await fetch('http://localhost:3000/api/user/login', {
                 method: "POST",
                 credentials: 'include',
@@ -21,20 +21,18 @@ function Login() {
                     "password": password
                 })
             })
-            console.log(res);
 
+            // Login failed
             if (res.status === 400) {
                 alert("Username/Email and password do not match");
-            } else if (res.ok) {
-                // Handle successful login here
-                console.log("Login Successful");
-                window.location.reload(); //just refresh I guess
-
-            } else {
-                // Handle other errors or statuses here
-                console.log("Error logging in");
+                return;
             }
 
+            // Set global user identifier, removed automatically when browser closed
+            sessionStorage.setItem('identifier', identifier);
+
+            // Redirect to polls page
+            navigate('/polls')
         }
         catch (err) {
             console.log(err);
@@ -43,7 +41,7 @@ function Login() {
     }
 
     return (
-        <Page title='Login'>
+        <Page title='Login' centerTitle={true} hideNav={true}>
             <form id='login-form'>
                 <input name='identifier' type='text' onInput={e => setIdentifier(e.target.value)} placeholder='Username or email' required></input>
                 <input type='password' onInput={e => setPassword(e.target.value)} placeholder='Password' required></input>

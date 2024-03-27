@@ -7,7 +7,10 @@ const router = express.Router();
 const { checkSession } = require('../middleware.js')
 
 router.get('/auth/', async (req, res) => {
-    return res.json({isLoggedIn: !!req.session.userId});
+    return res.json({
+        isLoggedIn: !!req.session.userId,
+        identifier: req.session.userIdentifier
+    });
 });
 
 router.post('/login/', async (req, res) => {
@@ -18,6 +21,7 @@ router.post('/login/', async (req, res) => {
             return res.status(400).send('Invalid credentials');
         }
         req.session.userId = user._id; // Create a session
+        req.session.userIdentifier = identifier;
         res.send('Login successful');
     } catch (error) {
         res.status(400).send("Invalid request");
@@ -96,5 +100,34 @@ router.delete('/:id', checkSession, async (req, res) => {
         console.log("Failed" + error);
     }
 });
+
+// TODO: should this be here? want to retrieve all polls a user created in from newest to oldest
+router.get('/:identifier/polls', checkSession, async (req, res) => {
+    console.log(`Currently logged in as ${req.session.userId}`)
+    
+    const identifier = req.params.identifier;
+    try {
+        const existingUser = await User.findOne({ 
+            $or: [
+                { username: identifier },
+                { email: identifier }
+            ] 
+        }, { password: 0 })
+            .populate('created_poll_id');
+        if (!existingUser) {
+            return res.status(404).send("User not found.");
+        }
+        if (existingUser.created_poll_id.length == 0) {
+            return res.status(400).send("User has not created any polls.");
+        }
+        if (existingUser._id != req.session.userId) {
+            return res.status(401).send("Unauthorized")
+        }
+        res.send(existingUser.created_poll_id.reverse());
+    }
+    catch (error) {
+        res.status(500).send({ message: error.message });
+    }
+})
 
 module.exports = router;

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 function Header() {
     const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -28,12 +29,12 @@ function Header() {
     };
 
     return (
-        <nav>
+        <nav style={hideNav? {display: "none"} : {}}>
             {/* Placeholders for actual links */}
             <span>Home</span>
             <div className='nav-links'>
                 <span>Answer Poll</span>
-                <span>My Polls</span>
+                <Link to='/polls'>My Polls</Link>
                 <span>My Account</span>
                 <div className="dropdown">
                     <span id='greet-user' onClick={toggleDropdown}>Hi, {identifier}</span>
