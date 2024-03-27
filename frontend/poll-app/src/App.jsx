@@ -1,7 +1,12 @@
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import Login from './pages/Login'
 import SignUp from './pages/SignUp'
+import Dashboard from './pages/Dashboard'
 import MyPolls from './pages/MyPolls'
+import { useUserContext } from '../context'
 import './App.css'
+
 
 // TODO: route between different pages
 // https://reactrouter.com/en/main/start/tutorial
@@ -10,29 +15,28 @@ import {
   RouterProvider
 } from "react-router-dom"
 
-// Routes page URL to page components (can use regex)
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: isLoggedIn ? <Dashboard /> : <Login />, // root is dashboard or login
-  }, 
-  {
-    path: "/login",
-    element: <Login></Login>,
-  },
-  {
-    path: "/signup",
-    element: <SignUp></SignUp>
-  },
-  {
-    path: "/polls",
-    element: <MyPolls></MyPolls>
-  }
-]);
-
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const { 
+    isLoggedIn,
+    setIsLoggedIn,
+    isLoading,
+    setIsLoading,
+    identifier,
+    setIdentifier
+  } = useUserContext();
+
+  function pageifLoggedIn(path, page) {
+    // return isLoggedIn ? page : <Login />
+    if (isLoggedIn) {
+      if (path == "/login") {
+        return <Navigate to="/"></Navigate>
+      }
+      return page;
+    }
+    else {
+      return <Navigate to="/login" replace={true} state={{ from: path }}/>
+    } 
+  }
 
   useEffect(() => {
     fetch('http://localhost:3000/api/user/auth/', {
@@ -40,12 +44,15 @@ function App() {
     })
       .then((response) => response.json())
       .then((data) => {
+        console.log("/auth response: " + data.isLoggedIn)
         setIsLoggedIn(data.isLoggedIn);
+        setIdentifier(data.identifier);
       })
       .catch((error) => {
         console.error('Error fetching auth status:', error);
       })
       .finally(() => {
+        // console.log(isLoggedIn) // redirect doesn't work without this?
         setIsLoading(false);
       });
   }, []);
@@ -57,14 +64,13 @@ function App() {
   return (
     <Router>
       <Routes>
-      <Route path="/" element={isLoggedIn ? <Dashboard /> : <React.Fragment><Login /><SignUp /></React.Fragment>} />
+        <Route path="/" element={pageifLoggedIn("/", <Dashboard />)} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/polls" element={pageifLoggedIn("/polls", <MyPolls />)} />
       </Routes>
-
     </Router>
   );
-  return (
-    <RouterProvider router={router} />
-  )
 }
 
 export default App

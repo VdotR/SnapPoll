@@ -1,11 +1,16 @@
 import Page from '../components/page'
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useUserContext } from '../../context';
 
 
-function Login() {
-    const [identifier, setIdentifier] = useState("");
+function Login({ redirected }) {
+    const [userIdentifier, setUserIdentifier] = useState("");
     const [password, setPassword] = useState("")
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { from } = location.state || {from: '/'}
+    const { isLoggedIn, setIsLoggedIn, setIdentifier } = useUserContext();
 
     async function handleLogin() {
         try {
@@ -17,7 +22,7 @@ function Login() {
                     'Content-Type': 'application/json' 
                 },
                 body: JSON.stringify({
-                    "identifier": identifier,
+                    "identifier": userIdentifier,
                     "password": password
                 })
             })
@@ -28,22 +33,26 @@ function Login() {
                 return;
             }
 
-            // Set global user identifier, removed automatically when browser closed
-            sessionStorage.setItem('identifier', identifier);
-
-            // Redirect to polls page
-            navigate('/polls')
+            // Login success, change global state
+            setIsLoggedIn(true);      
+            setIdentifier(userIdentifier);      
         }
         catch (err) {
             console.log(err);
-        }
-        
+        }        
     }
+
+    // Send the user back from whence they came on successful login or if already logged in
+    useEffect(() => {
+        if (isLoggedIn) {
+            navigate(from);
+        } 
+    }, [isLoggedIn])
 
     return (
         <Page title='Login' centerTitle={true} hideNav={true}>
             <form id='login-form'>
-                <input name='identifier' type='text' onInput={e => setIdentifier(e.target.value)} placeholder='Username or email' required></input>
+                <input name='identifier' type='text' onInput={e => setUserIdentifier(e.target.value)} placeholder='Username or email' required></input>
                 <input type='password' onInput={e => setPassword(e.target.value)} placeholder='Password' required></input>
                 <button onClick={handleLogin} type='button'>
                     Login

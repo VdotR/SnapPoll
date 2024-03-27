@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useUserContext } from '../../context';
 
-function Header() {
+function Header({ hideNav }) {
     const [dropdownVisible, setDropdownVisible] = useState(false);
-    const identifier = "User"; // This should be dynamically set based on the logged-in user
+    const { identifier } = useUserContext();
 
     const toggleDropdown = () => setDropdownVisible(!dropdownVisible);
 
