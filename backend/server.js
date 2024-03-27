@@ -13,12 +13,14 @@ const userRoutes = require('./api/routes/user.routes');
 // Middleware
 app.use(express.json());
 app.use(cors({
-  origin: 'http://localhost:5173'
+  origin: 'http://localhost:5173',
+  credentials: true
 }));
 app.use(session({
   secret: 'secret', //TODO: change
   resave: false,
   saveUninitialized: true,
+cookie: { secure: false, httpOnly: true, maxAge: 1210000000 /*2 weeks*/ } // TODO: Change secure to true when done testing
 }));
 
 // Connect to mongodb

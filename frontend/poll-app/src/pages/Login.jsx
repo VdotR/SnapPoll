@@ -1,15 +1,17 @@
 import Page from '../components/page'
 import { useState } from 'react';
 
+
 function Login() {
     const [identifier, setIdentifier] = useState("");
-    const [password, setPassword] = useState("");
+    const [password, setPassword] = useState("")
 
     async function handleLogin() {
         try {
             console.log("fetch")
             const res = await fetch('http://localhost:3000/api/user/login', {
                 method: "POST",
+                credentials: 'include',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json' 
@@ -26,6 +28,8 @@ function Login() {
             } else if (res.ok) {
                 // Handle successful login here
                 console.log("Login Successful");
+                window.location.reload(); //just refresh I guess
+
             } else {
                 // Handle other errors or statuses here
                 console.log("Error logging in");
