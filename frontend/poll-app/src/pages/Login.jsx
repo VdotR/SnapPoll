@@ -20,6 +20,17 @@ function Login() {
                 })
             })
             console.log(res);
+
+            if (res.status === 400) {
+                alert("Username/Email and password do not match");
+            } else if (res.ok) {
+                // Handle successful login here
+                console.log("Login Successful");
+            } else {
+                // Handle other errors or statuses here
+                console.log("Error logging in");
+            }
+
         }
         catch (err) {
             console.log(err);

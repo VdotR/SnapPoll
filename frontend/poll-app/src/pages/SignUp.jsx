@@ -28,6 +28,16 @@ function SignUp() {
                 })
             })
             console.log(res);
+
+            if (res.status === 400) {
+                alert("Can't create user. User with same username/email may already exist."); 
+            } else if (res.ok) {
+                // Handle successful sign up
+                console.log("Sign Up Successful");
+            } else {
+                // Handle other errors or statuses here
+                console.log("Error Signing Up");
+            }
         }
         catch (err) {
             console.log(err);
