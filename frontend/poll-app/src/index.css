@@ -71,11 +71,11 @@ nav #greet-user:hover {
 }
 
 /* Form used on signup and login pages */
-#login-form {
+form {
   flex-grow: auto;
 }
 
-#login-form input {
+form input {
   display: block;
   margin-bottom: 1rem;
   height: 1rem;
