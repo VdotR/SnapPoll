@@ -10,7 +10,9 @@ function MyPolls() {
 
     async function fetchPolls(identifier) {
         try {
-            const res = await fetch(`http://localhost:3000/api/user/${identifier}/polls`);
+            const res = await fetch(`http://localhost:3000/api/user/created_polls/${identifier}`, { 
+                credentials: 'include' 
+            });
             if (res.status == 401) {
                 navigate('/login');
             }

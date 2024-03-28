@@ -101,10 +101,8 @@ router.delete('/:id', checkSession, async (req, res) => {
     }
 });
 
-// TODO: should this be here? want to retrieve all polls a user created in from newest to oldest
-router.get('/:identifier/polls', checkSession, async (req, res) => {
-    console.log(`Currently logged in as ${req.session.userId}`)
-    
+// TODO: should this be here? want to retrieve all polls a user created from newest to oldest
+router.get('/created_polls/:identifier', checkSession, async (req, res) => {
     const identifier = req.params.identifier;
     try {
         const existingUser = await User.findOne({ 

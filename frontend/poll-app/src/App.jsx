@@ -28,9 +28,6 @@ function App() {
   function pageifLoggedIn(path, page) {
     // return isLoggedIn ? page : <Login />
     if (isLoggedIn) {
-      if (path == "/login") {
-        return <Navigate to="/"></Navigate>
-      }
       return page;
     }
     else {
