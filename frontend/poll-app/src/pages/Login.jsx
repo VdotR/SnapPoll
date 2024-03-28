@@ -11,6 +11,7 @@ function Login({ redirected }) {
     const location = useLocation();
     const { from } = location.state || {from: '/'}
     const { isLoggedIn, setIsLoggedIn, setIdentifier } = useUserContext();
+    const successMessage = location.state?.message;
 
     async function handleLogin() {
         try {
@@ -51,7 +52,12 @@ function Login({ redirected }) {
 
     return (
         <Page title='Login' centerTitle={true} hideNav={true}>
-            <form id='login-form'>
+            <form id='login-form'>  
+                {successMessage && (
+                    <div className='success-login-message'>
+                        {successMessage}
+                    </div>
+                )}            
                 <input name='identifier' type='text' onInput={e => setUserIdentifier(e.target.value)} placeholder='Username or email' required></input>
                 <input type='password' onInput={e => setPassword(e.target.value)} placeholder='Password' required></input>
                 <button onClick={handleLogin} type='button'>

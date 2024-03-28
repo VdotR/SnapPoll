@@ -1,7 +1,10 @@
 import Page from '../components/page'
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 
 function SignUp() {
+    const navigate = useNavigate();
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -12,7 +15,6 @@ function SignUp() {
             alert("Passwords don't match!");
             return;
         }
-
         try {
             console.log("fetch")
             const res = await fetch('http://localhost:3000/api/user/signup', {
@@ -33,7 +35,9 @@ function SignUp() {
                 alert("Can't create user. User with same username/email may already exist."); 
             } else if (res.ok) {
                 // Handle successful sign up
-                console.log("Sign Up Successful");
+                console.log("Sign Up Successful, will redirect to login page");
+                // redirect to Login Page
+                navigate('/login', { state: { message: 'Signup successful. Please log in.' } });
             } else {
                 // Handle other errors or statuses here
                 console.log("Error Signing Up");
