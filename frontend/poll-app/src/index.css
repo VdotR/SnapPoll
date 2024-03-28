@@ -6,9 +6,17 @@ html * {
   height: 100%;
 }
 
+html {
+  height: 100%
+}
+
 body {
   margin: 0;
-  min-height: 100%;
+  height: 100%;
+}
+
+body * {
+  height: min-content;
 }
 
 #root {
@@ -48,6 +56,10 @@ nav span, nav a {
 
 nav #greet-user {
   margin-left: 1.5rem;
+}
+
+nav #greet-user:hover {
+  cursor: pointer;
 }
 
 .content .title {
@@ -93,4 +105,69 @@ button:hover {
   margin-bottom: 15px;
   border-radius: 4px;
   text-align: center;
+}
+
+/* Polls page */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead, tbody {
+  width: 100%;
+  text-align: left;
+}
+
+td, th {
+  padding: 0.5rem;
+}
+
+th svg {
+  display: inline;
+  vertical-align: middle;
+}
+
+th:hover {
+  cursor: pointer;
+}
+
+tr {
+  border-bottom: 1px solid grey;
+}
+
+tbody tr:hover {
+  background-color: whitesmoke;
+  cursor: pointer;
+}
+
+td a {
+  color: black;
+  text-decoration: none;
+  text-overflow: ellipsis;
+}
+
+/* https://stackoverflow.com/questions/826782/how-to-disable-text-selection-highlighting */
+.no-select {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
+
+.toolbar {
+  width: 100%;
+  display: flex;
+  justify-content: start;
+}
+
+.toolbar svg {
+  vertical-align: middle;
+}
+
+.toolbar button {
+  margin: 0.5rem;
+  margin-left: 0;
 }
