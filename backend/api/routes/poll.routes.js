@@ -27,7 +27,7 @@ router.patch('/vote/:id', checkSession, async (req, res) => {
         
         // Update user's answered_poll_id without adding duplicates (like adding to a set)
         await User.updateOne(
-            { _id: req.body.user_id },
+            { _id: req.session.userId },
             { $addToSet: { answered_poll_id: _id } }
         );
 
@@ -41,7 +41,7 @@ router.patch('/vote/:id', checkSession, async (req, res) => {
         } else {
             // Add new response
             poll.responses.push({
-                user: _id,
+                user: req.session.userId,
                 answer: req.body.answer
             });
         }
