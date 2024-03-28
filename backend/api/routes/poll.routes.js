@@ -32,7 +32,7 @@ router.patch('/vote/:id', checkSession, async (req, res) => {
         );
 
         // Check if user already responded
-        let existingResponse = poll.responses.find(r => r.user.toString() === req.body.user_id);
+        let existingResponse = poll.responses.find(r => r.user.toString() === _id);
         
         if (existingResponse) {
             // Update the existing response
@@ -41,7 +41,7 @@ router.patch('/vote/:id', checkSession, async (req, res) => {
         } else {
             // Add new response
             poll.responses.push({
-                user: req.body.user_id,
+                user: _id,
                 answer: req.body.answer
             });
         }

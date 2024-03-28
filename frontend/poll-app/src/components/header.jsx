@@ -32,9 +32,9 @@ function Header({ hideNav }) {
     return (
         <nav style={hideNav? {display: "none"} : {}}>
             {/* Placeholders for actual links */}
-            <span>Home</span>
+            <Link to='/'>Home</Link>
             <div className='nav-links'>
-                <span>Answer Poll</span>
+            <Link to='/vote'>Answer Poll</Link>
                 <Link to='/polls'>My Polls</Link>
                 <span>My Account</span>
                 <div className="dropdown">

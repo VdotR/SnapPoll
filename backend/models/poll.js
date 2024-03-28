@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const responseSchema = new Schema({
-    user: { type: Schema.Types.ObjectId, ref: "User" },
-    answer: Number,
+    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    answer: { type: Number, required: true },
     updatedAt: { type: Date, default: Date.now }
 });
 
