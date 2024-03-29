@@ -57,7 +57,11 @@ router.patch('/vote/:id', checkSession, async (req, res) => {
 router.patch('/open/:id', checkSession, async (req, res) => {
     const _id = req.params.id;
     try {
+        const user = await User.findById(req.session.userId);
         const poll = await Poll.findById(_id);
+        if (!user.created_poll_id.includes(poll._id)) {
+            return res.status(403).send("Forbidden");
+        }
         poll.available = true;
         const newPoll = await poll.save();
         res.send(newPoll);
@@ -70,7 +74,11 @@ router.patch('/open/:id', checkSession, async (req, res) => {
 router.patch('/close/:id', checkSession, async (req, res) => {
     const _id = req.params.id;
     try {
+        const user = await User.findById(req.session.userId);
         const poll = await Poll.findById(_id);
+        if (!user.created_poll_id.includes(poll._id)) {
+            return res.status(403).send("Forbidden");
+        }
         poll.available = false;
         const newPoll = await poll.save();
         res.send(newPoll);
