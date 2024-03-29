@@ -169,13 +169,6 @@ td a {
 }
 
 /* Create Poll Page ---------------------------------*/
-.option {
-  display: flex;
-}
 
-.option .left,
-.option .middle,
-.option .right{
-  flex: 1;
-}
+
 /*---------------------------------------------------*/

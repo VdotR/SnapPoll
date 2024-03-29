@@ -1,6 +1,7 @@
 import Page from '../components/page'
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { BsFillTrash3Fill } from "react-icons/bs";
 
 // Constants
 const MAX_QUESTION_LENGTH = 200;
@@ -116,32 +117,35 @@ function CreatePoll() {
                     onChange={handleQuestionChange}
                 />
             </div>
-            {options.map((option, index) => (
-                <div key={index}>
-                    <div className = "option">
-                        <div className='left'>
-                            <input 
-                                type="checkbox"
-                                checked={correctOption===index}
-                                onChange={() => handleCorrectOptionChange(index)}
-                            />
-                        </div>
-                        <div className='middle'>
-                            <input
+            <table>
+            <tbody>
+                {options.map((option, index) => (
+                <tr key={index}>
+                    <td>
+                        <input
+                            type="checkbox"
+                            checked={correctOption === index}
+                            onChange={() => handleCorrectOptionChange(index)}
+                            className='option_delete'
+                        />
+                    </td>
+                    <td>
+                        <input
                             type="text"
                             value={option}
-                            placeholder={`Option ${index+1}`}
-                            onChange={(event) => handleOptionChange(index, event)}/>
-                        </div>
-                        <div className='right'>
-                            <button type="button" className='side_button' onClick={() => removeOption(index)}>
-                                ✖
-                            </button>
-                        </div>
-                    </div>
-                    
-                </div>
-            ))}
+                            placeholder={`Option ${index + 1}`}
+                            onChange={(event) => handleOptionChange(index, event)}
+                        />
+                    </td>
+                    <td className='option_delete'>
+                        <button  type="button" onClick={() => removeOption(index)}>
+                            <BsFillTrash3Fill />
+                        </button>
+                    </td>
+                </tr>
+                ))}
+            </tbody>
+            </table>
             <button type="button" onClick={addOption}>
                 Add Option
             </button>
