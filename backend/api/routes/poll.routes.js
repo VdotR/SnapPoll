@@ -32,7 +32,7 @@ router.patch('/vote/:id', checkSession, async (req, res) => {
         );
 
         // Check if user already responded
-        let existingResponse = poll.responses.find(r => r.user.toString() === _id);
+        let existingResponse = poll.responses.find(r => r.user.toString() === req.session.userId);
         
         if (existingResponse) {
             // Update the existing response
