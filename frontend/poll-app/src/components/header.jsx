@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useUserContext } from '../../context';
-
+import config from './config';
+ 
 function Header({ hideNav }) {
     const [dropdownVisible, setDropdownVisible] = useState(false);
     const { username, setIsLoading } = useUserContext();
@@ -11,9 +12,9 @@ function Header({ hideNav }) {
     const handleLogout = async () => {
         try {
             // Make a GET request to the logout endpoint
-            const response = await fetch('http://localhost:3000/api/user/logout', {
+            const response = await fetch(`${config.BACKEND_BASE_URL}/api/user/logout`, {
                 method: 'GET',
-                credentials: 'include', // Ensure cookies are sent with the request if sessions are used
+                credentials: config.API_REQUEST_CREDENTIALS_SETTING, // Ensure cookies are sent with the request if sessions are used
             });
     
             if (response.ok) {

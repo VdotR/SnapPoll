@@ -75,7 +75,7 @@ function MyPolls() {
 
     async function fetchPolls(identifier) {
         setIsLoading(true);
-        fetch(`http://localhost:3000/api/user/created_polls/${identifier}`, { 
+        fetch(`${config.BACKEND_BASE_URL}/api/user/created_polls/${identifier}`, { 
             credentials: config.API_REQUEST_CREDENTIALS_SETTING 
         })
         .then(res => {
