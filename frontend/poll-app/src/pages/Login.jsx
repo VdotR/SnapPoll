@@ -11,7 +11,7 @@ function Login({ redirected }) {
     const navigate = useNavigate();
     const location = useLocation();
     const { from } = location.state || {from: '/'}
-    const { isLoggedIn, setIsLoggedIn, setIdentifier } = useUserContext();
+    const { isLoggedIn, setIsLoggedIn, setIsLoading } = useUserContext();
     const successMessage = location.state?.message;
 
     async function handleLogin() {
@@ -37,7 +37,6 @@ function Login({ redirected }) {
 
             // Login success, change global state
             setIsLoggedIn(true);      
-            setIdentifier(userIdentifier);      
         }
         catch (err) {
             console.log(err);
@@ -47,6 +46,7 @@ function Login({ redirected }) {
     // Send the user back from whence they came on successful login or if already logged in
     useEffect(() => {
         if (isLoggedIn) {
+            setIsLoading(true); //force auth check to get username
             navigate(from);
         } 
     }, [isLoggedIn])

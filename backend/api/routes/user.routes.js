@@ -9,7 +9,7 @@ const { checkSession } = require('../middleware.js')
 router.get('/auth/', async (req, res) => {
     return res.json({
         isLoggedIn: !!req.session.userId,
-        identifier: req.session.userIdentifier
+        username: req.session.username
     });
 });
 
@@ -21,7 +21,7 @@ router.post('/login/', async (req, res) => {
             return res.status(400).send('Invalid credentials');
         }
         req.session.userId = user._id; // Create a session
-        req.session.userIdentifier = identifier;
+        req.session.username = user.username;
         res.send('Login successful');
     } catch (error) {
         res.status(400).send("Invalid request");

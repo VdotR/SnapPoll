@@ -4,7 +4,7 @@ import { useUserContext } from '../../context';
 
 function Header({ hideNav }) {
     const [dropdownVisible, setDropdownVisible] = useState(false);
-    const { identifier } = useUserContext();
+    const { username, setIsLoading } = useUserContext();
 
     const toggleDropdown = () => setDropdownVisible(!dropdownVisible);
 
@@ -38,7 +38,7 @@ function Header({ hideNav }) {
                 <Link to='/polls'>My Polls</Link>
                 <span>My Account</span>
                 <div className="dropdown">
-                    <span id='greet-user' onClick={toggleDropdown}>Hi, {identifier}</span>
+                    <span id='greet-user' onClick={toggleDropdown}>Hi, {username}</span>
                     {dropdownVisible && (
                         <div className="dropdown-content">
                             <span onClick={handleLogout}>Logout</span>
