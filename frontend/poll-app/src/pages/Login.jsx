@@ -2,6 +2,7 @@ import Page from '../components/page'
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useUserContext } from '../../context';
+import config from '../config';
 
 
 function Login({ redirected }) {
@@ -15,9 +16,9 @@ function Login({ redirected }) {
 
     async function handleLogin() {
         try {
-            const res = await fetch('http://localhost:3000/api/user/login', {
+            const res = await fetch(`${config.BACKEND_BASE_URL}/api/user/login`, {
                 method: "POST",
-                credentials: 'include',
+                credentials: config.API_REQUEST_CREDENTIALS_SETTING,
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json' 

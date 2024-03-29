@@ -1,6 +1,7 @@
 import Page from '../components/page'
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import config from '../config';
 
 // Constants
 const MAX_QUESTION_LENGTH = 200;
@@ -76,9 +77,9 @@ function CreatePoll() {
         }
 
         try {
-            const response = await fetch('http://localhost:3000/api/poll', {
+            const response = await fetch(`${config.BACKEND_BASE_URL}/api/poll`, {
                 method: 'POST',
-                credentials: "include",
+                credentials: config.API_REQUEST_CREDENTIALS_SETTING,
                 headers: {
                     'Content-Type': 'application/json',
                 },

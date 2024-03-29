@@ -1,6 +1,8 @@
 import Page from '../components/page'
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { fetchPollDetails } from '../utils/pollUtils';
+import config from '../config';
 
 function Vote() {
     const navigate = useNavigate();
@@ -9,40 +11,34 @@ function Vote() {
 
     const [pollDetails, setPollDetails] = useState(location.state?.pollDetails || null);
 
-    // Function to fetch poll details if not provided
-    async function fetchPollDetails(pollId) {
-        try {
-            const response = await fetch(`http://localhost:3000/api/poll/${pollId}`, {
-                method: "GET",
-                credentials: 'include',
-            });
-            const data = await response.json();
-            setPollDetails(data);
-            if (!response.ok || (data && !data._id)) {
-                alert('Poll not found.');
-                navigate(`/vote`);
-            }
-            else if (!data.available) {
-                alert('Poll not available');
-                navigate(`/vote`);
-            }
-        } catch (error) {
-            console.error("Error fetching poll details:", error);
-        }
-    }
-
     useEffect(() => {
         if (!pollDetails) {
-            fetchPollDetails(poll_id);
+            fetchPollDetails(poll_id)
+            .then(data => {
+                setPollDetails(data);
+                
+                if (!response.ok || (data && !data._id)) {
+                    alert('Poll not found.');
+                    navigate(`/vote`);
+                }
+                else if (!data.available) {
+                    alert('Poll not available');
+                    navigate(`/vote`);
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching poll details:", error);
+                alert('An error occurred while fetching poll details.');
+            });
         }
     }, [pollDetails]);
 
     // Function to handle answer submission
     const submitAnswer = async (answerIndex) => {
         try {
-            const response = await fetch(`http://localhost:3000/api/poll/vote/${poll_id}`, {
+            const response = await fetch(`${config.BACKEND_BASE_URL}/api/poll/vote/${poll_id}`, {
                 method: "PATCH",
-                credentials: 'include',
+                credentials: config.API_REQUEST_CREDENTIALS_SETTING,
                 headers: {
                     'Content-Type': 'application/json'
                 },

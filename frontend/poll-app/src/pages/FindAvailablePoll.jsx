@@ -1,6 +1,7 @@
 import Page from '../components/page'
 import React, { useState } from 'react';
 import { useNavigate} from 'react-router-dom';
+import { fetchPollDetails } from '../utils/pollUtils';
 
 function FindAvailablePoll() {
     const navigate = useNavigate();
@@ -8,27 +9,24 @@ function FindAvailablePoll() {
     const [pollId, setPollId] = useState("");
     const [pollDetails, setPollDetails] = useState(null);
 
-    async function fetchPollDetails(pollId) {
-        try {
-            const response = await fetch(`http://localhost:3000/api/poll/${pollId}`, {
-                method: "GET",
-                credentials: 'include',
-            });
-            const data = await response.json();
-            setPollDetails(data);
-            if (!response.ok || (data && !data._id)) {
-                alert('Poll not found.');
-            }
-            else if(!data.available) alert('Poll not available');
-            else navigate(`/vote/${pollId}`, { state: { pollDetails } }); // Navigate to the specific poll page
-        } catch (error) {
-            console.error("Error fetching poll details:", error);
-        }
-    }
-
     const handleSubmit = (e) => {
         e.preventDefault(); // Prevent default form submission behavior
-        fetchPollDetails(pollId);
+        fetchPollDetails(pollId)
+        .then(data => {
+            setPollDetails(data);
+            
+            if (data && !data._id) {
+                alert('Poll not found.');
+            } else if (!data.available) {
+                alert('Poll not available');
+            } else {
+                navigate(`/vote/${pollId}`, { state: { pollDetails: data } }); // Navigate with poll details
+            }
+        })
+        .catch(error => {
+            console.error("Error fetching poll details:", error);
+            alert('An error occurred while fetching poll details.');
+        });
     };
     return (
         // Input form for poll ID on /vote/
