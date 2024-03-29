@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useUserContext } from '../../context';
-import config from './config';
- 
+import config from '../config';
+
 function Header({ hideNav }) {
     const [dropdownVisible, setDropdownVisible] = useState(false);
     const { username, setIsLoading } = useUserContext();
