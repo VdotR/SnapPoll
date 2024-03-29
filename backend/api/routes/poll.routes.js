@@ -118,4 +118,44 @@ router.get('/:id', checkSession, async (req, res) => {
     }
 })
 
+
+router.delete('/:id', checkSession, async (req, res) => {
+    try{
+        const poll = await Poll.findOneAndDelete({ _id: req.params.id; })
+        if (!poll) {
+            return res.status(404).send({ message: "Can't delete poll: Poll not found" });
+        }
+        else {
+           res.send(poll);
+        }
+    } catch (error) {
+        // If there's an error, it might be because the `id` is not a valid ObjectId
+        res.status(500).send({ message: error.message });
+    }
+})
+
+router.patch('/:id/clear', checkSession, async (req, res) => {
+    try{
+        const result = await Poll.updateOne(
+            { _id : req.params.id },
+            { $set : {responses: []}}
+        );
+
+     // Check if the poll was found and updated
+      if (result.matchedCount === 0) {
+        return res.status(404).send({ message: 'Poll not found' });
+      }
+      if (result.modifiedCount === 0) {
+        return res.status(400).send({ message: 'No updates made to the poll. The poll maybe originally empty' });
+      }
+      
+      res.send({ message: 'Poll responses cleared successfully.' });
+
+    } catch (error) {
+        console.error('Error clearing poll responses:', error);
+        // If there's an error, it might be because the `id` is not a valid ObjectId
+        res.status(500).send({ message: error.message });
+    }
+})
+
 module.exports = router;
