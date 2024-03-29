@@ -28,14 +28,15 @@ function MyPolls() {
     tableCols.forEach(col => defaultSortOrder[col] = true);
     const [sortOrder, setSortOrder] = useState(defaultSortOrder);
 
-    // Link each row to poll details
-    function handleRowClick(shortId) {
-        navigate(`/poll/${shortId}`)
+    // Link to poll details, ignore clicks on checkbox
+    function handleRowClick(e, shortId) {
+        if (e.target.tagName.toLowerCase() != 'input') {
+          navigate(`/poll/${shortId}`);  
+        }        
     }
 
     // Sort entries in a table column
     function handleSort(col) {
-        console.log("sorting " + col)
         // Toggle sort order for column
         const newSortOrder = sortOrder;
         newSortOrder[col] = !sortOrder[col];
@@ -52,10 +53,27 @@ function MyPolls() {
                 : (a[col] > b[col]? 1 : -1);
         });
         setPolls(sortedPolls);
-        console.log(sortedPolls)
+    }
+
+    // Toggle poll availability
+    async function toggleAvailable(poll) {
+        console.log(`http://localhost:3000/api/poll/${poll.available? 'close' : 'open'}/${poll._id}`);
+        fetch(`http://localhost:3000/api/poll/${poll.available? 'close' : 'open'}/${poll._id}`, {
+            method: "PATCH",    
+            credentials: 'include'
+        })
+        .then(res => {
+            if (res.status == 401) {
+                navigate('/login');
+                throw new Error(res.statusText)
+            }
+        })
+        .then(() => fetchPolls(identifier))
+        .catch(error => console.log(error))
     }
 
     async function fetchPolls(identifier) {
+        setIsLoading(true);
         fetch(`http://localhost:3000/api/user/created_polls/${identifier}`, { 
             credentials: 'include' 
         })
@@ -68,28 +86,20 @@ function MyPolls() {
         })
         .then(data => setPolls(data))
         .catch(error => console.log(error))
-        .finally(() => setIsLoading(false))
+        .finally(() => {
+            console.log("refreshed polls")
+            setIsLoading(false);
+        })
     }
 
     useEffect(() => {
         fetchPolls(identifier);
     }, []);
 
-    if (isLoading) {
-        return <Page title="My Polls">
-            <p>Loading...</p>
-        </Page>
-    }
-    else if (polls.length == 0) {
-        return <Page title="My Polls">
-            <p>You haven't created any polls</p>
-        </Page>
-    }
-
+    // TODO: delete and clear poll
+    
     return (
-        <Page title="My Polls"> { 
-            isLoading? <p>Loading...</p> :
-            polls.length == 0? <p>You haven't created any polls</p> :
+        <Page title="My Polls">  
             <>
             <div className='toolbar'>
                 <button><FaPlus /> New Poll</button>
@@ -105,11 +115,13 @@ function MyPolls() {
                         })}
                     </tr>
                 </thead>
+                {isLoading? <h2>Loading...</h2> :
+                polls.length == 0? <h2>You haven't created any polls</h2> :
                 <tbody>
                     {polls.map(poll => {
-                        return <tr onClick={() => handleRowClick(poll.shortId)} key={poll._id}>
+                        return <tr onClick={(e) => handleRowClick(e, poll.shortId)} key={poll._id}>
                             <td>{poll.question}</td>
-                            <td>{
+                            <td> {
                                 new Date(poll.date_created).toLocaleString('en-US', {
                                     year: 'numeric',
                                     month: '2-digit',
@@ -118,15 +130,15 @@ function MyPolls() {
                                     minute: '2-digit',
                                     second: '2-digit',
                                 })
-                            }</td>
-                            <td>{poll.available ? 'Yes' : 'No'}</td>
+                            } </td>
+                            <td><input type='checkbox' onClick={() => toggleAvailable(poll)} defaultChecked={poll.available}></input></td>
                             <td>{poll.responses.length}</td>
                         </tr>
                     })}
-                </tbody>
+                </tbody>}
             </table>
             </>
-        } </Page>
+        </Page>
     );
 }
 

@@ -51,7 +51,6 @@ function App() {
         console.error('Error fetching auth status:', error);
       })
       .finally(() => {
-        // console.log(isLoggedIn) // redirect doesn't work without this?
         setIsLoading(false);
       });
   }, []);
@@ -67,6 +66,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/polls" element={pageifLoggedIn("/polls", <MyPolls />)} />
+        <Route path="/poll/:poll_id" element={pageifLoggedIn("/polls/:poll_id", <MyPolls />)} />
         <Route path="/vote" element={pageifLoggedIn("/vote", <FindAvailablePoll />)} />
         <Route path="/vote/:poll_id" element={pageifLoggedIn("/vote/:poll_id", <Vote />)} />        
       </Routes>

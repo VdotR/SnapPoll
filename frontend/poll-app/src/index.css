@@ -3,20 +3,16 @@
 /* Global fonts */
 html * {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  height: 100%;
 }
 
 html {
-  height: 100%
+  height: 100%;
+  overflow: auto;
 }
 
 body {
   margin: 0;
   height: 100%;
-}
-
-body * {
-  height: min-content;
 }
 
 #root {
