@@ -102,7 +102,7 @@ function MyPolls() {
         <Page title="My Polls">  
             <>
             <div className='toolbar'>
-                <button><FaPlus /> New Poll</button>
+                <button onClick={() => navigate("/polls/create")}><FaPlus /> New Poll</button>
                 <button onClick={() => fetchPolls(identifier)}><FaRedo /></button>
             </div>
             <table>

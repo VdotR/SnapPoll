@@ -118,4 +118,69 @@ router.get('/:id', checkSession, async (req, res) => {
     }
 })
 
+
+router.delete('/:id', checkSession, async (req, res) => {
+    try{
+        const _id = req.params.id;
+        // Poll Side
+        const poll = await Poll.findOneAndDelete({ _id: _id })
+        if (!poll) {
+            return res.status(404).send({ message: "Can't delete poll: Poll not found" });
+        }
+
+        // User side 
+        // Each poll is created by ONLY 1 user
+        const updateCreated = User.findOneAndUpdate(
+            { created_poll_id: _id },
+            { $pull: { created_poll_id : _id } }
+        );
+
+        // Each poll will be answered by multiple users
+        const updateAnswered = User.updateMany(
+            { answered_poll_id: _id }, 
+            { $pull: { answered_poll_id: _id } } 
+        );
+
+        await Promise.all([updateCreated, updateAnswered]);
+        
+        res.send({ message: "Poll and references deleted successfully.", poll });
+
+    } catch (error) {
+        // If there's an error, it might be because the `id` is not a valid ObjectId
+        res.status(500).send({ message: error.message });
+    }
+})
+
+router.patch('/:id/clear', checkSession, async (req, res) => {
+    try{
+        const _id = req.params.id;
+        const result = await Poll.updateOne(
+            { _id : _id },
+            { $set : {responses: []}}
+        );
+
+        // Check if the poll was found and updated
+        if (result.matchedCount === 0) {
+            return res.status(404).send({ message: 'Poll not found' });
+        }
+      
+        // Update User side 
+        await User.updateMany(
+            { answered_poll_id: _id }, 
+            { $pull: { answered_poll_id: _id } } 
+        );
+
+        if (result.modifiedCount === 0) {
+            return res.status(200).send({ message: 'No updates made to the poll. The poll maybe originally empty' });
+        }
+
+      res.send({ message: 'Poll responses cleared successfully' });
+
+    } catch (error) {
+        console.error('Error clearing poll responses:', error);
+        // If there's an error, it might be because the `id` is not a valid ObjectId
+        res.status(500).send({ message: error.message });
+    }
+})
+
 module.exports = router;
