@@ -16,6 +16,7 @@ import {
   createBrowserRouter,
   RouterProvider
 } from "react-router-dom"
+import CreatePoll from './pages/CreatePoll';
 
 function App() {
   const { 
@@ -68,7 +69,8 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/polls" element={pageifLoggedIn("/polls", <MyPolls />)} />
         <Route path="/vote" element={pageifLoggedIn("/vote", <FindAvailablePoll />)} />
-        <Route path="/vote/:poll_id" element={pageifLoggedIn("/vote/:poll_id", <Vote />)} />        
+        <Route path="/vote/:poll_id" element={pageifLoggedIn("/vote/:poll_id", <Vote />)} />
+        <Route path="/polls/create" element={pageifLoggedIn("/polls/create", <CreatePoll />)} />        
       </Routes>
     </Router>
   );

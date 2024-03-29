@@ -92,7 +92,7 @@ function MyPolls() {
             polls.length == 0? <p>You haven't created any polls</p> :
             <>
             <div className='toolbar'>
-                <button><FaPlus /> New Poll</button>
+                <button onClick={() => navigate("/polls/create")}><FaPlus /> New Poll</button>
                 <button onClick={() => fetchPolls(identifier)}><FaRedo /></button>
             </div>
             <table>
