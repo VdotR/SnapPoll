@@ -16,7 +16,12 @@ router.get('/auth/', async (req, res) => {
 router.post('/login/', async (req, res) => {
     try {
         const { identifier, password } = req.body;
-        const user = await User.findOne({ $or: [{ username: identifier }, { email: identifier }] });
+        const user = await User.findOne({
+            $or: [
+              { username: { $regex: `^${identifier}$`, $options: 'i' } },
+              { email: { $regex: `^${identifier}$`, $options: 'i' } }
+            ]
+          });
         if (!user || !await bcrypt.compare(password, user.password)) {
             return res.status(400).send('Invalid credentials');
         }
@@ -44,7 +49,12 @@ router.get('/logout/', checkSession, async (req, res) => {
 router.get('/lookup/:email_username', async (req, res) => {
     const identifier = req.params.email_username;
     try {
-        const existingUser = await User.findOne({ $or: [{ username: identifier }, { email: identifier }] }, { password: 0 });
+        const existingUser = await User.findOne({
+            $or: [
+              { username: { $regex: `^${identifier}$`, $options: 'i' } },
+              { email: { $regex: `^${identifier}$`, $options: 'i' } }
+            ]
+          }, { password: 0 });
         if (!existingUser) res.status(404).send("User not found.");
         else res.status(200).send(existingUser);
     }
@@ -67,10 +77,10 @@ router.get('/:id', async (req, res) => {
 router.post('/signup/', async (req, res) => {
     try {
         const newUser = new User({
-            email: req.body.email,
-            username: req.body.username,
-            password: req.body.password
-        });
+            email: req.body.email.toLowerCase(),
+            username: req.body.username.toLowerCase(),
+            password: req.body.password 
+          });
         await newUser.save();
         res.send("User registration successful.")
     }
