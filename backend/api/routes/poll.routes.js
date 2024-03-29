@@ -153,7 +153,7 @@ router.delete('/:id', checkSession, async (req, res) => {
 
 router.patch('/:id/clear', checkSession, async (req, res) => {
     try{
-        const _id = req.params.id
+        const _id = req.params.id;
         const result = await Poll.updateOne(
             { _id : _id },
             { $set : {responses: []}}
