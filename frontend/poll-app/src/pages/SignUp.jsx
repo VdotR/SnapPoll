@@ -1,7 +1,7 @@
 import Page from '../components/page'
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import config from '../config';
 
 function SignUp() {
     const navigate = useNavigate();
@@ -17,7 +17,7 @@ function SignUp() {
         }
         try {
             console.log("fetch")
-            const res = await fetch('http://localhost:3000/api/user/signup', {
+            const res = await fetch(`${config.BACKEND_BASE_URL}/api/user/signup`, {
                 method: "POST",
                 headers: {
                     'Accept': 'application/json',
