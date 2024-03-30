@@ -58,19 +58,31 @@ function MyPolls() {
 
     // Toggle poll availability
     async function toggleAvailable(poll) {
-        console.log(`${config.BACKEND_BASE_URL}/api/poll/${poll.available? 'close' : 'open'}/${poll._id}`);
-        fetch(`${config.BACKEND_BASE_URL}/api/poll/${poll.available? 'close' : 'open'}/${poll._id}`, {
-            method: "PATCH",    
-            credentials: config.API_REQUEST_CREDENTIALS_SETTING
-        })
-        .then(res => {
-            if (res.status == 401) {
+        console.log(`${config.BACKEND_BASE_URL}/api/poll/${poll.available ? 'close' : 'open'}/${poll._id}`);
+        try {
+            const response = await fetch(`${config.BACKEND_BASE_URL}/api/poll/${poll.available ? 'close' : 'open'}/${poll._id}`, {
+                method: "PATCH",
+                credentials: config.API_REQUEST_CREDENTIALS_SETTING
+            });
+    
+            if (response.status === 401) {
                 navigate('/login');
-                throw new Error(res.statusText)
+                return; 
             }
-        })
-        .then(() => fetchPolls(username))
-        .catch(error => console.log(error))
+            if (response.status != 200) {
+                alert("Failed to change vote availability.");
+                return;
+            }
+            setPolls(prevPolls => prevPolls.map(p => {
+                if (p._id === poll._id) {
+                    // Return a new object with the updated available property
+                    return { ...p, available: !p.available };
+                }
+                return p;
+            }));
+        } catch (error) {
+            console.error('Error:', error);
+        }
     }
 
     async function fetchPolls(username) {
@@ -106,6 +118,8 @@ function MyPolls() {
                 <button onClick={() => navigate("/polls/create")}><FaPlus /> New Poll</button>
                 <button onClick={() => fetchPolls(username)}><FaRedo /></button>
             </div>
+                {isLoading? <h2>Loading...</h2> :
+                polls.length == 0? <h2>You haven't created any polls</h2> :            
             <table>
                 <thead>
                     <tr>
@@ -116,8 +130,7 @@ function MyPolls() {
                         })}
                     </tr>
                 </thead>
-                {isLoading? <h2>Loading...</h2> :
-                polls.length == 0? <h2>You haven't created any polls</h2> :
+
                 <tbody>
                     {polls.map(poll => {
                         return <tr onClick={(e) => handleRowClick(e, poll.shortId)} key={poll._id}>
@@ -132,12 +145,12 @@ function MyPolls() {
                                     second: '2-digit',
                                 })
                             } </td>
-                            <td><input type='checkbox' onClick={() => toggleAvailable(poll)} defaultChecked={poll.available}></input></td>
+                            <td><input type='checkbox' onChange={() => toggleAvailable(poll)} checked={poll.available}></input></td>
                             <td>{poll.responses.length}</td>
                         </tr>
                     })}
-                </tbody>}
-            </table>
+                </tbody>
+            </table>}
             </>
         </Page>
     );
