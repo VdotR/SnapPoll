@@ -2,6 +2,7 @@ import Page from '../components/page'
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useUserContext } from '../../context';
+import config from '../config';
 
 // https://react-icons.github.io/react-icons/icons/fa/
 import { FaPlus, FaRedo, FaAngleUp, FaAngleDown } from 'react-icons/fa';
@@ -57,10 +58,10 @@ function MyPolls() {
 
     // Toggle poll availability
     async function toggleAvailable(poll) {
-        console.log(`http://localhost:3000/api/poll/${poll.available? 'close' : 'open'}/${poll._id}`);
-        fetch(`http://localhost:3000/api/poll/${poll.available? 'close' : 'open'}/${poll._id}`, {
+        console.log(`${config.BACKEND_BASE_URL}/api/poll/${poll.available? 'close' : 'open'}/${poll._id}`);
+        fetch(`${config.BACKEND_BASE_URL}/api/poll/${poll.available? 'close' : 'open'}/${poll._id}`, {
             method: "PATCH",    
-            credentials: 'include'
+            credentials: config.API_REQUEST_CREDENTIALS_SETTING
         })
         .then(res => {
             if (res.status == 401) {
@@ -74,8 +75,8 @@ function MyPolls() {
 
     async function fetchPolls(identifier) {
         setIsLoading(true);
-        fetch(`http://localhost:3000/api/user/created_polls/${identifier}`, { 
-            credentials: 'include' 
+        fetch(`${config.BACKEND_BASE_URL}/api/user/created_polls/${identifier}`, { 
+            credentials: config.API_REQUEST_CREDENTIALS_SETTING 
         })
         .then(res => {
             if (res.status == 401) {
