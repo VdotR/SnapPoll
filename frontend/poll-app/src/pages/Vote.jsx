@@ -17,7 +17,7 @@ function Vote() {
             .then(data => {
                 setPollDetails(data);
                 
-                if (!response.ok || (data && !data._id)) {
+                if (data && !data._id) {
                     alert('Poll not found.');
                     navigate(`/vote`);
                 }
