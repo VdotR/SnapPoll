@@ -15,6 +15,10 @@ function SignUp() {
             alert("Passwords don't match!");
             return;
         }
+        if(!username || !email || !password || !confirmPassword){
+            alert("Please fill in all fields.");
+            return;
+        }
         try {
             console.log("fetch")
             const res = await fetch(`${config.BACKEND_BASE_URL}/api/user/signup`, {
@@ -32,7 +36,7 @@ function SignUp() {
             console.log(res);
 
             if (res.status === 400) {
-                alert("Can't create user. User with same username/email may already exist."); 
+                alert(await res.text()); 
             } else if (res.ok) {
                 // Handle successful sign up
                 console.log("Sign Up Successful, will redirect to login page");
