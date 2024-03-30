@@ -18,10 +18,10 @@ router.post('/login/', async (req, res) => {
         const { identifier, password } = req.body;
         const user = await User.findOne({
             $or: [
-              { username: { $regex: `^${identifier}$`, $options: 'i' } },
-              { email: { $regex: `^${identifier}$`, $options: 'i' } }
+                { username: { $regex: `^${identifier}$`, $options: 'i' } },
+                { email: { $regex: `^${identifier}$`, $options: 'i' } }
             ]
-          });
+        });
         if (!user || !await bcrypt.compare(password, user.password)) {
             return res.status(400).send('Invalid credentials');
         }
@@ -51,10 +51,10 @@ router.get('/lookup/:email_username', async (req, res) => {
     try {
         const existingUser = await User.findOne({
             $or: [
-              { username: { $regex: `^${identifier}$`, $options: 'i' } },
-              { email: { $regex: `^${identifier}$`, $options: 'i' } }
+                { username: { $regex: `^${identifier}$`, $options: 'i' } },
+                { email: { $regex: `^${identifier}$`, $options: 'i' } }
             ]
-          }, { password: 0 });
+        }, { password: 0 });
         if (!existingUser) res.status(404).send("User not found.");
         else res.status(200).send(existingUser);
     }
@@ -77,10 +77,10 @@ router.get('/:id', async (req, res) => {
 router.post('/signup/', async (req, res) => {
     try {
         const newUser = new User({
-            email: req.body.email.toLowerCase(),
-            username: req.body.username.toLowerCase(),
-            password: req.body.password 
-          });
+            email: req.body.email,
+            username: req.body.username,
+            password: req.body.password
+        });
         await newUser.save();
         res.send("User registration successful.")
     }
@@ -92,6 +92,20 @@ router.post('/signup/', async (req, res) => {
             } else if (error.keyPattern.email) {
                 console.log('Email already exists.');
                 res.status(400).send('Email already exists.');
+            }
+        }
+        else if (error.name === 'ValidationError') {
+            // Handle validation errors for specific fields
+            if (error.errors.username) {
+                console.log('Invalid username:', error.errors.username.message);
+                res.status(400).send('Invalid username.');
+            } else if (error.errors.email) {
+                console.log('Invalid email:', error.errors.email.message);
+                res.status(400).send('Invalid email.');
+            } else {
+                // Handle other validation errors
+                console.error('Validation error:', error.message);
+                res.status(400).send('Invalid input data.');
             }
         } else {
             console.error('Error adding user:', error);
@@ -115,11 +129,11 @@ router.delete('/:id', checkSession, async (req, res) => {
 router.get('/created_polls/:identifier', checkSession, async (req, res) => {
     const identifier = req.params.identifier;
     try {
-        const existingUser = await User.findOne({ 
+        const existingUser = await User.findOne({
             $or: [
                 { username: identifier },
                 { email: identifier }
-            ] 
+            ]
         }, { password: 0 })
             .populate('created_poll_id');
         if (!existingUser) {
