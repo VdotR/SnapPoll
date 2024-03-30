@@ -37,8 +37,7 @@ function CreatePoll() {
         setOptions([...options, '']);
     };
 
-    const removeOption = (index, event) => {
-        event.preventDefault();
+    const handleRemoveOption = (index) => {      
         if (options.length > 1) {
             if (index === correctOption){
                 // Clear correct option if deleted old correct option
@@ -49,6 +48,8 @@ function CreatePoll() {
             }
             const newOptions = options.filter((_, optIndex) => index !== optIndex);
             setOptions(newOptions);
+
+            console.log(options);
         } else {
             alert('There must be at least one option.');
         }
@@ -140,7 +141,7 @@ function CreatePoll() {
                         />
                     </td>
                     <td className='delete-button-cell'>
-                        <button type="check" className='delete-button' onClick={(event) => removeOption(index)}>
+                        <button type="check" className='delete-button' onClick={() => handleRemoveOption(index)}>
                             <BsFillTrash3Fill />
                         </button>
                     </td>
