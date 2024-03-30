@@ -169,6 +169,62 @@ td a {
 }
 
 /* Create Poll Page ---------------------------------*/
+.poll-table {
+  width: 100%;
+  border-collapse: separate;
+  background-color: transparent;
+  border-spacing: 0.3rem;
+}
 
+.poll-table, .poll-table td {
+  border: 0; /* Optional: adds border for clarity */
+  border-style: hidden;
+}
 
+.poll-table .custom-row td {
+  height: 2rem;
+  padding: 0; /* Removes padding to allow content to fill the cell */
+  padding-bottom: 1rem;
+}
+
+.poll-table .custom-row:hover{
+  cursor: auto;
+  background-color: white;
+}
+
+/* First and third columns */
+.poll-table .checkbox-cell, .poll-table .delete-button-cell {
+  width: 2rem;
+}
+
+/* Style for checkbox, textbox, and button to fill the cell */
+.poll-table .checkbox-cell .checkbox, .poll-table .textbox-cell .dynamic-textbox, .poll-table .delete-button-cell .delete-button {
+  width: 100%;
+  height: 100%;
+  margin: 0; /* Adjusts margins to fill the cell */
+  border: 0; /* Optional: removes border from checkbox and button */
+  padding: 0; /* Removes padding to allow content to fill the entire space */
+}
+
+/* Optional: Adjust the button styling */
+.poll-table .delete-button-cell .delete-button {
+  background-color: black; /* Example: red background */
+  color: #fff; /* Example: white text */
+}
+
+/* Styling adjustments for the textbox */
+.poll-table .textbox-cell .dynamic-textbox {
+  box-sizing: border-box; /* Ensures padding does not increase size beyond 100% */
+  /* Additional styles as needed for visual consistency */
+}
+
+.create-poll-question {
+  margin: 0 auto;
+  margin-bottom: 1rem;
+  width: 89%; /* This seems like a magical number to get question and option aligned */
+}
+
+.create-poll-button {
+  margin-bottom: 1rem;
+}
 /*---------------------------------------------------*/

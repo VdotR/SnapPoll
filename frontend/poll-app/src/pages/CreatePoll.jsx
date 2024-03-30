@@ -36,7 +36,8 @@ function CreatePoll() {
         setOptions([...options, '']);
     };
 
-    const removeOption = (index) => {
+    const removeOption = (index, event) => {
+        event.preventDefault();
         if (options.length > 1) {
             if (index === correctOption){
                 // Clear correct option if deleted old correct option
@@ -109,36 +110,36 @@ function CreatePoll() {
     return (
         <Page>
             <form>
-            <div>
                 <input
                     type="text"
                     value={question}
                     placeholder='Question'
                     onChange={handleQuestionChange}
+                    className='create-poll-question'
                 />
-            </div>
-            <table>
+            <table className='poll-table'>
             <tbody>
                 {options.map((option, index) => (
-                <tr key={index}>
-                    <td>
+                <tr key={index} className='custom-row'>
+                    <td className='checkbox-cell'>
                         <input
                             type="checkbox"
+                            className='checkbox'
                             checked={correctOption === index}
                             onChange={() => handleCorrectOptionChange(index)}
-                            className='option_delete'
                         />
                     </td>
-                    <td>
+                    <td className='textbox-cell'>
                         <input
                             type="text"
+                            className='dynamic-textbox'
                             value={option}
                             placeholder={`Option ${index + 1}`}
                             onChange={(event) => handleOptionChange(index, event)}
                         />
                     </td>
-                    <td className='option_delete'>
-                        <button  type="button" onClick={() => removeOption(index)}>
+                    <td className='delete-button-cell'>
+                        <button type="check" className='delete-button' onClick={(event) => removeOption(index)}>
                             <BsFillTrash3Fill />
                         </button>
                     </td>
@@ -146,10 +147,10 @@ function CreatePoll() {
                 ))}
             </tbody>
             </table>
-            <button type="button" onClick={addOption}>
+            <button type="button" onClick={addOption} className='create-poll-button'>
                 Add Option
             </button>
-            <button type="button" onClick={handleSubmit}>
+            <button type="button" onClick={handleSubmit} className='create-poll-button'>
                 Create Poll
             </button>
         </form>
