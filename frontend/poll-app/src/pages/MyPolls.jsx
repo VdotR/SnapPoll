@@ -11,7 +11,7 @@ function MyPolls() {
     const [polls, setPolls] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
-    const { identifier } = useUserContext();
+    const { username } = useUserContext();
 
     // Table column names
     const dateCol = "date_created"
@@ -69,13 +69,13 @@ function MyPolls() {
                 throw new Error(res.statusText)
             }
         })
-        .then(() => fetchPolls(identifier))
+        .then(() => fetchPolls(username))
         .catch(error => console.log(error))
     }
 
-    async function fetchPolls(identifier) {
+    async function fetchPolls(username) {
         setIsLoading(true);
-        fetch(`${config.BACKEND_BASE_URL}/api/user/created_polls/${identifier}`, { 
+        fetch(`${config.BACKEND_BASE_URL}/api/user/created_polls/${username}`, { 
             credentials: config.API_REQUEST_CREDENTIALS_SETTING 
         })
         .then(res => {
@@ -94,7 +94,7 @@ function MyPolls() {
     }
 
     useEffect(() => {
-        fetchPolls(identifier);
+        fetchPolls(username);
     }, []);
 
     // TODO: delete and clear poll
@@ -104,7 +104,7 @@ function MyPolls() {
             <>
             <div className='toolbar'>
                 <button onClick={() => navigate("/polls/create")}><FaPlus /> New Poll</button>
-                <button onClick={() => fetchPolls(identifier)}><FaRedo /></button>
+                <button onClick={() => fetchPolls(username)}><FaRedo /></button>
             </div>
             <table>
                 <thead>
