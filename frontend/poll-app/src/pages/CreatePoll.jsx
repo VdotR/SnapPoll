@@ -112,6 +112,7 @@ function CreatePoll() {
     return (
         <Page>
             <form>
+            <div>
                 <input
                     type="text"
                     value={question}
@@ -119,6 +120,7 @@ function CreatePoll() {
                     onChange={handleQuestionChange}
                     className='create-poll-question'
                 />
+            </div>
             <table className='poll-table'>
             <tbody>
                 {options.map((option, index) => (
@@ -126,22 +128,22 @@ function CreatePoll() {
                     <td className='checkbox-cell'>
                         <input
                             type="checkbox"
-                            className='checkbox'
                             checked={correctOption === index}
                             onChange={() => handleCorrectOptionChange(index)}
+                            className="checkbox"
                         />
                     </td>
                     <td className='textbox-cell'>
                         <input
                             type="text"
-                            className='dynamic-textbox'
                             value={option}
                             placeholder={`Option ${index + 1}`}
                             onChange={(event) => handleOptionChange(index, event)}
+                            className='dynamic-textbox'
                         />
                     </td>
-                    <td className='delete-button-cell'>
-                        <button type="check" className='delete-button' onClick={() => handleRemoveOption(index)}>
+                    <td className='delete-button-cell"'>
+                        <button type="button" onClick={() => handleRemoveOption(index) } className="delete-button">
                             <BsFillTrash3Fill />
                         </button>
                     </td>
@@ -160,5 +162,6 @@ function CreatePoll() {
        
     );
 }
+
 
 export default CreatePoll;
