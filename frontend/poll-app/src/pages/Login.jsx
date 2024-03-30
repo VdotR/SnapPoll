@@ -1,6 +1,6 @@
 import Page from '../components/page'
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useUserContext } from '../../context';
 import config from '../config';
 
@@ -10,7 +10,7 @@ function Login({ redirected }) {
     const [password, setPassword] = useState("")
     const navigate = useNavigate();
     const location = useLocation();
-    const { from } = location.state || {from: '/'}
+    const { from } = location.state || { from: '/' }
     const { isLoggedIn, setIsLoggedIn, setIsLoading } = useUserContext();
     const successMessage = location.state?.message;
 
@@ -21,7 +21,7 @@ function Login({ redirected }) {
                 credentials: config.API_REQUEST_CREDENTIALS_SETTING,
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json' 
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     "identifier": userIdentifier,
@@ -36,11 +36,11 @@ function Login({ redirected }) {
             }
 
             // Login success, change global state
-            setIsLoggedIn(true);      
+            setIsLoggedIn(true);
         }
         catch (err) {
             console.log(err);
-        }        
+        }
     }
 
     // Send the user back from whence they came on successful login or if already logged in
@@ -48,26 +48,29 @@ function Login({ redirected }) {
         if (isLoggedIn) {
             setIsLoading(true); //force auth check to get username
             navigate(from);
-        } 
+        }
     }, [isLoggedIn])
 
     return (
         <Page title='Login' centerTitle={true} hideNav={true}>
-            <form id='login-form'>  
+            <form id='login-form'>
                 {successMessage && (
                     <div className='success-login-message'>
                         {successMessage}
                     </div>
-                )}            
+                )}
                 <input name='identifier' type='text' onInput={e => setUserIdentifier(e.target.value)} placeholder='Username or email' required></input>
                 <input type='password' onInput={e => setPassword(e.target.value)} placeholder='Password' required></input>
                 <button onClick={handleLogin} type='button'>
                     Login
                 </button>
+                <div className="signup-link" style={{ marginTop: '20px' }}>
+                    Not a Member? <Link to="/signup">Sign Up</Link>
+                </div>
             </form>
         </Page>
     )
-    
+
 }
 
 export default Login;
