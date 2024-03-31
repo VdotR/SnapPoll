@@ -2,6 +2,8 @@ import Page from '../components/page'
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BsFillTrash3Fill } from "react-icons/bs";
+import { useUserContext } from '../../context';
+
 import config from '../config';
 
 // Constants
@@ -14,6 +16,7 @@ function CreatePoll() {
     const [question, setQuestion] = useState('');
     const [options, setOptions] = useState(['']);
     const [correctOption, setCorrectOption] = useState(null);
+    const {pushAlert } = useUserContext();
 
     const handleQuestionChange = (event) => {
         setQuestion(event.target.value);
@@ -51,30 +54,30 @@ function CreatePoll() {
 
             console.log(options);
         } else {
-            alert('There must be at least one option.');
+            pushAlert('There must be at least one option.', 'error');
         }
     };
 
     const handleSubmit = async () => {
         // Edge Cases
         if (correctOption === null) {
-            alert("You need to select a correct option!")
+            pushAlert("You need to select a correct option!" , 'error')
             return;
         }
 
         if (question === null){
-            alert("Question should not be null!")
+            pushAlert("Question should not be null!" , 'error')
             return;
         } else if (question.length > MAX_QUESTION_LENGTH){
-            alert(`Question is too long! Max question length is ${MAX_QUESTION_LENGTH} characters while current question has ${question.length} characters`);
+            pushAlert(`Question is too long! Max question length is ${MAX_QUESTION_LENGTH} characters while current question has ${question.length} characters` , 'error');
         }
         
         for (let i = 0; i < options.length; i++){
             if (options[i] === ""){
-                alert("Option cannot be null!");
+                pushAlert("Please fill in all options.", 'error');
                 return;
             } else if (options[i].length > MAX_OPTION_LENGTH){
-                alert(`Option is too long! Each option should be under ${MAX_OPTION_LENGTH} characters`);
+                pushAlert(`Option is too long! Each option should be under ${MAX_OPTION_LENGTH} characters`, 'error');
                 return;
             }
         }
@@ -95,17 +98,17 @@ function CreatePoll() {
 
             if (response.ok) {
                 const newPoll = await response.json();
-                //alert('Poll created successfully!');
+                pushAlert('Poll created successfully!');
                 console.log("created" + newPoll);
                 // Redirect to polls page
                 navigate("/polls");
             } else {
-                alert('Failed to create the poll.');
+                pushAlert('Failed to create the poll.', 'error');
             }
 
         } catch (error) {
             console.error('Error:', error);
-            alert('Error creating the poll.');
+            pushAlert('Error creating the poll.', 'error');
         }
     };
 

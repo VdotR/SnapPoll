@@ -11,7 +11,7 @@ function Login({ redirected }) {
     const navigate = useNavigate();
     const location = useLocation();
     const { from } = location.state || { from: '/' }
-    const { isLoggedIn, setIsLoggedIn, setIsLoading } = useUserContext();
+    const { isLoggedIn, setIsLoggedIn, setIsLoading, pushAlert } = useUserContext();
     const successMessage = location.state?.message;
 
     async function handleLogin() {
@@ -31,7 +31,7 @@ function Login({ redirected }) {
 
             // Login failed
             if (res.status === 400) {
-                alert("Username/Email and password do not match");
+                pushAlert("Username/Email and password do not match", 'error');
                 return;
             }
 

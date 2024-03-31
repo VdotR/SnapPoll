@@ -2,13 +2,14 @@ import Page from '../components/page'
 import React, { useState } from 'react';
 import { useNavigate} from 'react-router-dom';
 import { fetchPollDetails } from '../utils/pollUtils';
+import { useUserContext } from '../../context';
 
 function FindAvailablePoll() {
     const navigate = useNavigate();
 
     const [pollId, setPollId] = useState("");
     const [pollDetails, setPollDetails] = useState(null);
-
+    const {pushAlert } = useUserContext();
     const handleSubmit = (e) => {
         e.preventDefault(); // Prevent default form submission behavior
         fetchPollDetails(pollId)
@@ -16,16 +17,16 @@ function FindAvailablePoll() {
             setPollDetails(data);
             
             if (data && !data._id) {
-                alert('Poll not found.');
+                pushAlert('Poll not found.', 'error');
             } else if (!data.available) {
-                alert('Poll not available');
+                pushAlert('Poll not available', 'error');
             } else {
                 navigate(`/vote/${pollId}`, { state: { pollDetails: data } }); // Navigate with poll details
             }
         })
         .catch(error => {
             console.error("Error fetching poll details:", error);
-            alert('An error occurred while fetching poll details.');
+            pushAlert('An error occurred while fetching poll details.', 'error');
         });
     };
     return (

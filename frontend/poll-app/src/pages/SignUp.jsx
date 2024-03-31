@@ -9,14 +9,15 @@ function SignUp() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const { pushAlert } = useUserContext();
 
     async function handleSignUp() {
         if (password !== confirmPassword) {
-            alert("Passwords don't match!");
+            pushAlert("Passwords don't match!", 'error');
             return;
         }
         if(!username || !email || !password || !confirmPassword){
-            alert("Please fill in all fields.");
+            pushAlert("Please fill in all fields.", 'error');
             return;
         }
         try {
@@ -36,7 +37,7 @@ function SignUp() {
             console.log(res);
 
             if (res.status === 400) {
-                alert(await res.text()); 
+                pushAlert(await res.text(), error); 
             } else if (res.ok) {
                 // Handle successful sign up
                 console.log("Sign Up Successful, will redirect to login page");
