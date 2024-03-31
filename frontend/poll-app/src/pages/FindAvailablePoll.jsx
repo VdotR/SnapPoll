@@ -50,10 +50,11 @@ function FindAvailablePoll() {
         setPolls(sortedPolls);
     }
 
-    // Link to poll details, ignore clicks on checkbox and icons
-    function handleRowClick(e, id) {
+    // Link to poll vote page if available, ignore clicks on checkbox and icons
+    function handleRowClick(e, id, available) {
         if (!['input', 'path'].includes(e.target.tagName.toLowerCase())) {
-            navigate(`/vote/${id}`);
+            if (available) navigate(`/vote/${id}`);
+            else pushAlert('Poll not available', 'error');
         }
     }
 
@@ -158,7 +159,7 @@ function FindAvailablePoll() {
 
                 <tbody>
                     {polls.map(poll => {
-                        return <tr onClick={(e) => handleRowClick(e, poll._id)} key={poll._id}>
+                        return <tr onClick={(e) => handleRowClick(e, poll._id, poll.available)} key={poll._id}>
                             <td><span>{poll.question}</span></td>
                             <td> {
                                 new Date(poll.date_created).toLocaleString('en-US', {
@@ -170,7 +171,6 @@ function FindAvailablePoll() {
                                     second: '2-digit',
                                 })
                             } </td>
-                            {/* <td><input type='checkbox' onChange={() => toggleAvailable(poll)} checked={poll.available}></input></td> */}
                             <td>{poll.available ? 'Yes' : 'No'}</td>
                         </tr>
                     })}
