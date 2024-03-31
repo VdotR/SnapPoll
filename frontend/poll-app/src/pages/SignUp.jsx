@@ -53,9 +53,15 @@ function SignUp() {
         
     }
 
+    const handleKeyDown = (event) => {
+        if (event.key === 'Enter') {
+            handleSignUp();
+        }
+    }
+
     return (
         <Page title='Sign Up'>
-            <form id='login-form'>
+            <form id='login-form' onKeyDown={ handleKeyDown }>
                 <input name='username' type='text' onInput={e => setUsername(e.target.value)} placeholder='Username' required></input>
                 <input name='email' type='email' onInput={e => setEmail(e.target.value)} placeholder='Email' required></input>
                 <input type='password' onInput={e => setPassword(e.target.value)} placeholder='Password' required></input>
