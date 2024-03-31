@@ -55,7 +55,7 @@ function SignUp() {
         
     }
     return (
-        <Page title='Sign Up'>
+        <Page title='Sign Up' centerTitle={true} hideNav={true}>
             <form id='login-form'>
                 <input name='username' type='text' onInput={e => setUsername(e.target.value)} placeholder='Username' required></input>
                 <input name='email' type='email' onInput={e => setEmail(e.target.value)} placeholder='Email' required></input>
