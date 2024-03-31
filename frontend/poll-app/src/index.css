@@ -22,7 +22,8 @@ body {
 }
 
 .content {
-  padding: 5%;
+  padding: 1rem 2rem;
+  padding-top: 4.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -31,11 +32,18 @@ body {
 
 /* Header and page */
 nav {
-  padding: 0 5%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 0 2rem;
   display: flex;
   border-bottom: 2px solid black;
   align-content: space-between;
   font-size: 1rem;
+  width: 100%;
+  background-color: white;
+  z-index: 9999;
+  box-sizing: border-box;
 }
 
 nav .nav-links {
@@ -80,13 +88,16 @@ form input {
   border: 1px solid black;
 }
 
+form button {
+  margin: 0 auto;
+}
+
 button {
   font-size: 1rem;
   background-color: white;
   border: 1px solid black;
   padding: 0.25rem 0.5em;
   display: block;
-  margin: 0 auto;
 }
 
 button:hover {
@@ -116,6 +127,14 @@ thead, tbody {
 
 td, th {
   padding: 0.5rem;
+}
+
+td span {
+  max-width: 40vw; /* TODO: adjust */
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 th svg {
@@ -167,6 +186,73 @@ td a {
   margin: 0.5rem;
   margin-left: 0;
 }
+
+/* Loading spinner */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 1rem;
+  height: 100%;
+}
+
+.loading {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Alert message */
+.alert-container {
+  position: absolute;
+  top: 3.5rem;
+  left: 0;
+  width: 100%;
+  z-index: 9998;
+}
+
+.alert {
+  border-radius: 4px;
+  padding: 0.25rem;
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  animation: slideInDown 0.5s forwards;
+}
+
+.alert span {
+  flex-grow: 1;
+}
+
+@keyframes slideInDown {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.close-button {
+  background-color: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+}
+
 
 /* Create Poll Page ---------------------------------*/
 .option {

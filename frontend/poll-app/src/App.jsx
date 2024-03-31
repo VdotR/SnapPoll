@@ -17,6 +17,8 @@ import {
   RouterProvider
 } from "react-router-dom"
 import CreatePoll from './pages/CreatePoll';
+import Page from './components/page';
+import Loading from './components/loading';
 
 function App() {
   const { 
@@ -24,7 +26,6 @@ function App() {
     setIsLoggedIn,
     isLoading,
     setIsLoading,
-    identifier,
     setIdentifier
   } = useUserContext();
 
@@ -57,7 +58,9 @@ function App() {
   }, []);
 
   if (isLoading) {
-    return <div>Loading...</div>; // Or any other loading indicator
+    return (
+      <Page hideNav={true}><Loading /></Page>
+    );
   }
 
   return (

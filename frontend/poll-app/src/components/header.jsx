@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useUserContext } from '../../context';
 
-function Header({ hideNav }) {
+function Header() {
     const [dropdownVisible, setDropdownVisible] = useState(false);
     const { identifier } = useUserContext();
 
@@ -30,7 +30,7 @@ function Header({ hideNav }) {
     };
 
     return (
-        <nav style={hideNav? {display: "none"} : {}}>
+        <nav>
             {/* Placeholders for actual links */}
             <Link to='/'>Home</Link>
             <div className='nav-links'>

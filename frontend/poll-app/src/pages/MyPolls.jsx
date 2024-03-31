@@ -1,39 +1,42 @@
 import Page from '../components/page'
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useUserContext } from '../../context';
+import Loading from '../components/loading';
 
 // https://react-icons.github.io/react-icons/icons/fa/
-import { FaPlus, FaRedo, FaAngleUp, FaAngleDown } from 'react-icons/fa';
+import { FaPlus, FaRedo, FaAngleUp, FaAngleDown, FaEraser, FaTrashAlt } from 'react-icons/fa';
 
 function MyPolls() {
     const [polls, setPolls] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
-    const { identifier } = useUserContext();
+    const { identifier, setAlert } = useUserContext();
 
     // Table column names
     const dateCol = "date_created"
-    const tableCols = ["question", dateCol, "available", "responses"];
+    const tableCols = ["question", dateCol, "responses", "available"];
+    const actionClass = "table-action";
 
     // Replace underscore with space and capitalize each word 
     function toName(str) {
         return str.replace(/_/g, ' ')
         .replace(/\b\w/g, char => char.toUpperCase());
-    }  
+    }
+
+    // Truncate and add ellipsis for long poll name
+    function truncate(str) {
+        if (str.length > 20) {
+            return str.substring(0, 20) + "...";
+        }
+        return str;
+    }
 
     // Indicates if column sorted in "default" order
     // (newest-to-oldest if date and reverse-alphabetical otherwise)
     let defaultSortOrder = {};
     tableCols.forEach(col => defaultSortOrder[col] = true);
     const [sortOrder, setSortOrder] = useState(defaultSortOrder);
-
-    // Link to poll details, ignore clicks on checkbox
-    function handleRowClick(e, shortId) {
-        if (e.target.tagName.toLowerCase() != 'input') {
-          navigate(`/poll/${shortId}`);  
-        }        
-    }
 
     // Sort entries in a table column
     function handleSort(col) {
@@ -55,10 +58,49 @@ function MyPolls() {
         setPolls(sortedPolls);
     }
 
+    // Link to poll details, ignore clicks on checkbox and icons
+    function handleRowClick(e, shortId) {
+        if (e.target.tagName.toLowerCase() in ['input', 'path']) {
+          navigate(`/poll/${shortId}`);  
+        }        
+    }
+
+    // Delete a poll
+    function deletePoll(poll) {
+        console.log(`http://localhost:3000/api/poll/${poll._id}`)
+        fetch(`http://localhost:3000/api/poll/${poll._id}/`, {
+            method: "DELETE",
+            credentials: 'include'
+        })
+        .then(() => setAlert({
+            message: `Deleted poll \"${truncate(poll.question)}\"`,
+            level: 'info'
+        }))
+        .then(() => fetchPolls(identifier))
+        .catch(error => console.log(error))
+
+    }
+
+    // Clear a poll's responses
+    function clearPoll(poll) {
+        console.log(`http://localhost:3000/api/poll/${poll._id}/clear`)
+        fetch(`http://localhost:3000/api/poll/${poll._id}/clear`, {
+            method: "PATCH",
+            credentials: 'include'
+        })
+        .then(() => setAlert({
+            message: `Cleared poll \"${truncate(poll.question)}\"`,
+            level: 'info'
+        }))
+        .then(() => fetchPolls(identifier))
+        .catch(error => console.log(error))
+
+    }
+
     // Toggle poll availability
     async function toggleAvailable(poll) {
-        console.log(`http://localhost:3000/api/poll/${poll.available? 'close' : 'open'}/${poll._id}`);
-        fetch(`http://localhost:3000/api/poll/${poll.available? 'close' : 'open'}/${poll._id}`, {
+        const action = poll.available? 'close' : 'open';
+        fetch(`http://localhost:3000/api/poll/${action}/${poll._id}`, {
             method: "PATCH",    
             credentials: 'include'
         })
@@ -69,6 +111,10 @@ function MyPolls() {
             }
         })
         .then(() => fetchPolls(identifier))
+        .then(() => setAlert({
+            message: `${action == 'close'? 'Closed' : 'Opened'} poll \"${truncate(poll.question)}\"`,
+            level: 'info'
+        }))
         .catch(error => console.log(error))
     }
 
@@ -87,7 +133,6 @@ function MyPolls() {
         .then(data => setPolls(data))
         .catch(error => console.log(error))
         .finally(() => {
-            console.log("refreshed polls")
             setIsLoading(false);
         })
     }
@@ -113,14 +158,14 @@ function MyPolls() {
                                 {toName(col)} {sortOrder[col]? <FaAngleDown /> : <FaAngleUp />  }
                             </th>
                         })}
+                        <th></th>
+                        <th></th>
                     </tr>
-                </thead>
-                {isLoading? <h2>Loading...</h2> :
-                polls.length == 0? <h2>You haven't created any polls</h2> :
-                <tbody>
+                </thead>                
+                <tbody>        
                     {polls.map(poll => {
                         return <tr onClick={(e) => handleRowClick(e, poll.shortId)} key={poll._id}>
-                            <td>{poll.question}</td>
+                            <td><span>{poll.question}</span></td>
                             <td> {
                                 new Date(poll.date_created).toLocaleString('en-US', {
                                     year: 'numeric',
@@ -131,12 +176,16 @@ function MyPolls() {
                                     second: '2-digit',
                                 })
                             } </td>
-                            <td><input type='checkbox' onClick={() => toggleAvailable(poll)} defaultChecked={poll.available}></input></td>
                             <td>{poll.responses.length}</td>
+                            <td><input type='checkbox' onClick={() => toggleAvailable(poll)} defaultChecked={poll.available}></input></td>
+                            <td><FaEraser onClick={() => clearPoll(poll)} /></td>
+                            <td><FaTrashAlt onClick={() => deletePoll(poll)} /></td>
                         </tr>
                     })}
-                </tbody>}
+                </tbody>
             </table>
+            {isLoading? <Loading />:
+            polls.length == 0? <p> You haven't created any polls.</p>: <></>} 
             </>
         </Page>
     );
