@@ -4,10 +4,7 @@ import { useUserContext } from '../../context';
 import config from '../config';
 
 function Header() {
-    const [dropdownVisible, setDropdownVisible] = useState(false);
-    const { username, setIsLoading } = useUserContext();
-
-    const toggleDropdown = () => setDropdownVisible(!dropdownVisible);
+    const { username } = useUserContext();
 
     const handleLogout = async () => {
         try {
@@ -16,7 +13,7 @@ function Header() {
                 method: 'GET',
                 credentials: config.API_REQUEST_CREDENTIALS_SETTING, // Ensure cookies are sent with the request if sessions are used
             });
-    
+
             if (response.ok) {
                 console.log("Logged out successfully");
                 window.location.reload(); //just refresh I guess
@@ -35,18 +32,15 @@ function Header() {
             {/* Placeholders for actual links */}
             <Link to='/'>Home</Link>
             <div className='nav-links'>
-            <Link to='/vote'>Answer Poll</Link>
+                <Link to='/vote'>Answer Poll</Link>
                 <Link to='/polls'>My Polls</Link>
-                <span>My Account</span>
-                <div className="dropdown">
-                    <span id='greet-user' onClick={toggleDropdown}>Hi, {username}</span>
-                    {dropdownVisible && (
-                        <div className="dropdown-content">
-                            <span onClick={handleLogout}>Logout</span>
-                        </div>
-                    )}
+                <div className="account-dropdown">
+                    <span id='greet-user'>Hi, {username}</span>
+                    <div className="account-dropdown-content">
+                        <span onClick={handleLogout}>Logout</span>
+                    </div>
                 </div>
-            </div>            
+            </div>
         </nav>
     );
 }
