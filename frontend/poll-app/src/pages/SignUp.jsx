@@ -2,6 +2,7 @@ import Page from '../components/page'
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import config from '../config';
+import { useUserContext } from '../../context';
 
 function SignUp() {
     const navigate = useNavigate();
@@ -37,7 +38,7 @@ function SignUp() {
             console.log(res);
 
             if (res.status === 400) {
-                pushAlert(await res.text(), error); 
+                pushAlert(await res.text(), 'error'); 
             } else if (res.ok) {
                 // Handle successful sign up
                 console.log("Sign Up Successful, will redirect to login page");
@@ -53,16 +54,9 @@ function SignUp() {
         }
         
     }
-
-    const handleKeyDown = (event) => {
-        if (event.key === 'Enter') {
-            handleSignUp();
-        }
-    }
-
     return (
         <Page title='Sign Up'>
-            <form id='login-form' onKeyDown={ handleKeyDown }>
+            <form id='login-form'>
                 <input name='username' type='text' onInput={e => setUsername(e.target.value)} placeholder='Username' required></input>
                 <input name='email' type='email' onInput={e => setEmail(e.target.value)} placeholder='Email' required></input>
                 <input type='password' onInput={e => setPassword(e.target.value)} placeholder='Password' required></input>
