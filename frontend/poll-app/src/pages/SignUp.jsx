@@ -1,6 +1,6 @@
 import Page from '../components/page'
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import config from '../config';
 import { useUserContext } from '../../context';
 
@@ -64,6 +64,9 @@ function SignUp() {
                 <button onClick={handleSignUp} type='button'>
                     Sign Up
                 </button>
+                <div className="login-link" style={{ marginTop: '20px' }}>
+                    Have an account? <Link to="/login">Log In</Link>
+                </div>
             </form>
         </Page>
     )
