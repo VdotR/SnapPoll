@@ -6,17 +6,10 @@ import Dashboard from './pages/Dashboard'
 import MyPolls from './pages/MyPolls'
 import FindAvailablePoll from './pages/FindAvailablePoll';
 import Vote from './pages/Vote'
+import CreatePoll from './pages/CreatePoll';
 import { useUserContext } from '../context'
 import './App.css'
-
-
-// TODO: route between different pages
-// https://reactrouter.com/en/main/start/tutorial
-import {
-  createBrowserRouter,
-  RouterProvider
-} from "react-router-dom"
-import CreatePoll from './pages/CreatePoll';
+import config from './config';
 import Page from './components/page';
 import Loading from './components/loading';
 
@@ -26,7 +19,8 @@ function App() {
     setIsLoggedIn,
     isLoading,
     setIsLoading,
-    setIdentifier
+    username,
+    setUsername
   } = useUserContext();
 
   function pageifLoggedIn(path, page) {
@@ -40,14 +34,14 @@ function App() {
   }
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/user/auth/', {
-      credentials: 'include' 
+    fetch(`${config.BACKEND_BASE_URL}/api/user/auth/`, {
+      credentials: config.API_REQUEST_CREDENTIALS_SETTING 
     })
       .then((response) => response.json())
       .then((data) => {
         console.log("/auth response: " + data.isLoggedIn)
         setIsLoggedIn(data.isLoggedIn);
-        setIdentifier(data.identifier);
+        setUsername(data.username);
       })
       .catch((error) => {
         console.error('Error fetching auth status:', error);
@@ -55,7 +49,7 @@ function App() {
       .finally(() => {
         setIsLoading(false);
       });
-  }, []);
+  }, [isLoading]);
 
   if (isLoading) {
     return (

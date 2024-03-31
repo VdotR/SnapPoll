@@ -23,7 +23,7 @@ body {
 
 .content {
   padding: 1rem 2rem;
-  padding-top: 4.5rem;
+  padding-top: 5.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -255,13 +255,59 @@ td a {
 
 
 /* Create Poll Page ---------------------------------*/
-.option {
-  display: flex;
+
+.poll-table {
+  width: 100%;
+  background-color: transparent;
+  border-spacing: 0.3rem;
+  border-collapse: separate;
 }
 
-.option .left,
-.option .middle,
-.option .right{
-  flex: 1;
+.poll-table, .poll-table td {
+  border: 0; 
+  border-style: hidden;
 }
+
+.poll-table .custom-row td {
+  height: 2rem;
+  padding: 0; 
+  padding-bottom: 1rem;
+}
+
+.poll-table .custom-row:hover{
+  cursor: auto;
+  background-color: white;
+}
+
+.poll-table .checkbox-cell, .poll-table .delete-button-cell {
+  width: 2rem;
+}
+
+.poll-table .checkbox-cell .checkbox, .poll-table .textbox-cell .dynamic-textbox, .poll-table .delete-button-cell .delete-button {
+  width: 100%;
+  height: 100%;
+  margin: 0; 
+  border: 0; 
+  padding: 0; 
+}
+
+.poll-table .delete-button-cell .delete-button {
+  background-color: black; 
+  color: #fff;
+}
+
+.poll-table .textbox-cell .dynamic-textbox {
+  box-sizing: border-box; 
+}
+
+.create-poll-question {
+  margin: 0 auto;
+  margin-bottom: 1rem;
+  width: 89%; 
+}
+
+.create-poll-button {
+  margin-bottom: 1rem;
+}
+
 /*---------------------------------------------------*/

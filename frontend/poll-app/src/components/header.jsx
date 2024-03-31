@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useUserContext } from '../../context';
+import config from '../config';
 
 function Header() {
     const [dropdownVisible, setDropdownVisible] = useState(false);
-    const { identifier } = useUserContext();
+    const { username, setIsLoading } = useUserContext();
 
     const toggleDropdown = () => setDropdownVisible(!dropdownVisible);
 
     const handleLogout = async () => {
         try {
             // Make a GET request to the logout endpoint
-            const response = await fetch('http://localhost:3000/api/user/logout', {
+            const response = await fetch(`${config.BACKEND_BASE_URL}/api/user/logout`, {
                 method: 'GET',
-                credentials: 'include', // Ensure cookies are sent with the request if sessions are used
+                credentials: config.API_REQUEST_CREDENTIALS_SETTING, // Ensure cookies are sent with the request if sessions are used
             });
     
             if (response.ok) {
@@ -38,7 +39,7 @@ function Header() {
                 <Link to='/polls'>My Polls</Link>
                 <span>My Account</span>
                 <div className="dropdown">
-                    <span id='greet-user' onClick={toggleDropdown}>Hi, {identifier}</span>
+                    <span id='greet-user' onClick={toggleDropdown}>Hi, {username}</span>
                     {dropdownVisible && (
                         <div className="dropdown-content">
                             <span onClick={handleLogout}>Logout</span>

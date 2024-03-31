@@ -1,6 +1,8 @@
 import Page from '../components/page'
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { BsFillTrash3Fill } from "react-icons/bs";
+import config from '../config';
 
 // Constants
 const MAX_QUESTION_LENGTH = 200;
@@ -35,7 +37,7 @@ function CreatePoll() {
         setOptions([...options, '']);
     };
 
-    const removeOption = (index) => {
+    const handleRemoveOption = (index) => {      
         if (options.length > 1) {
             if (index === correctOption){
                 // Clear correct option if deleted old correct option
@@ -46,6 +48,8 @@ function CreatePoll() {
             }
             const newOptions = options.filter((_, optIndex) => index !== optIndex);
             setOptions(newOptions);
+
+            console.log(options);
         } else {
             alert('There must be at least one option.');
         }
@@ -76,9 +80,9 @@ function CreatePoll() {
         }
 
         try {
-            const response = await fetch('http://localhost:3000/api/poll', {
+            const response = await fetch(`${config.BACKEND_BASE_URL}/api/poll`, {
                 method: 'POST',
-                credentials: "include",
+                credentials: config.API_REQUEST_CREDENTIALS_SETTING,
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -114,38 +118,43 @@ function CreatePoll() {
                     value={question}
                     placeholder='Question'
                     onChange={handleQuestionChange}
+                    className='create-poll-question'
                 />
             </div>
-            {options.map((option, index) => (
-                <div key={index}>
-                    <div className = "option">
-                        <div className='left'>
-                            <input 
-                                type="checkbox"
-                                checked={correctOption===index}
-                                onChange={() => handleCorrectOptionChange(index)}
-                            />
-                        </div>
-                        <div className='middle'>
-                            <input
+            <table className='poll-table'>
+            <tbody>
+                {options.map((option, index) => (
+                <tr key={index} className='custom-row'>
+                    <td className='checkbox-cell'>
+                        <input
+                            type="checkbox"
+                            checked={correctOption === index}
+                            onChange={() => handleCorrectOptionChange(index)}
+                            className="checkbox"
+                        />
+                    </td>
+                    <td className='textbox-cell'>
+                        <input
                             type="text"
                             value={option}
-                            placeholder={`Option ${index+1}`}
-                            onChange={(event) => handleOptionChange(index, event)}/>
-                        </div>
-                        <div className='right'>
-                            <button type="button" className='side_button' onClick={() => removeOption(index)}>
-                                ✖
-                            </button>
-                        </div>
-                    </div>
-                    
-                </div>
-            ))}
-            <button type="button" onClick={addOption}>
+                            placeholder={`Option ${index + 1}`}
+                            onChange={(event) => handleOptionChange(index, event)}
+                            className='dynamic-textbox'
+                        />
+                    </td>
+                    <td className='delete-button-cell"'>
+                        <button type="button" onClick={() => handleRemoveOption(index) } className="delete-button">
+                            <BsFillTrash3Fill />
+                        </button>
+                    </td>
+                </tr>
+                ))}
+            </tbody>
+            </table>
+            <button type="button" onClick={addOption} className='create-poll-button'>
                 Add Option
             </button>
-            <button type="button" onClick={handleSubmit}>
+            <button type="button" onClick={handleSubmit} className='create-poll-button'>
                 Create Poll
             </button>
         </form>
@@ -153,5 +162,6 @@ function CreatePoll() {
        
     );
 }
+
 
 export default CreatePoll;

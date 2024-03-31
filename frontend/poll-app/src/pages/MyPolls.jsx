@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserContext } from '../../context';
 import Loading from '../components/loading';
+import config from '../config';
 
 // https://react-icons.github.io/react-icons/icons/fa/
 import { FaPlus, FaRedo, FaAngleUp, FaAngleDown, FaEraser, FaTrashAlt } from 'react-icons/fa';
@@ -11,12 +12,11 @@ function MyPolls() {
     const [polls, setPolls] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
-    const { identifier, setAlert } = useUserContext();
+    const { username, pushAlert } = useUserContext();
 
     // Table column names
     const dateCol = "date_created"
     const tableCols = ["question", dateCol, "responses", "available"];
-    const actionClass = "table-action";
 
     // Replace underscore with space and capitalize each word 
     function toName(str) {
@@ -72,11 +72,8 @@ function MyPolls() {
             method: "DELETE",
             credentials: 'include'
         })
-        .then(() => setAlert({
-            message: `Deleted poll \"${truncate(poll.question)}\"`,
-            level: 'info'
-        }))
-        .then(() => fetchPolls(identifier))
+        .then(() => pushAlert(`Deleted poll \"${truncate(poll.question)}\"`))
+        .then(() => fetchPolls(username))
         .catch(error => console.log(error))
 
     }
@@ -88,40 +85,57 @@ function MyPolls() {
             method: "PATCH",
             credentials: 'include'
         })
-        .then(() => setAlert({
-            message: `Cleared poll \"${truncate(poll.question)}\"`,
-            level: 'info'
-        }))
-        .then(() => fetchPolls(identifier))
+        .then(res => {
+            if (!res.ok) {
+                pushAlert('Failed to clear poll responses', 'error');
+            }
+        })
+        .then(() => pushAlert(`Cleared poll \"${truncate(poll.question)}\"`))
+        .then(() => setPolls(prevPolls => prevPolls.map(p => {
+            if (p._id === poll._id) {
+                // Return a new object with the updated available property
+                return { ...p, responses: [] };
+            }
+            return p;
+        })))
         .catch(error => console.log(error))
-
     }
 
     // Toggle poll availability
     async function toggleAvailable(poll) {
-        const action = poll.available? 'close' : 'open';
-        fetch(`http://localhost:3000/api/poll/${action}/${poll._id}`, {
-            method: "PATCH",    
-            credentials: 'include'
-        })
-        .then(res => {
-            if (res.status == 401) {
+        console.log(`${config.BACKEND_BASE_URL}/api/poll/${poll.available ? 'close' : 'open'}/${poll._id}`);
+        try {
+            const action = poll.available ? 'close' : 'open';
+            const response = await fetch(`${config.BACKEND_BASE_URL}/api/poll/${action}/${poll._id}`, {
+                method: "PATCH",
+                credentials: config.API_REQUEST_CREDENTIALS_SETTING
+            });
+    
+            if (response.status === 401) {
                 navigate('/login');
-                throw new Error(res.statusText)
+                return; 
             }
-        })
-        .then(() => fetchPolls(identifier))
-        .then(() => setAlert({
-            message: `${action == 'close'? 'Closed' : 'Opened'} poll \"${truncate(poll.question)}\"`,
-            level: 'info'
-        }))
-        .catch(error => console.log(error))
+            if (response.status != 200) {
+                alert("Failed to change vote availability.");
+                return;
+            }
+            setPolls(prevPolls => prevPolls.map(p => {
+                if (p._id === poll._id) {
+                    // Return a new object with the updated available property
+                    return { ...p, available: !p.available };
+                }
+                return p;
+            }));
+            pushAlert(`${action == 'close'? 'Closed' : 'Opened'} poll \"${truncate(poll.question)}\"`);
+        } catch (error) {
+            console.error('Error:', error);
+        }
     }
 
-    async function fetchPolls(identifier) {
+    async function fetchPolls(username) {
         setIsLoading(true);
-        fetch(`http://localhost:3000/api/user/created_polls/${identifier}`, { 
-            credentials: 'include' 
+        fetch(`${config.BACKEND_BASE_URL}/api/user/created_polls/${username}`, { 
+            credentials: config.API_REQUEST_CREDENTIALS_SETTING 
         })
         .then(res => {
             if (res.status == 401) {
@@ -138,7 +152,7 @@ function MyPolls() {
     }
 
     useEffect(() => {
-        fetchPolls(identifier);
+        fetchPolls(username);
     }, []);
 
     // TODO: delete and clear poll
@@ -148,8 +162,8 @@ function MyPolls() {
             <>
             <div className='toolbar'>
                 <button onClick={() => navigate("/polls/create")}><FaPlus /> New Poll</button>
-                <button onClick={() => fetchPolls(identifier)}><FaRedo /></button>
-            </div>
+                <button onClick={() => fetchPolls(username)}><FaRedo /></button>
+            </div>         
             <table>
                 <thead>
                     <tr>
@@ -161,8 +175,9 @@ function MyPolls() {
                         <th></th>
                         <th></th>
                     </tr>
-                </thead>                
-                <tbody>        
+                </thead>
+
+                <tbody>
                     {polls.map(poll => {
                         return <tr onClick={(e) => handleRowClick(e, poll.shortId)} key={poll._id}>
                             <td><span>{poll.question}</span></td>
@@ -176,8 +191,9 @@ function MyPolls() {
                                     second: '2-digit',
                                 })
                             } </td>
+                            {/* <td><input type='checkbox' onChange={() => toggleAvailable(poll)} checked={poll.available}></input></td> */}
                             <td>{poll.responses.length}</td>
-                            <td><input type='checkbox' onClick={() => toggleAvailable(poll)} defaultChecked={poll.available}></input></td>
+                            <td><input type='checkbox' onChange={() => toggleAvailable(poll)} checked={poll.available}></input></td>
                             <td><FaEraser onClick={() => clearPoll(poll)} /></td>
                             <td><FaTrashAlt onClick={() => deletePoll(poll)} /></td>
                         </tr>
@@ -185,7 +201,8 @@ function MyPolls() {
                 </tbody>
             </table>
             {isLoading? <Loading />:
-            polls.length == 0? <p> You haven't created any polls.</p>: <></>} 
+            polls.length == 0? <p> You haven't created any polls.</p>: <></>
+            } 
             </>
         </Page>
     );

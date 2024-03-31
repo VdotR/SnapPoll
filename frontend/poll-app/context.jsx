@@ -7,23 +7,29 @@ const UserContext = createContext();
 export const UserProvider = ({ children }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-    const [identifier, setIdentifier] = useState('');
     const [alert, setAlert] = useState(null);
+    const [username, setUsername] = useState('');
 
-    useEffect(() => {
-        console.log(alert);
-    }, [alert]);
-
+    // Set alert with message string and level (error or info)
+    const pushAlert = (message, level = 'info') => {
+        setAlert({
+            message: message,
+            level: level
+        })
+    }
+    const popAlert = () => setAlert(null);
+    
     return (
         <UserContext.Provider value={{
             isLoggedIn: isLoggedIn,
             setIsLoggedIn: setIsLoggedIn,
             isLoading: isLoading,
             setIsLoading: setIsLoading,
-            identifier: identifier,
-            setIdentifier: setIdentifier,
             alert: alert,
-            setAlert: setAlert
+            pushAlert: pushAlert,
+            popAlert: popAlert,
+            username: username,
+            setUsername: setUsername,
         }}>
             {children}
         </UserContext.Provider>
