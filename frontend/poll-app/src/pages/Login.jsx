@@ -51,9 +51,15 @@ function Login({ redirected }) {
         }
     }, [isLoggedIn])
 
+    const handleKeyDown = (event) => {
+        if (event.key === 'Enter') {
+            handleLogin();
+        }
+    }
+
     return (
         <Page title='Login' centerTitle={true} hideNav={true}>
-            <form id='login-form'>
+            <form id='login-form' onKeyDown={ handleKeyDown }> 
                 {successMessage && (
                     <div className='success-login-message'>
                         {successMessage}
