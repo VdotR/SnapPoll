@@ -60,9 +60,9 @@ function MyPolls() {
 
     // Link to poll details, ignore clicks on checkbox and icons
     function handleRowClick(e, shortId) {
-        if (e.target.tagName.toLowerCase() in ['input', 'path']) {
-          navigate(`/poll/${shortId}`);  
-        }        
+        if (!['input', 'path'].includes(e.target.tagName.toLowerCase())) {
+            navigate(`/poll/${shortId}`);
+        }
     }
 
     // Delete a poll
