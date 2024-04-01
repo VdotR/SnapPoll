@@ -23,6 +23,10 @@ app.use(session({
 cookie: { secure: false, httpOnly: true, maxAge: 1210000000 /*2 weeks*/ } // TODO: Change secure to true when done testing
 }));
 
+app.use((req, res, next) => {
+    setTimeout(next, process.env.RESPONSE_DELAY); 
+});
+
 // Connect to mongodb
 mongoose.connect(process.env.CONNECTION_STRING, {
   useNewUrlParser: true,

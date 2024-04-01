@@ -18,7 +18,7 @@ function Header() {
                 method: 'GET',
                 credentials: config.API_REQUEST_CREDENTIALS_SETTING, // Ensure cookies are sent with the request if sessions are used
             });
-    
+
             if (response.ok) {
                 console.log("Logged out successfully");
                 window.location.reload(); //just refresh I guess

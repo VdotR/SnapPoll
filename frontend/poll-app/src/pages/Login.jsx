@@ -31,7 +31,7 @@ function Login({ redirected }) {
 
             // Login failed
             if (res.status === 400) {
-                pushAlert("Username/Email and password do not match", "error");
+                pushAlert("Username/Email and password do not match", 'error');
                 return;
             }
 

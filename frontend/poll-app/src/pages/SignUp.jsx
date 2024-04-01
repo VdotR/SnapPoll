@@ -1,6 +1,6 @@
 import Page from '../components/page'
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import config from '../config';
 import { useUserContext } from '../../context';
 
@@ -18,7 +18,7 @@ function SignUp() {
             return;
         }
         if(!username || !email || !password || !confirmPassword){
-            pushAlert("Please fill in all fields", 'error');
+            pushAlert("Please fill in all fields.", 'error');
             return;
         }
         try {
@@ -53,16 +53,9 @@ function SignUp() {
         }
         
     }
-
-    const handleKeyDown = (event) => {
-        if (event.key === 'Enter') {
-            handleSignUp();
-        }
-    }
-
     return (
-        <Page title='Sign Up' hideNav={true} centerTitle={true}>
-            <form id='login-form' onKeyDown={ handleKeyDown }>
+        <Page title='Sign Up' centerTitle={true} hideNav={true}>
+            <form id='login-form'>
                 <input name='username' type='text' onInput={e => setUsername(e.target.value)} placeholder='Username' required></input>
                 <input name='email' type='email' onInput={e => setEmail(e.target.value)} placeholder='Email' required></input>
                 <input type='password' onInput={e => setPassword(e.target.value)} placeholder='Password' required></input>
@@ -70,6 +63,9 @@ function SignUp() {
                 <button className='submit-btn' onClick={handleSignUp} type='button'>
                     Register
                 </button>
+                <div className="login-link" style={{ marginTop: '20px' }}>
+                    Have an account? <Link to="/login">Log In</Link>
+                </div>
             </form>
         </Page>
     )
