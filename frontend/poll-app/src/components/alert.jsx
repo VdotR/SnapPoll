@@ -9,10 +9,13 @@ const alertColor = {
 };
 
 // Floats in a closeable alert for errors or info
-function Alert({ message, level = 'info' }) {
+function Alert({ message, level = 'info', autoHide = true }) {
     const [showAlert, setShowAlert] = useState(true);
     const { popAlert } = useUserContext();
     const [fontColor, bgColor] = alertColor[level];
+    const alertContainerStyle = {
+      top: autoHide? '3.5rem' : '0'
+    }
     const alertStyle = {
         color: fontColor,
         backgroundColor: bgColor
@@ -24,20 +27,22 @@ function Alert({ message, level = 'info' }) {
       popAlert();
     }
 
-    // Hides itself in two minutes
+    // Hides itself in five seconds
     useEffect(() => {
+      if (autoHide) {
         const timeout = setTimeout(() => {
             setShowAlert(false);
             popAlert();
-        }, 3000);
+        }, 5000);
 
         // https://stackoverflow.com/questions/53090432/react-hooks-right-way-to-clear-timeouts-and-intervals
         return () => clearTimeout(timeout)
+      }        
     }, []);
 
     return (
         showAlert && (
-          <div className="alert-container">
+          <div className="alert-container" style={alertContainerStyle}>
             <div className='alert' style={alertStyle}>
               <span>{message}</span>
               <button className="close-button" onClick={handleClose}>

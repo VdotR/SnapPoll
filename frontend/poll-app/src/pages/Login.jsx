@@ -11,7 +11,7 @@ function Login({ redirected }) {
     const navigate = useNavigate();
     const location = useLocation();
     const { from } = location.state || { from: '/' }
-    const { isLoggedIn, setIsLoggedIn, setIsLoading } = useUserContext();
+    const { isLoggedIn, setIsLoggedIn, setIsLoading, pushAlert, popAlert } = useUserContext();
     const successMessage = location.state?.message;
 
     async function handleLogin() {
@@ -31,12 +31,13 @@ function Login({ redirected }) {
 
             // Login failed
             if (res.status === 400) {
-                alert("Username/Email and password do not match");
+                pushAlert("Username/Email and password do not match", "error");
                 return;
             }
 
             // Login success, change global state
             setIsLoggedIn(true);
+            popAlert();
         }
         catch (err) {
             console.log(err);
@@ -67,13 +68,13 @@ function Login({ redirected }) {
                 )}
                 <input name='identifier' type='text' onInput={e => setUserIdentifier(e.target.value)} placeholder='Username or email' required></input>
                 <input type='password' onInput={e => setPassword(e.target.value)} placeholder='Password' required></input>
-                <button onClick={handleLogin} type='button'>
-                    Login
+                <button className='submit-btn' onClick={handleLogin} type='button'>
+                    Sign in
                 </button>
-                <div className="signup-link" style={{ marginTop: '20px' }}>
-                    Not a Member? <Link to="/signup">Sign Up</Link>
-                </div>
             </form>
+            <div className="signup-link">
+                Not a Member? <Link to="/signup">Sign Up</Link>
+            </div>
         </Page>
     )
 

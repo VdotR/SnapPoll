@@ -155,51 +155,51 @@ function MyPolls() {
         fetchPolls(username);
     }, []);
 
-    // TODO: delete and clear poll
-    
     return (
         <Page title="My Polls">  
             <>
             <div className='toolbar'>
                 <button onClick={() => navigate("/polls/create")}><FaPlus /> New Poll</button>
                 <button onClick={() => fetchPolls(username)}><FaRedo /></button>
-            </div>         
-            <table>
-                <thead>
-                    <tr>
-                        {tableCols.map(col => {
-                            return <th className='no-select' key={col} onClick={() => handleSort(col)}>
-                                {toName(col)} {sortOrder[col]? <FaAngleDown /> : <FaAngleUp />  }
-                            </th>
-                        })}
-                        <th></th>
-                        <th></th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {polls.map(poll => {
-                        return <tr onClick={(e) => handleRowClick(e, poll.shortId)} key={poll._id}>
-                            <td><span>{poll.question}</span></td>
-                            <td> {
-                                new Date(poll.date_created).toLocaleString('en-US', {
-                                    year: 'numeric',
-                                    month: '2-digit',
-                                    day: '2-digit',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                    second: '2-digit',
-                                })
-                            } </td>
-                            {/* <td><input type='checkbox' onChange={() => toggleAvailable(poll)} checked={poll.available}></input></td> */}
-                            <td>{poll.responses.length}</td>
-                            <td><input type='checkbox' onChange={() => toggleAvailable(poll)} checked={poll.available}></input></td>
-                            <td><FaEraser onClick={() => clearPoll(poll)} /></td>
-                            <td><FaTrashAlt onClick={() => deletePoll(poll)} /></td>
+            </div>
+            <div className='table-container'>
+                <table>
+                    <thead>
+                        <tr>
+                            {tableCols.map(col => {
+                                return <th className='no-select' key={col} onClick={() => handleSort(col)}>
+                                    {toName(col)} {sortOrder[col]? <FaAngleDown /> : <FaAngleUp />  }
+                                </th>
+                            })}
+                            <th></th>
+                            <th></th>
                         </tr>
-                    })}
-                </tbody>
-            </table>
+                    </thead>
+
+                    <tbody>
+                        {polls.map(poll => {
+                            return <tr onClick={(e) => handleRowClick(e, poll.shortId)} key={poll._id}>
+                                <td><span>{poll.question}</span></td>
+                                <td className='table-date'> {
+                                    new Date(poll.date_created).toLocaleString('en-US', {
+                                        year: 'numeric',
+                                        month: '2-digit',
+                                        day: '2-digit',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        second: '2-digit',
+                                    })
+                                } </td>
+                                {/* <td><input type='checkbox' onChange={() => toggleAvailable(poll)} checked={poll.available}></input></td> */}
+                                <td>{poll.responses.length}</td>
+                                <td><input type='checkbox' onChange={() => toggleAvailable(poll)} checked={poll.available}></input></td>
+                                <td><FaEraser onClick={() => clearPoll(poll)} /></td>
+                                <td><FaTrashAlt onClick={() => deletePoll(poll)} /></td>
+                            </tr>
+                        })}
+                    </tbody>
+                </table>
+            </div>    
             {isLoading? <Loading />:
             polls.length == 0? <p> You haven't created any polls.</p>: <></>
             } 

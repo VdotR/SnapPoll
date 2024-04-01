@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useUserContext } from '../../context';
 import config from '../config';
+import { FaAngleDown, FaBars } from 'react-icons/fa';
+import useWindowDimensions from '../utils/dimensions'
 
 function Header() {
-    const [dropdownVisible, setDropdownVisible] = useState(false);
-    const { username, setIsLoading } = useUserContext();
-
-    const toggleDropdown = () => setDropdownVisible(!dropdownVisible);
+    const { username } = useUserContext();
+    const { width } = useWindowDimensions();
+    const isSmallDevice = width < 640;
+    const [navOpen, setNavOpen] = useState(false);
 
     const handleLogout = async () => {
         try {
@@ -30,23 +32,34 @@ function Header() {
         }
     };
 
+    const navContents = <>
+        <Link to='/'>Home</Link>
+        <div className='nav-links'>
+            <Link to='/vote'>Answer Poll</Link>
+            <Link to='/polls'>My Polls</Link>
+            <div className="dropdown">
+                <div id='greet-user'>
+                    <span>Hi, {username}</span><FaAngleDown />
+                </div>
+                <div className="dropdown-content" >
+                    <span>My Account</span>
+                    <span onClick={handleLogout}>Logout</span>
+                </div>
+            </div>
+        </div> 
+    </>
+
     return (
         <nav>
-            {/* Placeholders for actual links */}
-            <Link to='/'>Home</Link>
-            <div className='nav-links'>
-            <Link to='/vote'>Answer Poll</Link>
-                <Link to='/polls'>My Polls</Link>
-                <span>My Account</span>
-                <div className="dropdown">
-                    <span id='greet-user' onClick={toggleDropdown}>Hi, {username}</span>
-                    {dropdownVisible && (
-                        <div className="dropdown-content">
-                            <span onClick={handleLogout}>Logout</span>
-                        </div>
-                    )}
-                </div>
-            </div>            
+            { isSmallDevice? 
+                <>
+                    <span className='nav-btn' onClick={() => setNavOpen(!navOpen)}><FaBars /></span>
+                    <div className='nav-contents' style={{display: navOpen? 'flex' : 'none'}}>
+                        {navContents}
+                    </div>
+                </>                
+                : navContents
+            }                       
         </nav>
     );
 }

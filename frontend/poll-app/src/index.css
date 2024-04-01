@@ -1,8 +1,23 @@
 /* TODO: move styles to a new file for each component */
 
+/* Colors */
+:root {
+  --border-gray: darkgray;
+  --second-color: #ff7;
+  --submit-btn-bg: #007bff;
+  --submit-btn-hover: #0b6fda;
+  --loading-bg: #3498db;
+}
+
 /* Global fonts */
 html * {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+@media screen and (max-width: 640px) {
+  html {
+    font-size: 0.75rem;
+  }
 }
 
 html {
@@ -22,7 +37,7 @@ body {
 }
 
 .content {
-  padding: 1rem 2rem;
+  padding: 1rem 5rem;
   padding-top: 5.5rem;
   display: flex;
   flex-direction: column;
@@ -37,11 +52,11 @@ nav {
   left: 0;
   padding: 0 2rem;
   display: flex;
-  border-bottom: 2px solid black;
+  border-bottom: 1px solid var(--border-gray);
   align-content: space-between;
   font-size: 1rem;
   width: 100%;
-  background-color: white;
+  background-color: whitesmoke;
   z-index: 9999;
   box-sizing: border-box;
 }
@@ -53,16 +68,75 @@ nav .nav-links {
 }
 
 nav span, nav a {
-  padding: 1rem;
-  padding-left: 0;
+  padding: 1rem 0.75rem;
   color: black;
 }
 
 nav #greet-user {
-  margin-left: 1.5rem;
+  display: flex;
+  align-items: center;
+  margin-top: -8px;
+}
+
+nav #greet-user span {
+  padding: 0;
+  padding-right: 0.25em;
 }
 
 nav #greet-user:hover {
+  cursor: pointer;
+}
+
+.dropdown {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  margin-top: 8px;
+  border: 1px solid transparent;
+  border-radius: 4px 4px 0 0;
+  padding: 0 0.7rem;
+}
+
+.dropdown:hover {
+  border: 1px solid var(--border-gray);
+}
+
+.dropdown:hover .dropdown-content {
+  display: flex;
+}
+
+.dropdown-content:hover {
+  display: flex;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  left: -1px;
+  right: -1px;
+  top: 100%;
+  background-color: whitesmoke;
+  border: 1px solid var(--border-gray);
+  box-shadow: 1px 3px 4px 0 rgba(0,0,0,0.15);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.dropdown-content span {
+  padding: 0;
+  padding-bottom: 0.5em;
+  margin: 0 0.7rem;
+  width: 100%;
+}
+
+.dropdown-content span:hover {
+  text-decoration: underline;
+}
+
+.dropdown-content *:hover {
   cursor: pointer;
 }
 
@@ -74,9 +148,94 @@ nav #greet-user:hover {
   text-align: center;
 }
 
+input[type=checkbox] {
+  transform: scale(1.25);
+}
+
+/* Navigation for < 640px wide */
+@media screen and (max-width: 640px) {
+  .content {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+  .nav-btn svg {
+    height: 1.25rem;
+    width: auto;
+  }
+
+  nav {
+    flex-direction: column;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  .nav-contents {
+    display: none;
+    flex-direction: column;
+    margin-top: 1rem;
+  }
+
+  .nav-contents::before {
+    height: 100vh;
+  }
+  
+  nav span, nav a {
+    padding-top: 0.25rem;
+    padding-bottom: 0;
+    text-decoration: none;
+  }
+
+  nav a:hover {
+    text-decoration: underline;
+  }
+
+  nav .nav-links {
+    margin-left: 0;
+  }
+
+  nav #greet-user {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .nav-links {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dropdown {
+    border: 0;
+    margin-top: 0;
+  }
+
+  .dropdown-content span {
+    padding-bottom: 0.5rem;
+  }
+
+  .dropdown-content {
+    border: 0;
+    border-left: 1px solid var(--border-gray);
+    box-shadow: 1px 3px 4px 0 transparent;
+    position: relative;
+  }
+
+  .dropdown:hover {
+    border: 0;
+  }
+
+  input[type=checkbox] {
+    transform: scale(.75);
+  }
+}
+
 /* Form used on signup and login pages */
 form {
-  flex-grow: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 250px;
+  max-width: 300px;
 }
 
 form input {
@@ -85,23 +244,41 @@ form input {
   height: 1rem;
   font-size: 1rem;
   padding: 0.5rem;
-  border: 1px solid black;
-}
-
-form button {
-  margin: 0 auto;
+  border: 1px solid var(--border-gray);
+  border-radius: 4px;
+  background-color: whitesmoke;
 }
 
 button {
   font-size: 1rem;
   background-color: white;
-  border: 1px solid black;
-  padding: 0.25rem 0.5em;
+  border-radius: 4px;
+  border: 1px solid darkgrey;
+  padding: 0.5rem;
+  max-width: 250px;
   display: block;
 }
 
 button:hover {
   cursor: pointer;
+  background-color: whitesmoke;
+}
+
+.submit-btn {
+  margin: 0 auto;
+  color: white;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  background-color: var(--submit-btn-bg);
+  margin-top: 1rem;
+  width: 50%;
+  max-width: 150px;
+}
+
+.submit-btn:hover {
+  background-color: #0b6fda;
 }
 
 /* Displayed in login page after successful sign up*/
@@ -114,7 +291,20 @@ button:hover {
   text-align: center;
 }
 
+.signup-link {
+  margin-top: 1rem;
+}
+
+.signup-link a:visited {
+  color: black;
+}
+
 /* Polls page */
+.table-container {
+  overflow-x: scroll;
+  width: 100%;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -127,6 +317,10 @@ thead, tbody {
 
 td, th {
   padding: 0.5rem;
+}
+
+td.table-date {
+  min-width: 210px;
 }
 
 td span {
@@ -159,6 +353,10 @@ td a {
   color: black;
   text-decoration: none;
   text-overflow: ellipsis;
+}
+
+#create-poll-form {
+  max-width: 500px;
 }
 
 /* https://stackoverflow.com/questions/826782/how-to-disable-text-selection-highlighting */
@@ -198,7 +396,7 @@ td a {
 
 .loading {
   border: 4px solid rgba(0, 0, 0, 0.1);
-  border-top: 4px solid #3498db;
+  border-top: 4px solid var(--loading-bg);
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -217,7 +415,6 @@ td a {
 /* Alert message */
 .alert-container {
   position: absolute;
-  top: 3.5rem;
   left: 0;
   width: 100%;
   z-index: 9998;
@@ -225,7 +422,6 @@ td a {
 
 .alert {
   border-radius: 4px;
-  padding: 0.25rem;
   text-align: center;
   display: flex;
   justify-content: space-between;
@@ -233,8 +429,13 @@ td a {
   animation: slideInDown 0.5s forwards;
 }
 
+.alert button:hover {
+  background-color: transparent;
+}
+
 .alert span {
   flex-grow: 1;
+  margin-left: 2rem;
 }
 
 @keyframes slideInDown {
@@ -253,61 +454,42 @@ td a {
   cursor: pointer;
 }
 
-
-/* Create Poll Page ---------------------------------*/
-
-.poll-table {
-  width: 100%;
-  background-color: transparent;
-  border-spacing: 0.3rem;
-  border-collapse: separate;
-}
-
-.poll-table, .poll-table td {
-  border: 0; 
-  border-style: hidden;
-}
-
-.poll-table .custom-row td {
-  height: 2rem;
-  padding: 0; 
-  padding-bottom: 1rem;
-}
-
-.poll-table .custom-row:hover{
-  cursor: auto;
-  background-color: white;
-}
-
-.poll-table .checkbox-cell, .poll-table .delete-button-cell {
-  width: 2rem;
-}
-
-.poll-table .checkbox-cell .checkbox, .poll-table .textbox-cell .dynamic-textbox, .poll-table .delete-button-cell .delete-button {
-  width: 100%;
-  height: 100%;
-  margin: 0; 
-  border: 0; 
-  padding: 0; 
-}
-
-.poll-table .delete-button-cell .delete-button {
-  background-color: black; 
-  color: #fff;
-}
-
-.poll-table .textbox-cell .dynamic-textbox {
-  box-sizing: border-box; 
-}
-
-.create-poll-question {
-  margin: 0 auto;
-  margin-bottom: 1rem;
-  width: 89%; 
-}
-
-.create-poll-button {
+/* Create Poll Page */
+.option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1rem;
 }
 
-/*---------------------------------------------------*/
+.option input {
+  margin-bottom: 0;
+}
+
+.option-check {
+  margin: 0 1rem;
+}
+
+.option-delete {
+  margin-left: .5rem;
+  border: 0;
+  border: 1px solid white;
+  padding: 0.5rem;
+}
+
+.option-delete:hover {
+  cursor: pointer;
+
+}
+
+.option-text {
+  flex-grow: 1;
+}
+
+#add-option-btn {
+  width: 100%;
+  margin-bottom: 1rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+

@@ -1,8 +1,9 @@
 import Page from '../components/page'
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BsFillTrash3Fill } from "react-icons/bs";
+import { FaRegTrashAlt, FaPlus } from "react-icons/fa";
 import config from '../config';
+import { useUserContext } from '../../context';
 
 // Constants
 const MAX_QUESTION_LENGTH = 200;
@@ -14,6 +15,7 @@ function CreatePoll() {
     const [question, setQuestion] = useState('');
     const [options, setOptions] = useState(['']);
     const [correctOption, setCorrectOption] = useState(null);
+    const { pushAlert } = useUserContext();
 
     const handleQuestionChange = (event) => {
         setQuestion(event.target.value);
@@ -37,7 +39,8 @@ function CreatePoll() {
         setOptions([...options, '']);
     };
 
-    const handleRemoveOption = (index) => {      
+    const handleRemoveOption = (e, index) => {  
+        e.preventDefault();
         if (options.length > 1) {
             if (index === correctOption){
                 // Clear correct option if deleted old correct option
@@ -51,30 +54,32 @@ function CreatePoll() {
 
             console.log(options);
         } else {
-            alert('There must be at least one option.');
+            console.log('tried to remove last option')
+            pushAlert('There must be at least one option', 'error');
         }
     };
 
     const handleSubmit = async () => {
         // Edge Cases
         if (correctOption === null) {
-            alert("You need to select a correct option!")
+            pushAlert("You need to select a correct option!", 'error')
             return;
         }
 
         if (question === null){
-            alert("Question should not be null!")
+            pushAlert('Question should not be empty', 'error')
             return;
         } else if (question.length > MAX_QUESTION_LENGTH){
-            alert(`Question is too long! Max question length is ${MAX_QUESTION_LENGTH} characters while current question has ${question.length} characters`);
+            pushAlert(`Question is too long! Max question length is ${MAX_QUESTION_LENGTH} characters while current question has ${question.length} characters`, 'error');
+            return;
         }
         
         for (let i = 0; i < options.length; i++){
             if (options[i] === ""){
-                alert("Option cannot be null!");
+                pushAlert("Option cannot be empty", 'error');
                 return;
             } else if (options[i].length > MAX_OPTION_LENGTH){
-                alert(`Option is too long! Each option should be under ${MAX_OPTION_LENGTH} characters`);
+                pushAlert(`Option is too long! Each option should be under ${MAX_OPTION_LENGTH} characters`, 'error');
                 return;
             }
         }
@@ -95,66 +100,55 @@ function CreatePoll() {
 
             if (response.ok) {
                 const newPoll = await response.json();
-                //alert('Poll created successfully!');
-                console.log("created" + newPoll);
-                // Redirect to polls page
                 navigate("/polls");
             } else {
-                alert('Failed to create the poll.');
+                pushAlert("Failed to create poll", "error")
             }
 
         } catch (error) {
             console.error('Error:', error);
-            alert('Error creating the poll.');
+            pushAlert("Error creating poll", "error")
         }
     };
 
     return (
-        <Page>
-            <form>
-            <div>
-                <input
-                    type="text"
-                    value={question}
-                    placeholder='Question'
-                    onChange={handleQuestionChange}
-                    className='create-poll-question'
-                />
-            </div>
-            <table className='poll-table'>
-            <tbody>
-                {options.map((option, index) => (
-                <tr key={index} className='custom-row'>
-                    <td className='checkbox-cell'>
+        <Page title='Create a new poll' centerTitle={true}>
+            <form id='create-poll-form'>
+                <div className='option'>
+                    <input style={{visibility: 'hidden'}} type="checkbox" className='option-check' />
+                    <input
+                        type="text"
+                        value={question}
+                        placeholder='Question'
+                        onChange={handleQuestionChange}
+                        className='option-text'
+                    />
+                    <button onClick={(e) => handleRemoveOption(e, index)} style={{visibility: 'hidden'}} className="option-delete"><FaRegTrashAlt type="button" /></button>
+                </div>
+                
+                {options.map((option, index) => {
+                    return <div className='option' key={`option-${index}`}>
                         <input
                             type="checkbox"
                             checked={correctOption === index}
                             onChange={() => handleCorrectOptionChange(index)}
-                            className="checkbox"
+                            className='option-check'
                         />
-                    </td>
-                    <td className='textbox-cell'>
                         <input
                             type="text"
                             value={option}
                             placeholder={`Option ${index + 1}`}
                             onChange={(event) => handleOptionChange(index, event)}
-                            className='dynamic-textbox'
+                            className='option-text'
                         />
-                    </td>
-                    <td className='delete-button-cell"'>
-                        <button type="button" onClick={() => handleRemoveOption(index) } className="delete-button">
-                            <BsFillTrash3Fill />
-                        </button>
-                    </td>
-                </tr>
-                ))}
-            </tbody>
-            </table>
-            <button type="button" onClick={addOption} className='create-poll-button'>
-                Add Option
+                        <button onClick={(e) => handleRemoveOption(e, index)} className="option-delete"><FaRegTrashAlt type="button" /></button>
+
+                    </div>
+                })}        
+            <button type="button" onClick={addOption} id='add-option-btn'>
+                <FaPlus /> Add an option
             </button>
-            <button type="button" onClick={handleSubmit} className='create-poll-button'>
+            <button type="button" onClick={handleSubmit} id='create-poll-btn' className='submit-btn'>
                 Create Poll
             </button>
         </form>

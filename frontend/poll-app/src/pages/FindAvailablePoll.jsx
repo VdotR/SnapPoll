@@ -39,7 +39,7 @@ function FindAvailablePoll() {
                     placeholder="Enter Poll ID"
                     required
                 />
-                <button type="submit">Submit</button>
+                <button className='submit-btn' type="submit">Submit</button>
             </form>
         </Page>
     );
