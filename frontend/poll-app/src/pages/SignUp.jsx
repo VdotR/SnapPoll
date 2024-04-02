@@ -62,11 +62,11 @@ function SignUp() {
                 <input type='password' onInput={e => setConfirmPassword(e.target.value)} placeholder='Confirm Password' required></input>
                 <button className='submit-btn' onClick={handleSignUp} type='button'>
                     Register
-                </button>
-                <div className="login-link" style={{ marginTop: '20px' }}>
-                    Have an account? <Link to="/login">Log In</Link>
-                </div>
+                </button>                
             </form>
+            <div className="signup-link">
+                Have an account? <Link to="/login">Log In</Link>
+            </div>
         </Page>
     )
     

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUserContext } from '../../context';
 import Loading from '../components/loading';
 import config from '../config';
+import { truncate } from '../utils/pollUtils';
 
 // https://react-icons.github.io/react-icons/icons/fa/
 import { FaPlus, FaRedo, FaAngleUp, FaAngleDown, FaEraser, FaTrashAlt } from 'react-icons/fa';
@@ -22,14 +23,6 @@ function MyPolls() {
     function toName(str) {
         return str.replace(/_/g, ' ')
         .replace(/\b\w/g, char => char.toUpperCase());
-    }
-
-    // Truncate and add ellipsis for long poll name
-    function truncate(str) {
-        if (str.length > 20) {
-            return str.substring(0, 20) + "...";
-        }
-        return str;
     }
 
     // Indicates if column sorted in "default" order
@@ -59,15 +52,14 @@ function MyPolls() {
     }
 
     // Link to poll details, ignore clicks on checkbox and icons
-    function handleRowClick(e, shortId) {
+    function handleRowClick(e, id) {
         if (!['input', 'path'].includes(e.target.tagName.toLowerCase())) {
-            navigate(`/poll/${shortId}`);
+            navigate(`/poll/${id}`);
         }
     }
 
     // Delete a poll
     function deletePoll(poll) {
-        console.log(`http://localhost:3000/api/poll/${poll._id}`)
         fetch(`http://localhost:3000/api/poll/${poll._id}/`, {
             method: "DELETE",
             credentials: 'include'
@@ -178,7 +170,7 @@ function MyPolls() {
 
                     <tbody>
                         {polls.map(poll => {
-                            return <tr onClick={(e) => handleRowClick(e, poll.shortId)} key={poll._id}>
+                            return <tr onClick={(e) => handleRowClick(e, poll._id)} key={poll._id}>
                                 <td><span>{poll.question}</span></td>
                                 <td className='table-date'> {
                                     new Date(poll.date_created).toLocaleString('en-US', {

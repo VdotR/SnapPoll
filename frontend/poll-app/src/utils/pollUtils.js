@@ -11,3 +11,11 @@ export async function fetchPollDetails(pollId) {
         console.error("Error fetching poll details:", error);
     }
 }
+
+// Truncate and add ellipsis for long poll or option name
+export function truncate(str) {
+    if (str.length > 30) {
+        return str.substring(0, 30) + "...";
+    }
+    return str;
+}

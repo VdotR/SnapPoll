@@ -12,6 +12,7 @@ import './App.css'
 import config from './config';
 import Page from './components/page';
 import Loading from './components/loading';
+import PollDetails from './pages/PollDetails';
 
 function App() {
   const { 
@@ -64,7 +65,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/polls" element={pageifLoggedIn("/polls", <MyPolls />)} />
-        <Route path="/poll/:poll_id" element={pageifLoggedIn("/polls/:poll_id", <MyPolls />)} />
+        <Route path="/poll/:poll_id" element={pageifLoggedIn("/polls/:poll_id", <PollDetails />)} />
         <Route path="/vote" element={pageifLoggedIn("/vote", <FindAvailablePoll />)} />
         <Route path="/vote/:poll_id" element={pageifLoggedIn("/vote/:poll_id", <Vote />)} />
         <Route path="/polls/create" element={pageifLoggedIn("/polls/create", <CreatePoll />)} />        
