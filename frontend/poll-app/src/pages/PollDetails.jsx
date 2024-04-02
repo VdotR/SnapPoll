@@ -45,12 +45,11 @@ function PollDetails() {
         datasets: [
             {
                 label: 'Responses',
-                backgroundColor: Object.keys(counts).map((_, index) => index === correctOption ? 'rgba(60, 179, 113, 0.7)' : 'rgba(211, 211, 211, 0.6)'),
-                borderColor: Object.keys(counts).map((_, index) => index === correctOption ? 'rgba(60, 179, 113, 1)' : 'rgba(211, 211, 211, 1)'),
+                backgroundColor: Object.keys(counts).map((_, index) => index === correctOption ? config.BAR_GREEN : config.BAR_GREY),
+                borderColor: Object.keys(counts).map((_, index) => index === correctOption ? config.BAR_GREEN_BORDER : config.BAR_GREY_BORDER),
                 borderWidth: 1,
-                hoverBackgroundColor: Object.keys(counts).map((_, index) => index === correctOption ? 'rgba(60, 179, 113, 0.9)' : 'rgba(211, 211, 211, 0.8)'),
-                hoverBorderColor: Object.keys(counts).map((_, index) => index === correctOption ? 'rgba(60, 179, 113, 1)' : 'rgba(211, 211, 211, 1)'), // For now same as not hovered
-
+                hoverBackgroundColor: Object.keys(counts).map((_, index) => index === correctOption ? config.BAR_GREEN_HOVER : config.BAR_GREY_HOVER),
+                hoverBorderColor: Object.keys(counts).map((_, index) => index === correctOption ? config.BAR_GREEN_BORDER : config.BAR_GREY_BORDER), // For now same as not hovered
                 data: counts
             }
         ]
@@ -137,7 +136,7 @@ function PollDetails() {
                                 </thead>
                                 <tbody>
                                     {Object.keys(counts).map(option => {
-                                        return <tr key={option} style={poll.options.indexOf(option) == poll.correct_option? correctOptionStyle : {}}>
+                                        return <tr key={option} style={poll.options.indexOf(option) == correctOption ? correctOptionStyle : {}}>
                                             <td>{truncate(option)}</td>
                                             <td>{counts[option]}</td>
                                             <td>{(counts[option] / poll.responses.length * 100).toFixed(2) + "%"}</td>
