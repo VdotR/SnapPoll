@@ -1,1 +1,1 @@
-# polling_system
+# SnapPoll
