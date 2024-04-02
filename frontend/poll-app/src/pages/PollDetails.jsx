@@ -15,6 +15,7 @@ function PollDetails() {
     const { pushAlert } = useUserContext();
     const [poll, setPoll] = useState(null);
     const [counts, setCounts] = useState({});
+    const [correctOption, setCorrectOption] = useState(null);
 
     const correctOptionStyle = {
         backgroundColor: "#dff0d8"
@@ -44,11 +45,12 @@ function PollDetails() {
         datasets: [
             {
                 label: 'Responses',
-                backgroundColor: 'rgba(54, 162, 235, 0.6)', // Blue color for bars
-                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: Object.keys(counts).map((_, index) => index === correctOption ? 'rgba(60, 179, 113, 0.7)' : 'rgba(211, 211, 211, 0.6)'),
+                borderColor: Object.keys(counts).map((_, index) => index === correctOption ? 'rgba(60, 179, 113, 1)' : 'rgba(211, 211, 211, 1)'),
                 borderWidth: 1,
-                hoverBackgroundColor: 'rgba(54, 162, 235, 0.8)',
-                hoverBorderColor: 'rgba(54, 162, 235, 1)',
+                hoverBackgroundColor: Object.keys(counts).map((_, index) => index === correctOption ? 'rgba(60, 179, 113, 0.9)' : 'rgba(211, 211, 211, 0.8)'),
+                hoverBorderColor: Object.keys(counts).map((_, index) => index === correctOption ? 'rgba(60, 179, 113, 1)' : 'rgba(211, 211, 211, 1)'), // For now same as not hovered
+
                 data: counts
             }
         ]
@@ -78,6 +80,7 @@ function PollDetails() {
             });
             console.log(newCounts);
             setCounts(newCounts);
+            setCorrectOption(data.correct_option);
         })
     }
 
