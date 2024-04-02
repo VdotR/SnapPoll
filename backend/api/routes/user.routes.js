@@ -22,6 +22,7 @@ router.post('/login/', async (req, res) => {
                 { email: { $regex: `^${identifier}$`, $options: 'i' } }
             ]
         });
+
         if (!user || !await bcrypt.compare(password, user.password)) {
             return res.status(400).send('Invalid credentials');
         }
@@ -33,6 +34,7 @@ router.post('/login/', async (req, res) => {
     }
 });
 
+// Logout the user by destroying the session
 router.get('/logout/', checkSession, async (req, res) => {
     req.session.destroy(function (err) {
         if (err) {
@@ -46,6 +48,7 @@ router.get('/logout/', checkSession, async (req, res) => {
     });
 });
 
+// Returns information (excluding password hash) about the user matching email or username
 router.get('/lookup/:email_username', async (req, res) => {
     const identifier = req.params.email_username;
     try {
@@ -63,6 +66,7 @@ router.get('/lookup/:email_username', async (req, res) => {
     }
 });
 
+//Returns information (excluding password hash) about the user matching id
 router.get('/:id', async (req, res) => {
     try {
         const existingUser = await User.findById(req.params.id).select('-password');
@@ -74,13 +78,29 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+//Creates new user with given information
+//@ char restriciton placed on email/username to prevent case where email and username are the same 
+//TODO: Password restrictions (minimum strength) 
 router.post('/signup/', async (req, res) => {
     try {
+        const { email, username, password } = req.body;
+
+        // Check if email contains '@'
+        if (!email.includes('@')) {
+            return res.status(400).send('Email must contain an @ symbol.');
+        }
+
+        // Check if username contains '@'
+        if (username.includes('@')) {
+            return res.status(400).send('Username must not contain an @ symbol.');
+        }
+
         const newUser = new User({
-            email: req.body.email,
-            username: req.body.username,
-            password: req.body.password
+            email: email,
+            username: username,
+            password: password
         });
+
         await newUser.save();
         res.send("User registration successful.")
     }
@@ -114,10 +134,23 @@ router.post('/signup/', async (req, res) => {
     }
 });
 
+//Deletes user if authorized (session has same userId), destroys session
 router.delete('/:id', checkSession, async (req, res) => {
     try {
+        if (req.session.userId != req.params.id) {
+            res.status(401).send("Unauthorized");
+            return;
+        }
         const deletedUser = await User.findOneAndDelete({ _id: req.params.id });
-        if (deletedUser) res.send("Deleted user.");
+        if (deletedUser) {
+            res.send("Deleted user.");
+            req.session.destroy(function (err) {
+                if (err) {
+                    // Handle error
+                    console.error("Session destruction error:", err);
+                }
+            });
+        }
         else res.status(404).send("User not found.");
     } catch (error) {
         res.status(400).send("Error");

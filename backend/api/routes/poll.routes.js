@@ -11,20 +11,26 @@ const { checkSession } = require('../middleware.js')
 mongoose.connect(process.env.CONNECTION_STRING, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-  }).then(() => console.log('Connected to MongoDB'))
+}).then(() => console.log('Connected to MongoDB'))
     .catch(err => console.error('Could not connect to MongoDB...', err));
 
+//Record a vote from a user. If sucessful, appends _id to  the created_poll_id and answered_poll_id of this user. 
+//Also updates the responses of the poll with the request body.
 router.patch('/vote/:id', checkSession, async (req, res) => {
     const _id = req.params.id;
     try {
+        if (req.session.userId != req.body.user_id) {
+            return res.status(401).send("Unauthorized");
+        }
+
         // Check if the poll is available directly
         const poll = await Poll.findById(_id);
         if (!poll) {
             return res.status(400).json({ message: "Poll is not available" });
-        } else if (!poll.available){
+        } else if (!poll.available) {
             return res.status(400).json({ message: "Poll is not accepting responses" });
         }
-        
+
         // Update user's answered_poll_id without adding duplicates (like adding to a set)
         await User.updateOne(
             { _id: req.session.userId },
@@ -33,7 +39,7 @@ router.patch('/vote/:id', checkSession, async (req, res) => {
 
         // Check if user already responded
         let existingResponse = poll.responses.find(r => r.user.toString() === req.session.userId);
-        
+
         if (existingResponse) {
             // Update the existing response
             existingResponse.answer = req.body.answer;
@@ -45,15 +51,16 @@ router.patch('/vote/:id', checkSession, async (req, res) => {
                 answer: req.body.answer
             });
         }
-        
+
         const newPoll = await poll.save();
         res.send(newPoll);
-        
+
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 });
 
+//Makes the poll available if requesting user created it.
 router.patch('/open/:id', checkSession, async (req, res) => {
     const _id = req.params.id;
     try {
@@ -71,10 +78,12 @@ router.patch('/open/:id', checkSession, async (req, res) => {
     }
 })
 
+//Makes the poll closed to responses if requesting user created it.
 router.patch('/close/:id', checkSession, async (req, res) => {
     const _id = req.params.id;
     try {
         const user = await User.findById(req.session.userId);
+
         const poll = await Poll.findById(_id);
         if (!user.created_poll_id.includes(poll._id)) {
             return res.status(403).send("Forbidden");
@@ -88,6 +97,8 @@ router.patch('/close/:id', checkSession, async (req, res) => {
     }
 })
 
+//Create a new poll with user-specified question and options.
+//Adds new poll to User created_poll_id
 router.post('/', checkSession, async (req, res) => {
     try {
         const poll = new Poll({
@@ -95,6 +106,7 @@ router.post('/', checkSession, async (req, res) => {
             correct_option: req.body.correct_option,
             options: req.body.options
         });
+
         const newPoll = await poll.save();
 
         // Update user's created_poll_id
@@ -110,15 +122,16 @@ router.post('/', checkSession, async (req, res) => {
     }
 })
 
+//Retrieve the post by id 
 router.get('/:id', checkSession, async (req, res) => {
     const _id = req.params.id;
-    try{
+    try {
         const poll = await Poll.findById(_id);
         if (!poll) {
             return res.status(404).send({ message: 'Poll not found' });
         }
         else {
-           res.send(poll);
+            res.send(poll);
         }
     } catch (error) {
         // If there's an error, it might be because the `id` is not a valid ObjectId
