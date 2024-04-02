@@ -6,18 +6,31 @@ const bcrypt = require('bcrypt');
 const router = express.Router();
 const { checkSession } = require('../middleware.js')
 
-// Login the user, using either email or username, and password
+router.get('/auth/', async (req, res) => {
+    return res.json({
+        isLoggedIn: !!req.session.userId,
+        username: req.session.username
+    });
+});
+
 router.post('/login/', async (req, res) => {
     try {
         const { identifier, password } = req.body;
-        const user = await User.findOne({ $or: [{ username: identifier }, { email: identifier }] });
+        const user = await User.findOne({
+            $or: [
+                { username: { $regex: `^${identifier}$`, $options: 'i' } },
+                { email: { $regex: `^${identifier}$`, $options: 'i' } }
+            ]
+        });
+
         if (!user || !await bcrypt.compare(password, user.password)) {
             return res.status(400).send('Invalid credentials');
         }
         req.session.userId = user._id; // Create a session
+        req.session.username = user.username;
         res.send('Login successful');
     } catch (error) {
-        res.status(500).send(error.message);
+        res.status(400).send("Invalid request");
     }
 });
 
@@ -39,7 +52,12 @@ router.get('/logout/', checkSession, async (req, res) => {
 router.get('/lookup/:email_username', async (req, res) => {
     const identifier = req.params.email_username;
     try {
-        const existingUser = await User.findOne({ $or: [{ username: identifier }, { email: identifier }] }, { password: 0 });
+        const existingUser = await User.findOne({
+            $or: [
+                { username: { $regex: `^${identifier}$`, $options: 'i' } },
+                { email: { $regex: `^${identifier}$`, $options: 'i' } }
+            ]
+        }, { password: 0 });
         if (!existingUser) res.status(404).send("User not found.");
         else res.status(200).send(existingUser);
     }
@@ -95,6 +113,20 @@ router.post('/signup/', async (req, res) => {
                 console.log('Email already exists.');
                 res.status(400).send('Email already exists.');
             }
+        }
+        else if (error.name === 'ValidationError') {
+            // Handle validation errors for specific fields
+            if (error.errors.username) {
+                console.log('Invalid username:', error.errors.username.message);
+                res.status(400).send('Invalid username.');
+            } else if (error.errors.email) {
+                console.log('Invalid email:', error.errors.email.message);
+                res.status(400).send('Invalid email.');
+            } else {
+                // Handle other validation errors
+                console.error('Validation error:', error.message);
+                res.status(400).send('Invalid input data.');
+            }
         } else {
             console.error('Error adding user:', error);
             res.status(400).send('Error adding user.');
@@ -125,5 +157,32 @@ router.delete('/:id', checkSession, async (req, res) => {
         console.log("Failed" + error);
     }
 });
+
+// TODO: should this be here? want to retrieve all polls a user created from newest to oldest
+router.get('/created_polls/:identifier', checkSession, async (req, res) => {
+    const identifier = req.params.identifier;
+    try {
+        const existingUser = await User.findOne({
+            $or: [
+                { username: identifier },
+                { email: identifier }
+            ]
+        }, { password: 0 })
+            .populate('created_poll_id');
+        if (!existingUser) {
+            return res.status(404).send("User not found.");
+        }
+        if (existingUser.created_poll_id.length == 0) {
+            return res.status(400).send("User has not created any polls.");
+        }
+        if (existingUser._id != req.session.userId) {
+            return res.status(401).send("Unauthorized")
+        }
+        res.send(existingUser.created_poll_id.reverse());
+    }
+    catch (error) {
+        res.status(500).send({ message: error.message });
+    }
+})
 
 module.exports = router;

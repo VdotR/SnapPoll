@@ -33,12 +33,12 @@ router.patch('/vote/:id', checkSession, async (req, res) => {
 
         // Update user's answered_poll_id without adding duplicates (like adding to a set)
         await User.updateOne(
-            { _id: req.body.user_id },
+            { _id: req.session.userId },
             { $addToSet: { answered_poll_id: _id } }
         );
 
         // Check if user already responded
-        let existingResponse = poll.responses.find(r => r.user.toString() === req.body.user_id);
+        let existingResponse = poll.responses.find(r => r.user.toString() === req.session.userId);
 
         if (existingResponse) {
             // Update the existing response
@@ -47,7 +47,7 @@ router.patch('/vote/:id', checkSession, async (req, res) => {
         } else {
             // Add new response
             poll.responses.push({
-                user: req.body.user_id,
+                user: req.session.userId,
                 answer: req.body.answer
             });
         }
@@ -64,20 +64,11 @@ router.patch('/vote/:id', checkSession, async (req, res) => {
 router.patch('/open/:id', checkSession, async (req, res) => {
     const _id = req.params.id;
     try {
-        // Ensure _id is a valid ObjectId
-        if (!mongoose.Types.ObjectId.isValid(_id)) {
-            return res.status(400).send("Invalid poll ID.");
-        }
-
-        const objectId = new mongoose.Types.ObjectId(_id); // Convert _id to ObjectId for comparison
-
-        const requestingUser = await User.findById(req.session.userId).select('created_poll_id -_id');
-        
-        // Check if the ObjectId exists in the created_poll_id array
-        if (!requestingUser.created_poll_id.some(id => id.equals(objectId))) {
-            return res.status(401).send("User did not create this poll.");
-        }
+        const user = await User.findById(req.session.userId);
         const poll = await Poll.findById(_id);
+        if (!user.created_poll_id.includes(poll._id)) {
+            return res.status(403).send("Forbidden");
+        }
         poll.available = true;
         const newPoll = await poll.save();
         res.send(newPoll);
@@ -91,20 +82,12 @@ router.patch('/open/:id', checkSession, async (req, res) => {
 router.patch('/close/:id', checkSession, async (req, res) => {
     const _id = req.params.id;
     try {
-        // Ensure _id is a valid ObjectId
-        if (!mongoose.Types.ObjectId.isValid(_id)) {
-            return res.status(400).send("Invalid poll ID.");
-        }
+        const user = await User.findById(req.session.userId);
 
-        const objectId = new mongoose.Types.ObjectId(_id); // Convert _id to ObjectId for comparison
-
-        const requestingUser = await User.findById(req.session.userId).select('created_poll_id -_id');
-        
-        // Check if the ObjectId exists in the created_poll_id array
-        if (!requestingUser.created_poll_id.some(id => id.equals(objectId))) {
-            return res.status(401).send("User did not create this poll.");
-        }
         const poll = await Poll.findById(_id);
+        if (!user.created_poll_id.includes(poll._id)) {
+            return res.status(403).send("Forbidden");
+        }
         poll.available = false;
         const newPoll = await poll.save();
         res.send(newPoll);
@@ -123,12 +106,16 @@ router.post('/', checkSession, async (req, res) => {
             correct_option: req.body.correct_option,
             options: req.body.options
         });
-        await poll.save();
+
+        const newPoll = await poll.save();
+
+        // Update user's created_poll_id
         await User.updateOne(
-            { _id: req.session.userId },
-            { $addToSet: { created_poll_id: poll._id } }
+            { _id: req.session.userId},
+            { $push: { created_poll_id: newPoll._id } }
         );
-        res.json(poll);
+
+        res.json(newPoll);
     }
     catch (error) {
         res.status(500).send({ message: error.message });
@@ -147,6 +134,71 @@ router.get('/:id', checkSession, async (req, res) => {
             res.send(poll);
         }
     } catch (error) {
+        // If there's an error, it might be because the `id` is not a valid ObjectId
+        res.status(500).send({ message: error.message });
+    }
+})
+
+
+router.delete('/:id', checkSession, async (req, res) => {
+    try{
+        const _id = req.params.id;
+        // Poll Side
+        const poll = await Poll.findOneAndDelete({ _id: _id })
+        if (!poll) {
+            return res.status(404).send({ message: "Can't delete poll: Poll not found" });
+        }
+
+        // User side 
+        // Each poll is created by ONLY 1 user
+        const updateCreated = User.findOneAndUpdate(
+            { created_poll_id: _id },
+            { $pull: { created_poll_id : _id } }
+        );
+
+        // Each poll will be answered by multiple users
+        const updateAnswered = User.updateMany(
+            { answered_poll_id: _id }, 
+            { $pull: { answered_poll_id: _id } } 
+        );
+
+        await Promise.all([updateCreated, updateAnswered]);
+        
+        res.send({ message: "Poll and references deleted successfully.", poll });
+
+    } catch (error) {
+        // If there's an error, it might be because the `id` is not a valid ObjectId
+        res.status(500).send({ message: error.message });
+    }
+})
+
+router.patch('/:id/clear', checkSession, async (req, res) => {
+    try{
+        const _id = req.params.id;
+        const result = await Poll.updateOne(
+            { _id : _id },
+            { $set : {responses: []}}
+        );
+
+        // Check if the poll was found and updated
+        if (result.matchedCount === 0) {
+            return res.status(404).send({ message: 'Poll not found' });
+        }
+      
+        // Update User side 
+        await User.updateMany(
+            { answered_poll_id: _id }, 
+            { $pull: { answered_poll_id: _id } } 
+        );
+
+        if (result.modifiedCount === 0) {
+            return res.status(200).send({ message: 'No updates made to the poll. The poll maybe originally empty' });
+        }
+
+      res.send({ message: 'Poll responses cleared successfully' });
+
+    } catch (error) {
+        console.error('Error clearing poll responses:', error);
         // If there's an error, it might be because the `id` is not a valid ObjectId
         res.status(500).send({ message: error.message });
     }
