@@ -13,10 +13,10 @@ function FindAvailablePoll() {
     const [polls, setPolls] = useState([]);
     const [pollId, setPollId] = useState("");
     const [pollDetails, setPollDetails] = useState(null);
-    const { username, pushAlert } = useUserContext();
+    const { userId, username, pushAlert } = useUserContext();
     const [isLoading, setIsLoading] = useState(true);
     const dateCol = "date_created"
-    const tableCols = ["question", dateCol, "available"];
+    const tableCols = ["question", dateCol, "available", "chosen_answer"];
 
     // Replace underscore with space and capitalize each word 
     function toName(str) {
@@ -60,7 +60,7 @@ function FindAvailablePoll() {
 
     async function fetchAnsweredPolls(username) {
         setIsLoading(true);
-        fetch(`${config.BACKEND_BASE_URL}/api/user/lookup/${username}`, {
+        fetch(`${config.BACKEND_BASE_URL}/api/user/${userId}`, {
             credentials: config.API_REQUEST_CREDENTIALS_SETTING
         })
             .then(res => {
@@ -94,9 +94,7 @@ function FindAvailablePoll() {
             .then(pollDetails => {
                 // Filter out any nulls (failed fetches) and update state with the successful fetches
                 const successfulPollDetails = pollDetails.filter(detail => detail !== null);
-                const pollsWithoutResponses = successfulPollDetails.map(({ responses, ...rest }) => rest);
-
-                setPolls(pollsWithoutResponses);
+                setPolls(successfulPollDetails);
             })
             .catch(error => console.log(error))
             .finally(() => {
@@ -159,20 +157,25 @@ function FindAvailablePoll() {
 
                 <tbody>
                     {polls.map(poll => {
-                        return <tr onClick={(e) => handleRowClick(e, poll._id, poll.available)} key={poll._id}>
-                            <td><span>{poll.question}</span></td>
-                            <td> {
-                                new Date(poll.date_created).toLocaleString('en-US', {
-                                    year: 'numeric',
-                                    month: '2-digit',
-                                    day: '2-digit',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                    second: '2-digit',
-                                })
-                            } </td>
-                            <td>{poll.available ? 'Yes' : 'No'}</td>
-                        </tr>
+                        const userResponse = poll.responses[0];
+                        return (
+                            <tr onClick={(e) => handleRowClick(e, poll._id, poll.available)} key={poll._id}>
+                                <td><span>{poll.question}</span></td>
+                                <td> {
+                                    new Date(poll.date_created).toLocaleString('en-US', {
+                                        year: 'numeric',
+                                        month: '2-digit',
+                                        day: '2-digit',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        second: '2-digit',
+                                    })
+                                } </td>
+                                <td>{poll.available ? 'Yes' : 'No'}</td>
+                                {/* Display the user's answer, if available */}
+                                <td>{poll.options[userResponse.answer]}</td>
+                            </tr>
+                        );
                     })}
                 </tbody>
             </table>
