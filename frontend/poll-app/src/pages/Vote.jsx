@@ -5,6 +5,7 @@ import { fetchPollDetails } from '../utils/pollUtils';
 import config from '../config';
 import Loading from '../components/loading';
 import { useUserContext } from '../../context';
+import '../css/Vote.css';
 
 function Vote() {
     const navigate = useNavigate();

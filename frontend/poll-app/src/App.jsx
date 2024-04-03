@@ -8,7 +8,6 @@ import FindAvailablePoll from './pages/FindAvailablePoll';
 import Vote from './pages/Vote'
 import CreatePoll from './pages/CreatePoll';
 import { useUserContext } from '../context'
-import './App.css'
 import config from './config';
 import Page from './components/page';
 import Loading from './components/loading';

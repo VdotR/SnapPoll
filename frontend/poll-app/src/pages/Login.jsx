@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useUserContext } from '../../context';
 import config from '../config';
-
+import '../css/Login.css';
 
 function Login({ redirected }) {
     const [userIdentifier, setUserIdentifier] = useState("");
@@ -72,7 +72,7 @@ function Login({ redirected }) {
                     Sign in
                 </button>
             </form>
-            <div className="signup-link">
+            <div className="prompt-link">
                 Not a Member? <Link to="/signup">Sign Up</Link>
             </div>
         </Page>
