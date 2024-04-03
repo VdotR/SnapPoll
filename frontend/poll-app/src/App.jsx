@@ -20,7 +20,9 @@ function App() {
     isLoading,
     setIsLoading,
     username,
-    setUsername
+    setUsername,
+    userId,
+    setUserId
   } = useUserContext();
 
   function pageifLoggedIn(path, page) {
@@ -42,6 +44,7 @@ function App() {
         console.log("/auth response: " + data.isLoggedIn)
         setIsLoggedIn(data.isLoggedIn);
         setUsername(data.username);
+        setUserId(data.userId);
       })
       .catch((error) => {
         console.error('Error fetching auth status:', error);

@@ -9,6 +9,7 @@ export const UserProvider = ({ children }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [alert, setAlert] = useState(null);
     const [username, setUsername] = useState('');
+    const [userId, setUserId] = useState('');
 
     // Set alert with message string and level (error or info)
     const pushAlert = (message, level = 'info') => {
@@ -30,6 +31,8 @@ export const UserProvider = ({ children }) => {
             popAlert: popAlert,
             username: username,
             setUsername: setUsername,
+            userId: userId,
+            setUserId: setUserId,            
         }}>
             {children}
         </UserContext.Provider>

@@ -6,22 +6,29 @@ const bcrypt = require('bcrypt');
 const router = express.Router();
 const { checkSession } = require('../middleware.js')
 
+//Check if requester is logged in, return id and username
 router.get('/auth/', async (req, res) => {
     return res.json({
         isLoggedIn: !!req.session.userId,
-        username: req.session.username
+        userId: req.session.userId,
+        username: req.session.username,
     });
 });
 
+//login the user by creating a server side cookie
 router.post('/login/', async (req, res) => {
     try {
         const { identifier, password } = req.body;
-        const user = await User.findOne({
-            $or: [
-                { username: { $regex: `^${identifier}$`, $options: 'i' } },
-                { email: { $regex: `^${identifier}$`, $options: 'i' } }
-            ]
-        });
+        let user;
+
+        // Check if the identifier contains '@'
+        if (identifier.includes('@')) {
+            // Attempt to find the user by email
+            user = await User.findOne({ email: identifier });
+        } else {
+            // Attempt to find the user by username
+            user = await User.findOne({ username: identifier });
+        }
 
         if (!user || !await bcrypt.compare(password, user.password)) {
             return res.status(400).send('Invalid credentials');
@@ -48,20 +55,28 @@ router.get('/logout/', checkSession, async (req, res) => {
     });
 });
 
-// Returns information (excluding password hash) about the user matching email or username
-router.get('/lookup/:email_username', async (req, res) => {
-    const identifier = req.params.email_username;
-    try {
-        const existingUser = await User.findOne({
-            $or: [
-                { username: { $regex: `^${identifier}$`, $options: 'i' } },
-                { email: { $regex: `^${identifier}$`, $options: 'i' } }
-            ]
-        }, { password: 0 });
-        if (!existingUser) res.status(404).send("User not found.");
-        else res.status(200).send(existingUser);
+// Returns information (excluding password hash) about the user matching email or username (identifier)
+router.get('/lookup/:identifier', async (req, res) => {
+    const identifier = req.params.identifier;
+    let query = {};
+
+    // Check if the identifier contains '@'
+    if (identifier.includes('@')) {
+        // Prepare to find the user by email
+        query.email = identifier;
+    } else {
+        // Prepare to find the user by username
+        query.username = identifier;
     }
-    catch (error) {
+
+    try {
+        const existingUser = await User.findOne(query, { password: 0 }); // Exclude the password hash from the result
+        if (!existingUser) {
+            res.status(404).send("User not found.");
+        } else {
+            res.status(200).send(existingUser);
+        }
+    } catch (error) {
         res.status(500).send("Something went wrong");
     }
 });
@@ -134,14 +149,16 @@ router.post('/signup/', async (req, res) => {
     }
 });
 
-//Deletes user if authorized (session has same userId), destroys session
-router.delete('/:id', checkSession, async (req, res) => {
+//Deletes user if authorized (session has same userId) and password in body matches, destroys session
+router.post('/delete/', checkSession, async (req, res) => {
+    const password = req.body.password;
+
     try {
-        if (req.session.userId != req.params.id) {
-            res.status(401).send("Unauthorized");
-            return;
-        }
-        const deletedUser = await User.findOneAndDelete({ _id: req.params.id });
+        const user = await User.findById(req.session.userId);
+        if (!user || !await bcrypt.compare(password, user.password)) {
+            return res.status(400).send('Invalid credentials');
+        }            
+        const deletedUser = await User.findOneAndDelete({ _id: req.session.userId });
         if (deletedUser) {
             res.send("Deleted user.");
             req.session.destroy(function (err) {
@@ -151,7 +168,6 @@ router.delete('/:id', checkSession, async (req, res) => {
                 }
             });
         }
-        else res.status(404).send("User not found.");
     } catch (error) {
         res.status(400).send("Error");
         console.log("Failed" + error);
@@ -159,15 +175,9 @@ router.delete('/:id', checkSession, async (req, res) => {
 });
 
 // TODO: should this be here? want to retrieve all polls a user created from newest to oldest
-router.get('/created_polls/:identifier', checkSession, async (req, res) => {
-    const identifier = req.params.identifier;
+router.get('/created_polls/:id', checkSession, async (req, res) => {
     try {
-        const existingUser = await User.findOne({
-            $or: [
-                { username: identifier },
-                { email: identifier }
-            ]
-        }, { password: 0 })
+        const existingUser = await User.findById(req.params.id).select('-password')
             .populate('created_poll_id');
         if (!existingUser) {
             return res.status(404).send("User not found.");
@@ -175,9 +185,11 @@ router.get('/created_polls/:identifier', checkSession, async (req, res) => {
         if (existingUser.created_poll_id.length == 0) {
             return res.status(400).send("User has not created any polls.");
         }
+        /*
         if (existingUser._id != req.session.userId) {
             return res.status(401).send("Unauthorized")
         }
+        */
         res.send(existingUser.created_poll_id.reverse());
     }
     catch (error) {
