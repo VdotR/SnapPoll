@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaRegTrashAlt, FaPlus } from "react-icons/fa";
 import { useUserContext } from '../../context';
 import config from '../config';
+import '../css/CreatePoll.css';
 
 // Constants
 const MAX_QUESTION_LENGTH = 200;

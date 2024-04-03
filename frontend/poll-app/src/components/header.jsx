@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { useUserContext } from '../../context';
 import config from '../config';
 import { FaAngleDown, FaBars } from 'react-icons/fa';
-import useWindowDimensions from '../utils/dimensions'
+import useWindowDimensions from '../utils/dimensions';
+import '../css/header.css'
 
 function Header() {
     const { username } = useUserContext();

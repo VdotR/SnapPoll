@@ -1,0 +1,41 @@
+.option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.option input {
+  margin-bottom: 0;
+}
+
+.option-check {
+  margin: 0 1rem;
+}
+
+.option-delete {
+  margin-left: .5rem;
+  border: 0;
+  border: 1px solid white;
+  padding: 0.5rem;
+}
+
+.option-delete:hover {
+  cursor: pointer;
+
+}
+
+.option-text {
+  flex-grow: 1;
+}
+
+#add-option-btn {
+  width: 100%;
+  margin-bottom: 1rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#create-poll-form {
+  max-width: 500px;
+}
