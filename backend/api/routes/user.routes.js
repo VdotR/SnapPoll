@@ -182,7 +182,7 @@ router.get('/created_polls/:id', checkSession, async (req, res) => {
         if (!existingUser) {
             return res.status(404).send("User not found.");
         }
-        if (existingUser.created_poll_id.length == 0) {
+        if (existingUser.created_poll_id.length === 0) {
             return res.status(400).send("User has not created any polls.");
         }
         /*

@@ -15,7 +15,7 @@ function FindAvailablePoll() {
     const [pollDetails, setPollDetails] = useState(null);
     const { userId, username, pushAlert } = useUserContext();
     const [isLoading, setIsLoading] = useState(true);
-    const dateCol = "date_created"
+    const dateCol = "date_answered"
     const tableCols = ["question", dateCol, "available", "chosen_answer"];
 
     // Replace underscore with space and capitalize each word 
@@ -162,7 +162,7 @@ function FindAvailablePoll() {
                             <tr onClick={(e) => handleRowClick(e, poll._id, poll.available)} key={poll._id}>
                                 <td><span>{poll.question}</span></td>
                                 <td> {
-                                    new Date(poll.date_created).toLocaleString('en-US', {
+                                    new Date(userResponse.updatedAt).toLocaleString('en-US', {
                                         year: 'numeric',
                                         month: '2-digit',
                                         day: '2-digit',
