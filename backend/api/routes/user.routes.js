@@ -185,4 +185,31 @@ router.get('/created_polls/:identifier', checkSession, async (req, res) => {
     }
 })
 
+// Update user password
+router.patch("/change_password", checkSession, async (req, res) => {
+    const id = req.session.userId
+    try {
+        const { old_password, new_password } = req.body;
+        // Check whether both are valid
+        if (!old_password || !new_password) {
+            return res.status(400).send('Invalid request');
+        }
+
+        // Compare old password with current password in database
+        const user = await User.findById(id);
+        if (!await bcrypt.compare(old_password, user.password)) {
+            return res.status(400).send('Invalid password');
+        }
+
+        // password check passes, now update password
+        user.password = new_password;
+        await user.save();
+        res.send('Password updated successfully');
+    } 
+    catch (error) {
+        res.status(400).send("Invalid request");
+    }
+});
+
+
 module.exports = router;
