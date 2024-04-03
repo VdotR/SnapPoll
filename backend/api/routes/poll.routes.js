@@ -147,7 +147,7 @@ router.delete('/:id', checkSession, async (req, res) => {
             return res.status(404).send({ message: "Can't delete poll: Poll not found" });
         }
         if(poll.created_by != req.session.userId) {
-            return res.status(401).send({ message: "Can't delete poll: Unauthorized" });
+            return res.status(403).send({ message: "Can't delete poll: Unauthorized" });
         }
 
         // Poll Side
@@ -185,7 +185,7 @@ router.patch('/:id/clear', checkSession, async (req, res) => {
             return res.status(404).send({ message: "Can't clear poll: Poll not found" });
         }
         if(poll.created_by != req.session.userId) {
-            return res.status(401).send({ message: "Can't clear poll: Unauthorized" });
+            return res.status(403).send({ message: "Can't clear poll: Unauthorized" });
         }        
         const result = await Poll.updateOne(
             { _id : _id },
