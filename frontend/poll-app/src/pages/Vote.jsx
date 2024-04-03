@@ -11,7 +11,7 @@ function Vote() {
     const navigate = useNavigate();
     const location = useLocation();
     const { poll_id } = useParams();
-    const { pushAlert } = useUserContext();
+    const { userId, pushAlert } = useUserContext();
 
     const [pollDetails, setPollDetails] = useState(location.state?.pollDetails || null);
     const [selectedOption, setSelectedOption] = useState(null);
@@ -20,8 +20,9 @@ function Vote() {
         if (!pollDetails) {
             fetchPollDetails(poll_id)
                 .then(data => {
+                    const userResponse = data.responses.find(response => response.user === userId);
                     setPollDetails(data);
-                    //setSelectedOption();
+                    setSelectedOption(userResponse.answer);
 
                     if (data && !data._id) {
                         pushAlert('Poll not found.', 'error');

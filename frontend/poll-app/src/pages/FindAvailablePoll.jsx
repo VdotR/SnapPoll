@@ -157,7 +157,7 @@ function FindAvailablePoll() {
 
                 <tbody>
                     {polls.map(poll => {
-                        const userResponse = poll.responses[0];
+                        const userResponse = poll.responses.find(response => response.user === userId);
                         return (
                             <tr onClick={(e) => handleRowClick(e, poll._id, poll.available)} key={poll._id}>
                                 <td><span>{poll.question}</span></td>
