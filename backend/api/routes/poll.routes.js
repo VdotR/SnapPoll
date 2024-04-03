@@ -95,12 +95,37 @@ router.patch('/close/:id', checkSession, async (req, res) => {
 
 //Create a new poll with user-specified question and options.
 //Adds new poll to User created_poll_id
+// Constants
+const MAX_QUESTION_LENGTH = 200;
+const MAX_OPTION_LENGTH = 80;
 router.post('/', checkSession, async (req, res) => {
+    // Destructure the required fields from req.body
+    const { question, correct_option, options } = req.body;
+
+    // Check if any of the fields are empty or null
+    if (!question || correct_option === null || !Array.isArray(options) || options.length === 0) {
+        // If any field is empty or null, send a 400 Bad Request response
+        return res.status(400).send({ message: 'Question, correct option, and options must not be empty.' });
+    }
+
+    // Additional validation to ensure options array does not contain empty strings
+    if (options.some(option => option.trim() === '')) {
+        return res.status(400).send({ message: 'Options must not contain empty strings.' });
+    }
+
+    // Separate length validations
+    if (question.length > MAX_QUESTION_LENGTH) {
+        return res.status(400).send({ message: `Question must be less than ${MAX_QUESTION_LENGTH} characters.` });
+    }
+    if (options.some(option => option.trim().length > MAX_OPTION_LENGTH)) {
+        return res.status(400).send({ message: `Each option must be less than ${MAX_OPTION_LENGTH} characters.` });
+    }
+
     try {
         const poll = new Poll({
-            question: req.body.question,
-            correct_option: req.body.correct_option,
-            options: req.body.options,
+            question: question,
+            correct_option: correct_option,
+            options: options,
             created_by: req.session.userId
         });
 
