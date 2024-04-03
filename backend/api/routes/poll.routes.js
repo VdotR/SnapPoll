@@ -19,10 +19,6 @@ mongoose.connect(process.env.CONNECTION_STRING, {
 router.patch('/vote/:id', checkSession, async (req, res) => {
     const _id = req.params.id;
     try {
-        if (req.session.userId != req.body.user_id) {
-            return res.status(401).send("Unauthorized");
-        }
-
         // Check if the poll is available directly
         const poll = await Poll.findById(_id);
         if (!poll) {
@@ -48,7 +44,8 @@ router.patch('/vote/:id', checkSession, async (req, res) => {
             // Add new response
             poll.responses.push({
                 user: req.session.userId,
-                answer: req.body.answer
+                answer: req.body.answer,
+                updatedAt: Date.now()
             });
         }
 
@@ -64,9 +61,8 @@ router.patch('/vote/:id', checkSession, async (req, res) => {
 router.patch('/open/:id', checkSession, async (req, res) => {
     const _id = req.params.id;
     try {
-        const user = await User.findById(req.session.userId);
         const poll = await Poll.findById(_id);
-        if (!user.created_poll_id.includes(poll._id)) {
+        if (poll.created_by != req.session.userId) {
             return res.status(403).send("Forbidden");
         }
         poll.available = true;
@@ -104,7 +100,8 @@ router.post('/', checkSession, async (req, res) => {
         const poll = new Poll({
             question: req.body.question,
             correct_option: req.body.correct_option,
-            options: req.body.options
+            options: req.body.options,
+            created_by: req.session.userId
         });
 
         const newPoll = await poll.save();
@@ -122,7 +119,8 @@ router.post('/', checkSession, async (req, res) => {
     }
 })
 
-//Retrieve the post by id 
+//Retrieve the poll by id 
+//Removes correct answer in response if not poll creator
 router.get('/:id', checkSession, async (req, res) => {
     const _id = req.params.id;
     try {
@@ -131,6 +129,7 @@ router.get('/:id', checkSession, async (req, res) => {
             return res.status(404).send({ message: 'Poll not found' });
         }
         else {
+            if(req.session.userId != poll.created_by) poll = poll.select('-correct_answer');
             res.send(poll);
         }
     } catch (error) {
@@ -139,15 +138,21 @@ router.get('/:id', checkSession, async (req, res) => {
     }
 })
 
-
+//Delete the poll if user is creator
 router.delete('/:id', checkSession, async (req, res) => {
     try{
         const _id = req.params.id;
-        // Poll Side
-        const poll = await Poll.findOneAndDelete({ _id: _id })
+        const poll = await Poll.findById(_id).select('created_by');
         if (!poll) {
             return res.status(404).send({ message: "Can't delete poll: Poll not found" });
         }
+        if(poll.created_by != req.session.userId) {
+            return res.status(401).send({ message: "Can't delete poll: Unauthorized" });
+        }
+
+        // Poll Side
+        await Poll.findOneAndDelete({ _id: _id })
+
 
         // User side 
         // Each poll is created by ONLY 1 user
@@ -175,16 +180,18 @@ router.delete('/:id', checkSession, async (req, res) => {
 router.patch('/:id/clear', checkSession, async (req, res) => {
     try{
         const _id = req.params.id;
+        const poll = await Poll.findById(_id).select('created_by');
+        if (!poll) {
+            return res.status(404).send({ message: "Can't clear poll: Poll not found" });
+        }
+        if(poll.created_by != req.session.userId) {
+            return res.status(401).send({ message: "Can't clear poll: Unauthorized" });
+        }        
         const result = await Poll.updateOne(
             { _id : _id },
             { $set : {responses: []}}
         );
-
-        // Check if the poll was found and updated
-        if (result.matchedCount === 0) {
-            return res.status(404).send({ message: 'Poll not found' });
-        }
-      
+   
         // Update User side 
         await User.updateMany(
             { answered_poll_id: _id }, 
@@ -192,7 +199,7 @@ router.patch('/:id/clear', checkSession, async (req, res) => {
         );
 
         if (result.modifiedCount === 0) {
-            return res.status(200).send({ message: 'No updates made to the poll. The poll maybe originally empty' });
+            return res.status(200).send({ message: 'No updates made to the poll. The poll may be originally empty' });
         }
 
       res.send({ message: 'Poll responses cleared successfully' });
