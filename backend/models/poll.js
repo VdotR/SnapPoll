@@ -19,8 +19,6 @@ const pollSchema = new Schema({
     shortId: { type: String }
 });
 
-pollSchema.index({ "responses.user": "hashed" });
-
 /*
 // Pre-save hook to generate shortId
 pollSchema.pre('save', function (next) {
