@@ -12,6 +12,28 @@ export async function fetchPollDetails(pollId) {
     }
 }
 
+export async function clearPoll(poll) {
+    fetch(`${config.BACKEND_BASE_URL}/api/poll/${poll._id}/clear`, {
+        method: "PATCH",
+        credentials: 'include'
+    })
+    .then(res => {
+        if (!res.ok) {
+            pushAlert('Failed to clear poll responses', 'error');
+        }
+    })
+    .then(() => pushAlert(`Cleared poll \"${truncate(poll.question)}\"`))
+    .then(() => setPolls(prevPolls => prevPolls.map(p => {
+        if (p._id === poll._id) {
+            // Return a new object with the updated available property
+            return { ...p, responses: [] };
+        }
+        return p;
+    })))
+    .catch(error => console.log(error))
+}
+
+
 // Truncate and add ellipsis for long poll or option name
 export function truncate(str) {
     if (str.length > 30) {

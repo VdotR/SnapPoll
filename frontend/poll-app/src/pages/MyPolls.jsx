@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUserContext } from '../../context';
 import Loading from '../components/loading';
 import config from '../config';
-import { truncate } from '../utils/pollUtils';
+import { clearPoll, truncate } from '../utils/pollUtils';
 
 // https://react-icons.github.io/react-icons/icons/fa/
 import { FaPlus, FaRedo, FaAngleUp, FaAngleDown, FaEraser, FaTrashAlt } from 'react-icons/fa';
@@ -60,7 +60,7 @@ function MyPolls() {
 
     // Delete a poll
     function deletePoll(poll) {
-        fetch(`http://localhost:3000/api/poll/${poll._id}/`, {
+        fetch(`${config.BACKEND_BASE_URL}/api/poll/${poll._id}/`, {
             method: "DELETE",
             credentials: 'include'
         })
@@ -68,28 +68,6 @@ function MyPolls() {
         .then(() => fetchPolls(userId))
         .catch(error => console.log(error))
 
-    }
-
-    // Clear a poll's responses
-    function clearPoll(poll) {
-        fetch(`http://localhost:3000/api/poll/${poll._id}/clear`, {
-            method: "PATCH",
-            credentials: 'include'
-        })
-        .then(res => {
-            if (!res.ok) {
-                pushAlert('Failed to clear poll responses', 'error');
-            }
-        })
-        .then(() => pushAlert(`Cleared poll \"${truncate(poll.question)}\"`))
-        .then(() => setPolls(prevPolls => prevPolls.map(p => {
-            if (p._id === poll._id) {
-                // Return a new object with the updated available property
-                return { ...p, responses: [] };
-            }
-            return p;
-        })))
-        .catch(error => console.log(error))
     }
 
     // Toggle poll availability
