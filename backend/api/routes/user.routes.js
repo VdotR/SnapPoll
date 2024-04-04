@@ -134,14 +134,12 @@ router.post('/signup/', async (req, res) => {
     }
 });
 
-//Deletes user if authorized (session has same userId), destroys session
-router.delete('/:id', checkSession, async (req, res) => {
+// Deletes user if authorized (session has same userId), destroys session
+// This approach uses session ONLY
+router.delete('/', checkSession, async (req, res) => {
+    const _id = req.session.userId;
     try {
-        if (req.session.userId != req.params.id) {
-            res.status(401).send("Unauthorized");
-            return;
-        }
-        const deletedUser = await User.findOneAndDelete({ _id: req.params.id });
+        const deletedUser = await User.findOneAndDelete({ _id });
         if (deletedUser) {
             res.send("Deleted user.");
             req.session.destroy(function (err) {
