@@ -154,6 +154,12 @@ td a {
   text-overflow: ellipsis;
 }
 
+td svg {
+  height: 1.25rem;
+  width: 1.25rem;
+  vertical-align: middle;
+}
+
 /* https://stackoverflow.com/questions/826782/how-to-disable-text-selection-highlighting */
 .no-select {
   -webkit-touch-callout: none; /* iOS Safari */
