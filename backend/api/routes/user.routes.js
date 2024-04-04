@@ -198,7 +198,7 @@ router.patch("/change_password", checkSession, async (req, res) => {
         // Compare old password with current password in database
         const user = await User.findById(id);
         if (!await bcrypt.compare(old_password, user.password)) {
-            return res.status(400).send('Invalid password');
+            return res.status(400).send('Current Password is invalid! Please re-enter!');
         }
 
         // password check passes, now update password
