@@ -17,5 +17,18 @@
     "mongodb": "^6.5.0",
     "mongoose": "^8.2.3",
     "nodemon": "^3.1.0"
+  },
+  "eslintConfig": {
+    "env": {
+      "node": true,
+      "es2022": true
+    },
+    "extends": "eslint:recommended",
+    "parserOptions": {
+      "ecmaVersion": "latest"
+    }
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0"
   }
 }
