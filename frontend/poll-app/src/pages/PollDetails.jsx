@@ -69,7 +69,6 @@ function PollDetails() {
             return res.json();
         })
         .then(data => {
-            console.log(data);
             setPoll(data);
             let newCounts = {};
             data.options.forEach(option => {
@@ -78,7 +77,6 @@ function PollDetails() {
             data.responses.forEach(response => {
                 newCounts[data.options[response.answer]]++
             });
-            console.log(newCounts);
             setCounts(newCounts);
             setCorrectOption(data.correct_option);
         })

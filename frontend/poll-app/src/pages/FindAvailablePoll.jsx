@@ -5,14 +5,13 @@ import { fetchPollDetails } from '../utils/pollUtils';
 import { useUserContext } from '../../context';
 import Loading from '../components/loading';
 import config from '../config';
-import { FaPlus, FaRedo, FaAngleUp, FaAngleDown, FaEraser, FaTrashAlt } from 'react-icons/fa';
+import { FaAngleUp, FaAngleDown } from 'react-icons/fa';
 
 function FindAvailablePoll() {
     const navigate = useNavigate();
 
     const [polls, setPolls] = useState([]);
     const [pollId, setPollId] = useState("");
-    const [pollDetails, setPollDetails] = useState(null);
     const { userId, username, pushAlert } = useUserContext();
     const [isLoading, setIsLoading] = useState(true);
     const dateCol = "date_answered"
@@ -112,8 +111,6 @@ function FindAvailablePoll() {
         e.preventDefault(); // Prevent default form submission behavior
         fetchPollDetails(pollId)
             .then(data => {
-                setPollDetails(data);
-
                 if (data && !data._id) {
                     pushAlert('Poll not found.', 'error');
                 } else if (!data.available) {

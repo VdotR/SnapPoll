@@ -41,7 +41,6 @@ function App() {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("/auth response: " + data.isLoggedIn)
         setIsLoggedIn(data.isLoggedIn);
         setUsername(data.username);
         setUserId(data.userId);

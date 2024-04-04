@@ -21,8 +21,6 @@ function Vote() {
             fetchPollDetails(poll_id)
                 .then(data => {
                     const userResponse = data.responses.find(response => response.user === userId);
-                    setPollDetails(data);
-                    setSelectedOption(userResponse.answer);
 
                     if (data && !data._id) {
                         pushAlert('Poll not found.', 'error');
@@ -32,6 +30,9 @@ function Vote() {
                         pushAlert('Poll not available', 'error');
                         navigate(`/vote`);
                     }
+
+                    setPollDetails(data);
+                    setSelectedOption(userResponse.answer);
                 })
                 .catch(error => {
                     console.error("Error fetching poll details:", error);

@@ -72,7 +72,6 @@ function MyPolls() {
 
     // Clear a poll's responses
     function clearPoll(poll) {
-        console.log(`http://localhost:3000/api/poll/${poll._id}/clear`)
         fetch(`http://localhost:3000/api/poll/${poll._id}/clear`, {
             method: "PATCH",
             credentials: 'include'
