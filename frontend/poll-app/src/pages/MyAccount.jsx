@@ -7,7 +7,7 @@ import { useUserContext } from '../../context';
 // As of now MyAccount's only purpose is to change user password
 // 04/03/2024
 function MyAccount() {
-    const navigate = useNavigate();
+    //const navigate = useNavigate();
     const [ oldPassword, setOldPassword ] = useState("");
     const [ newPassword, setNewPassword ] = useState("");
     const [ confirmNewPassword, setConfirmNewPassword ] = useState("");
@@ -18,6 +18,11 @@ function MyAccount() {
         // Check whether all fields are filled
         if (!newPassword || !oldPassword || !confirmNewPassword){
             pushAlert("Please fill in all fields.", 'error');
+            return;
+        }
+
+        if (oldPassword === newPassword){
+            pushAlert("New password cannot be the same as your current password", "error");
             return;
         }
         // Check if new password matches with confirm new password
