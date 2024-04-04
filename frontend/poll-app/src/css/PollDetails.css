@@ -1,0 +1,31 @@
+.poll-details {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.poll-details .table-outer-container {
+  margin-left: 2rem;
+  width: min-content;
+  flex-grow: 1;
+}
+
+.responses-plot canvas {
+  max-width: 500px; /* canvas size can't be relative units :( */
+  height: 600px;
+  margin: 0 auto;
+}
+
+@media screen and (max-width: 550px) {
+  .responses-plot canvas {
+    max-width: 300px;
+    height: 300px;
+  }
+}
+
+@media screen and (max-width: 900px) {
+.poll-details .table-outer-container {
+    margin-left: 0rem;
+    width: 100%;
+  }
+}

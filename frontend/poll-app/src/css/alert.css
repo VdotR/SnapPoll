@@ -1,0 +1,40 @@
+.alert-container {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  z-index: 9998;
+}
+
+.alert {
+  border-radius: 4px;
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  animation: slideInDown 0.5s forwards;
+}
+
+.alert button:hover {
+  background-color: transparent;
+}
+
+.alert span {
+  flex-grow: 1;
+  margin-left: 2rem;
+}
+
+@keyframes slideInDown {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.close-button {
+  background-color: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+}

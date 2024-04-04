@@ -1,0 +1,25 @@
+.voteOptionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px; 
+}
+
+.voteOption {
+  border: 2px solid black;
+  padding: 10px;
+  margin: 2px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  min-width: 100px; 
+  height: 40px; 
+  display: flex;
+  justify-content: center; 
+  align-items: center; 
+  text-align: center;
+}
+
+.voteOption.selected {
+  background-color: green;
+  color: white;
+}

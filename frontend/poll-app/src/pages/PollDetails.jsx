@@ -8,6 +8,7 @@ import { truncate } from '../utils/pollUtils';
 import { Chart as ChartJS } from 'chart.js/auto'; // needed for some reason
 import { Bar } from 'react-chartjs-2';
 import { FaRedo, FaEraser, FaTrashAlt } from 'react-icons/fa';
+import '../css/PollDetails.css';
 
 function PollDetails() {
     const navigate = useNavigate();

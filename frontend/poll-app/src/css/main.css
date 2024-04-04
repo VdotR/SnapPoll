@@ -1,0 +1,186 @@
+/* Colors */
+:root {
+  --border-gray: darkgray;
+  --second-color: #ff7;
+  --submit-btn-bg: #007bff;
+  --submit-btn-hover: #0b6fda;
+  --loading-bg: #3498db;
+}
+
+/* Global fonts */
+html * {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+@media screen and (max-width: 640px) {
+  html {
+    font-size: 0.75rem;
+  }
+}
+
+html {
+  height: 100%;
+  overflow: auto;
+}
+
+body {
+  margin: 0;
+  height: 100%;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+
+/* Centered, responsive form */ 
+form {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 250px;
+  max-width: 300px;
+}
+
+form input {
+  display: block;
+  margin-bottom: 1rem;
+  height: 1rem;
+  font-size: 1rem;
+  padding: 0.5rem;
+  border: 1px solid var(--border-gray);
+  border-radius: 4px;
+  background-color: whitesmoke;
+}
+
+button {
+  font-size: 1rem;
+  background-color: white;
+  border-radius: 4px;
+  border: 1px solid darkgrey;
+  padding: 0.5rem;
+  max-width: 250px;
+  display: block;
+}
+
+button:hover {
+  cursor: pointer;
+  background-color: whitesmoke;
+}
+
+/* Button at end of forms */
+.submit-btn {
+  margin: 0 auto;
+  color: white;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  background-color: var(--submit-btn-bg);
+  margin-top: 1rem;
+  width: 50%;
+  max-width: 150px;
+}
+
+.submit-btn:hover {
+  background-color: #0b6fda;
+}
+
+/* Link placed below forms (e.g. "Have an account?") */
+.prompt-link {
+  margin-top: 1rem;
+}
+
+.prompt-link a:visited {
+  color: black;
+}
+
+/* Scrollable table and toolbar */
+.table-container {
+  overflow-x: scroll;
+  width: 100%;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead, tbody {
+  width: 100%;
+  text-align: left;
+}
+
+td, th {
+  padding: 0.5rem;
+}
+
+td.table-date {
+  min-width: 210px;
+}
+
+td span {
+  max-width: 40vw; /* TODO: adjust */
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+th svg {
+  display: inline;
+  vertical-align: middle;
+}
+
+th:hover {
+  cursor: pointer;
+}
+
+tr {
+  border-bottom: 1px solid grey;
+}
+
+tbody tr:hover {
+  background-color: whitesmoke;
+  cursor: pointer;
+}
+
+td a {
+  color: black;
+  text-decoration: none;
+  text-overflow: ellipsis;
+}
+
+/* https://stackoverflow.com/questions/826782/how-to-disable-text-selection-highlighting */
+.no-select {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
+
+.toolbar {
+  width: 100%;
+  display: flex;
+  justify-content: start;
+}
+
+.toolbar svg {
+  vertical-align: middle;
+}
+
+.toolbar button {
+  margin: 0.5rem;
+  margin-left: 0;
+}
+
+/* Larger checkbox for tables*/
+input[type=checkbox] {
+  transform: scale(1.25);
+}

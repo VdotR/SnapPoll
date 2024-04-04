@@ -64,7 +64,7 @@ function SignUp() {
                     Register
                 </button>                
             </form>
-            <div className="signup-link">
+            <div className="prompt-link">
                 Have an account? <Link to="/login">Log In</Link>
             </div>
         </Page>
