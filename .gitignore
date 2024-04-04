@@ -8,6 +8,7 @@ backend/.env
 # Mongodb
 frontend/node_modules/*
 frontend/.env
+frontend/poll-app/.vite
 
 
 # Others
