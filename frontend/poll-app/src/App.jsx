@@ -12,6 +12,7 @@ import config from './config';
 import Page from './components/page';
 import Loading from './components/loading';
 import PollDetails from './pages/PollDetails';
+import MyAccount from './pages/MyAccount';
 
 function App() {
   const { 
@@ -70,6 +71,7 @@ function App() {
         <Route path="/vote" element={pageifLoggedIn("/vote", <FindAvailablePoll />)} />
         <Route path="/vote/:poll_id" element={pageifLoggedIn("/vote/:poll_id", <Vote />)} />
         <Route path="/polls/create" element={pageifLoggedIn("/polls/create", <CreatePoll />)} />        
+        <Route path="/myaccount" element={pageifLoggedIn("/myaccount", <MyAccount />)} />
       </Routes>
     </Router>
   );

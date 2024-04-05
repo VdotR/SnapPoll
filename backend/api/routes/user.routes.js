@@ -150,13 +150,13 @@ router.post('/signup/', async (req, res) => {
 });
 
 //Deletes user if authorized (session has same userId) and password in body matches, destroys session
-router.post('/delete/', checkSession, async (req, res) => {
+router.delete('/', checkSession, async (req, res) => {
     const password = req.body.password;
 
     try {
         const user = await User.findById(req.session.userId);
         if (!user || !await bcrypt.compare(password, user.password)) {
-            return res.status(400).send('Invalid credentials');
+            return res.status(403).send('Invalid credentials');
         }            
         const deletedUser = await User.findOneAndDelete({ _id: req.session.userId });
         if (deletedUser) {
@@ -196,5 +196,32 @@ router.get('/created_polls/:id', checkSession, async (req, res) => {
         res.status(500).send({ message: error.message });
     }
 })
+
+// Update user password
+router.patch("/change_password", checkSession, async (req, res) => {
+    const id = req.session.userId
+    try {
+        const { old_password, new_password } = req.body;
+        // Check whether both are valid
+        if (!old_password || !new_password) {
+            return res.status(400).send('Invalid request');
+        }
+
+        // Compare old password with current password in database
+        const user = await User.findById(id);
+        if (!await bcrypt.compare(old_password, user.password)) {
+            return res.status(400).send('Current Password is invalid! Please re-enter!');
+        }
+
+        // password check passes, now update password
+        user.password = new_password;
+        await user.save();
+        res.send('Password updated successfully');
+    } 
+    catch (error) {
+        res.status(400).send("Invalid request");
+    }
+});
+
 
 module.exports = router;
