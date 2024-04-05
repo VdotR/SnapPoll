@@ -24,10 +24,10 @@ router.post('/login/', async (req, res) => {
         // Check if the identifier contains '@'
         if (identifier.includes('@')) {
             // Attempt to find the user by email
-            user = await User.findOne({ email: identifier });
+            user = await User.findOne({ email: identifier }).collation({ locale: 'en', strength: 2 });
         } else {
             // Attempt to find the user by username
-            user = await User.findOne({ username: identifier });
+            user = await User.findOne({ username: identifier }).collation({ locale: 'en', strength: 2 });
         }
 
         if (!user || !await bcrypt.compare(password, user.password)) {
@@ -70,7 +70,7 @@ router.get('/lookup/:identifier', async (req, res) => {
     }
 
     try {
-        const existingUser = await User.findOne(query, { password: 0 }); // Exclude the password hash from the result
+        const existingUser = await User.findOne(query, { password: 0 }).collation({ locale: 'en', strength: 2 }); // Exclude the password hash from the result
         if (!existingUser) {
             res.status(404).send("User not found.");
         } else {
