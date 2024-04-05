@@ -12,8 +12,8 @@ const pollSchema = new Schema({
     question: { type: String, required: true },
     options: [{ type: String, default: [] }],
     correct_option: { type: Number, default: -1 },
-    available: { type: Boolean, default: false },
-    date_created: { type: Date, default: Date.now },
+    available: { type: Boolean, default: false, required: true },
+    date_created: { type: Date, default: Date.now, required: true },
     created_by: {type: Schema.Types.ObjectId, ref: "User", required: true},
     responses: { type: [responseSchema], default: [] },
     shortId: { type: String }
