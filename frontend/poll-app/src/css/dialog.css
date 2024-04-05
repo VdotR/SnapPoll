@@ -38,6 +38,10 @@
   margin-right: 2rem;
 }
 
+.dialog-target {
+  width: 100%;
+}
+
 @media screen and (max-width: 640px) {
   .dialog-container {
     max-width: 250px;

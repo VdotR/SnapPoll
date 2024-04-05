@@ -9,7 +9,7 @@ function Dialog({target, title, text, onConfirm, denyText = 'Cancel', confirmTex
 
     return (
         <>
-            <span onClick={() => setIsOpen(true)}>
+            <span className="dialog-target" onClick={() => setIsOpen(true)}>
                 {target}
             </span>
             {isOpen && (<div className="dialog-overlay">
