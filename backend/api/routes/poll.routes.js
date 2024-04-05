@@ -119,41 +119,6 @@ router.post('/', checkSession, checkCreateValidPoll, async (req, res) => {
     }
 });
 
-router.post('/quickpoll', checkSession,  async (req, res) => {
-    // Get current date
-    let currentDate = new Date();
-    let dateString = currentDate.toLocaleDateString();
-    let timeString = currentDate.toLocaleTimeString();
-
-    // Create a question string based on current date and time
-    const question = `Quick Poll ${dateString} ${timeString}`;
-    const correct_option = -1;
-    const options = ["A", "B", "C", "D", "E"];
-
-    try {
-        const poll = new Poll({
-            question: question,
-            correct_option: correct_option,
-            options: options,
-            created_by: req.session.userId
-        });
-
-        const newPoll = await poll.save();
-
-        console.log("Good here")
-        // Update user's created_poll_id
-        await User.updateOne(
-            { _id: req.session.userId },
-            { $push: { created_poll_id: newPoll._id } }
-        );
-
-        res.json(newPoll);
-    }
-    catch (error) {
-        res.status(500).send({ message: error.message });
-    }
-});
-
 //Retrieve the poll by id 
 //Removes correct answer, responses in response if not poll creator
 router.get('/:id', checkSession, async (req, res) => {
