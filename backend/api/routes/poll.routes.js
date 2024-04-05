@@ -124,7 +124,18 @@ router.post('/', checkSession, checkCreateValidPoll, async (req, res) => {
 router.get('/:id', checkSession, async (req, res) => {
     const _id = req.params.id;
     try {
-        let poll = await Poll.findById(_id);
+        let query = {};
+        if (_id.length === 6) {
+            query.shortId = _id.toUpperCase();
+        }
+        else {
+            if (!mongoose.Types.ObjectId.isValid(_id)) {
+                return res.status(400).send({ message: 'Invalid ID format' });
+            }
+            query._id = _id;
+        }
+        let poll = await Poll.findOne(query);
+
         if (!poll) {
             return res.status(404).send({ message: 'Poll not found' });
         }
