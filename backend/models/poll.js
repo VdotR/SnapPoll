@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const crypto = require('crypto');
 
 const Schema = mongoose.Schema;
 
@@ -16,20 +17,47 @@ const pollSchema = new Schema({
     date_created: { type: Date, default: Date.now, required: true },
     created_by: {type: Schema.Types.ObjectId, ref: "User", required: true},
     responses: { type: [responseSchema], default: [] },
-    shortId: { type: String }
+    shortId: { type: String, unique: true }
 });
 
-/*
+
 // Pre-save hook to generate shortId
-pollSchema.pre('save', function (next) {
-    if (this.isNew) {
-        // Generate shortId from ObjectId
-        const objectId = this._id.toString().toUpperCase();
-        this.shortId = objectId.substring(1, 3) + objectId.substring(9, 11) + objectId.substring(21, 23);
+
+pollSchema.pre('save', async function(next) {
+    if (this.available && !this.shortId) {
+        try {
+            this.shortId = await generateUniqueShortId();
+        } catch (error) {
+            next(error);
+            return; 
+        }
+    } else if (!this.available) {
+        this.shortId = undefined;
     }
     next();
 });
-*/ 
+
+async function generateUniqueShortId() {
+    let id, existing;
+    do {
+        id = generateShortId();
+        existing = await Poll.findOne({ shortId: id }).exec();
+    } while (existing); // If the ID exists, loop to generate a new one
+    return id;
+}
+
+function generateShortId(length = 6) {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const charactersLength = characters.length;
+    const bytes = crypto.randomBytes(length);
+    let id = '';
+
+    for (let i = 0; i < length; i++) {
+        id += characters[bytes[i] % charactersLength];
+    }
+
+    return id;
+}
 
 const Poll = mongoose.model('Poll', pollSchema);
 
