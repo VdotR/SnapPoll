@@ -62,7 +62,7 @@ function MyPolls() {
     function deletePoll(poll) {
         fetch(`${config.BACKEND_BASE_URL}/api/poll/${poll._id}/`, {
             method: "DELETE",
-            credentials: 'include'
+            credentials: config.API_REQUEST_CREDENTIALS_SETTING
         })
         .then(() => pushAlert(`Deleted poll \"${truncate(poll.question)}\"`))
         .then(() => fetchPolls(userId))
@@ -74,10 +74,16 @@ function MyPolls() {
     async function toggleAvailable(poll) {
         console.log(`${config.BACKEND_BASE_URL}/api/poll/${poll.available ? 'close' : 'open'}/${poll._id}`);
         try {
-            const action = poll.available ? 'close' : 'open';
-            const response = await fetch(`${config.BACKEND_BASE_URL}/api/poll/${action}/${poll._id}`, {
+            const action = poll.available ? false : true;
+            const response = await fetch(`${config.BACKEND_BASE_URL}/api/poll/${poll._id}/available`, {
                 method: "PATCH",
-                credentials: config.API_REQUEST_CREDENTIALS_SETTING
+                credentials: config.API_REQUEST_CREDENTIALS_SETTING,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    available: action
+                })
             });
     
             if (response.status === 401) {
