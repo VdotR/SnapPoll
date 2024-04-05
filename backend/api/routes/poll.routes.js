@@ -86,6 +86,8 @@ router.patch('/:id/available', checkSession, async (req, res) => {
     }
 })
 
+
+
 //Create a new poll with user-specified question and options.
 //Adds new poll to User created_poll_id
 // Constants
@@ -138,6 +140,7 @@ router.post('/quickpoll', checkSession, checkCreateValidPoll, async (req, res) =
 
         const newPoll = await poll.save();
 
+        console.log("Good here")
         // Update user's created_poll_id
         await User.updateOne(
             { _id: req.session.userId },

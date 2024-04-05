@@ -132,11 +132,33 @@ function MyPolls() {
         fetchPolls(userId);
     }, []);
 
+    const createNewPoll = async () => {
+        try {
+            const response = await fetch(`${config.BACKEND_BASE_URL}/api/poll/quickpoll`, {
+                method: 'POST', 
+                credentials: config.API_REQUEST_CREDENTIALS_SETTING,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            });
+    
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+    
+            pushAlert("Created quick poll!");
+            await fetchPolls(userId);
+        } catch (error) {
+            console.error('There was a problem with your fetch operation:', error);
+        }
+    };
+
     return (
         <Page title="My Polls">  
             <>
             <div className='toolbar'>
                 <button onClick={() => navigate("/polls/create")}><FaPlus /> New Poll</button>
+                <button onClick={() => createNewPoll()}><FaPlus /> Quick Poll</button>
                 <button onClick={() => fetchPolls(userId)}><FaRedo /></button>
             </div>
             <div className='table-container'>
