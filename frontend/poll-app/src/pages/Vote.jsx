@@ -20,7 +20,6 @@ function Vote() {
         if (!pollDetails) {
             fetchPollDetails(poll_id)
                 .then(data => {
-                    const userResponse = data.responses.find(response => response.user === userId);
 
                     if (data && !data._id) {
                         pushAlert('Poll not found.', 'error');
@@ -32,7 +31,8 @@ function Vote() {
                     }
 
                     setPollDetails(data);
-                    setSelectedOption(userResponse.answer);
+                    const userResponse = data.responses.find(response => response.user === userId);
+                    if(userResponse) setSelectedOption(userResponse.answer);
                 })
                 .catch(error => {
                     console.error("Error fetching poll details:", error);
@@ -44,7 +44,7 @@ function Vote() {
     // Function to handle answer submission
     const submitAnswer = async (answerIndex) => {
         try {
-            const response = await fetch(`${config.BACKEND_BASE_URL}/api/poll/vote/${poll_id}`, {
+            const response = await fetch(`${config.BACKEND_BASE_URL}/api/poll/${poll_id}/vote`, {
                 method: "PATCH",
                 credentials: config.API_REQUEST_CREDENTIALS_SETTING,
                 headers: {
