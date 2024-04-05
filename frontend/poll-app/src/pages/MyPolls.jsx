@@ -4,16 +4,17 @@ import { useNavigate } from 'react-router-dom';
 import { useUserContext } from '../../context';
 import Loading from '../components/loading';
 import config from '../config';
-import { truncate } from '../utils/pollUtils';
+import { clearPoll, getDialogText, truncate } from '../utils/pollUtils';
 
 // https://react-icons.github.io/react-icons/icons/fa/
 import { FaPlus, FaRedo, FaAngleUp, FaAngleDown, FaEraser, FaTrashAlt } from 'react-icons/fa';
+import Dialog from '../components/dialog';
 
 function MyPolls() {
     const [polls, setPolls] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
-    const { username, pushAlert } = useUserContext();
+    const { userId, username, pushAlert } = useUserContext();
 
     // Table column names
     const dateCol = "date_created"
@@ -53,54 +54,38 @@ function MyPolls() {
 
     // Link to poll details, ignore clicks on checkbox and icons
     function handleRowClick(e, id) {
-        if (!['input', 'path'].includes(e.target.tagName.toLowerCase())) {
+        console.log(e.target.tagName.toLowerCase())
+        if (!['span', 'svg', 'button', 'input', 'path'].includes(e.target.tagName.toLowerCase())) {
             navigate(`/poll/${id}`);
         }
     }
 
     // Delete a poll
     function deletePoll(poll) {
-        fetch(`http://localhost:3000/api/poll/${poll._id}/`, {
+        fetch(`${config.BACKEND_BASE_URL}/api/poll/${poll._id}/`, {
             method: "DELETE",
-            credentials: 'include'
+            credentials: config.API_REQUEST_CREDENTIALS_SETTING
         })
         .then(() => pushAlert(`Deleted poll \"${truncate(poll.question)}\"`))
-        .then(() => fetchPolls(username))
+        .then(() => fetchPolls(userId))
         .catch(error => console.log(error))
 
-    }
-
-    // Clear a poll's responses
-    function clearPoll(poll) {
-        console.log(`http://localhost:3000/api/poll/${poll._id}/clear`)
-        fetch(`http://localhost:3000/api/poll/${poll._id}/clear`, {
-            method: "PATCH",
-            credentials: 'include'
-        })
-        .then(res => {
-            if (!res.ok) {
-                pushAlert('Failed to clear poll responses', 'error');
-            }
-        })
-        .then(() => pushAlert(`Cleared poll \"${truncate(poll.question)}\"`))
-        .then(() => setPolls(prevPolls => prevPolls.map(p => {
-            if (p._id === poll._id) {
-                // Return a new object with the updated available property
-                return { ...p, responses: [] };
-            }
-            return p;
-        })))
-        .catch(error => console.log(error))
     }
 
     // Toggle poll availability
     async function toggleAvailable(poll) {
         console.log(`${config.BACKEND_BASE_URL}/api/poll/${poll.available ? 'close' : 'open'}/${poll._id}`);
         try {
-            const action = poll.available ? 'close' : 'open';
-            const response = await fetch(`${config.BACKEND_BASE_URL}/api/poll/${action}/${poll._id}`, {
+            const action = poll.available ? false : true;
+            const response = await fetch(`${config.BACKEND_BASE_URL}/api/poll/${poll._id}/available`, {
                 method: "PATCH",
-                credentials: config.API_REQUEST_CREDENTIALS_SETTING
+                credentials: config.API_REQUEST_CREDENTIALS_SETTING,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    available: action
+                })
             });
     
             if (response.status === 401) {
@@ -124,9 +109,9 @@ function MyPolls() {
         }
     }
 
-    async function fetchPolls(username) {
+    async function fetchPolls(userId) {
         setIsLoading(true);
-        fetch(`${config.BACKEND_BASE_URL}/api/user/created_polls/${username}`, { 
+        fetch(`${config.BACKEND_BASE_URL}/api/user/created_polls/${userId}`, { 
             credentials: config.API_REQUEST_CREDENTIALS_SETTING 
         })
         .then(res => {
@@ -144,7 +129,7 @@ function MyPolls() {
     }
 
     useEffect(() => {
-        fetchPolls(username);
+        fetchPolls(userId);
     }, []);
 
     return (
@@ -152,7 +137,7 @@ function MyPolls() {
             <>
             <div className='toolbar'>
                 <button onClick={() => navigate("/polls/create")}><FaPlus /> New Poll</button>
-                <button onClick={() => fetchPolls(username)}><FaRedo /></button>
+                <button onClick={() => fetchPolls(userId)}><FaRedo /></button>
             </div>
             <div className='table-container'>
                 <table>
@@ -171,7 +156,7 @@ function MyPolls() {
                     <tbody>
                         {polls.map(poll => {
                             return <tr onClick={(e) => handleRowClick(e, poll._id)} key={poll._id}>
-                                <td><span>{poll.question}</span></td>
+                                <td className='truncate'>{ poll.question }</td>
                                 <td className='table-date'> {
                                     new Date(poll.date_created).toLocaleString('en-US', {
                                         year: 'numeric',
@@ -185,8 +170,18 @@ function MyPolls() {
                                 {/* <td><input type='checkbox' onChange={() => toggleAvailable(poll)} checked={poll.available}></input></td> */}
                                 <td>{poll.responses.length}</td>
                                 <td><input type='checkbox' onChange={() => toggleAvailable(poll)} checked={poll.available}></input></td>
-                                <td><FaEraser onClick={() => clearPoll(poll)} /></td>
-                                <td><FaTrashAlt onClick={() => deletePoll(poll)} /></td>
+                                <td className='table-action'><Dialog
+                                    title='Confirm clear poll'
+                                    text={getDialogText(`clear the responses for "${truncate(poll.question)}"`)} 
+                                    onConfirm={() => clearPoll(poll)} 
+                                    target={<FaEraser />}
+                                /></td>
+                                <td className='table-action'><Dialog
+                                    title='Confirm poll deletion'
+                                    text={getDialogText(`delete the poll "${truncate(poll.question)}"`)} 
+                                    onConfirm={() => deletePoll(poll)} 
+                                    target={<FaTrashAlt />}
+                                /></td>
                             </tr>
                         })}
                     </tbody>

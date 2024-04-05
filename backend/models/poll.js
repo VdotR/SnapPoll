@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 const responseSchema = new Schema({
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
     answer: { type: Number, required: true },
-    updatedAt: { type: Date, default: Date.now }
+    updatedAt: { type: Date, default: Date.now, required: true }
 });
 
 const pollSchema = new Schema({
@@ -14,10 +14,12 @@ const pollSchema = new Schema({
     correct_option: { type: Number, default: -1 },
     available: { type: Boolean, default: false },
     date_created: { type: Date, default: Date.now },
+    created_by: {type: Schema.Types.ObjectId, ref: "User", required: true},
     responses: { type: [responseSchema], default: [] },
     shortId: { type: String }
 });
 
+/*
 // Pre-save hook to generate shortId
 pollSchema.pre('save', function (next) {
     if (this.isNew) {
@@ -27,6 +29,7 @@ pollSchema.pre('save', function (next) {
     }
     next();
 });
+*/ 
 
 const Poll = mongoose.model('Poll', pollSchema);
 

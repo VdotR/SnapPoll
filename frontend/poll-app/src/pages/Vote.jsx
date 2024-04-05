@@ -11,7 +11,7 @@ function Vote() {
     const navigate = useNavigate();
     const location = useLocation();
     const { poll_id } = useParams();
-    const { pushAlert } = useUserContext();
+    const { userId, pushAlert } = useUserContext();
 
     const [pollDetails, setPollDetails] = useState(location.state?.pollDetails || null);
     const [selectedOption, setSelectedOption] = useState(null);
@@ -20,8 +20,6 @@ function Vote() {
         if (!pollDetails) {
             fetchPollDetails(poll_id)
                 .then(data => {
-                    setPollDetails(data);
-                    //setSelectedOption();
 
                     if (data && !data._id) {
                         pushAlert('Poll not found.', 'error');
@@ -31,6 +29,10 @@ function Vote() {
                         pushAlert('Poll not available', 'error');
                         navigate(`/vote`);
                     }
+
+                    setPollDetails(data);
+                    const userResponse = data.responses.find(response => response.user === userId);
+                    if(userResponse) setSelectedOption(userResponse.answer);
                 })
                 .catch(error => {
                     console.error("Error fetching poll details:", error);
@@ -42,7 +44,7 @@ function Vote() {
     // Function to handle answer submission
     const submitAnswer = async (answerIndex) => {
         try {
-            const response = await fetch(`${config.BACKEND_BASE_URL}/api/poll/vote/${poll_id}`, {
+            const response = await fetch(`${config.BACKEND_BASE_URL}/api/poll/${poll_id}/vote`, {
                 method: "PATCH",
                 credentials: config.API_REQUEST_CREDENTIALS_SETTING,
                 headers: {
