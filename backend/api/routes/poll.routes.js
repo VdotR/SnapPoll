@@ -16,7 +16,7 @@ mongoose.connect(process.env.CONNECTION_STRING, {
 
 //Record a vote from a user. If sucessful, appends _id to  the created_poll_id and answered_poll_id of this user. 
 //Also updates the responses of the poll with the request body.
-router.patch('/vote/:id', checkSession, async (req, res) => {
+router.patch('/:id/vote', checkSession, async (req, res) => {
     const _id = req.params.id;
     try {
         // Check if the poll is available directly
@@ -57,36 +57,29 @@ router.patch('/vote/:id', checkSession, async (req, res) => {
     }
 });
 
-//Makes the poll available if requesting user created it.
-router.patch('/open/:id', checkSession, async (req, res) => {
+//Changes poll availability if requesting user created it.
+router.patch('/:id/available', checkSession, async (req, res) => {
     const _id = req.params.id;
+    const { available } = req.body;
+
+    if (typeof available !== 'boolean') {
+        return res.status(400).send({ message: "'available' must be true or false." });
+    }    
+
     try {
         const poll = await Poll.findById(_id);
-        if (poll.created_by != req.session.userId) {
+        if (req.session.userId !== poll.created_by.toString()) {
             return res.status(403).send("Forbidden");
         }
-        poll.available = true;
-        const newPoll = await poll.save();
-        res.send(newPoll);
-    }
-    catch (error) {
-        res.status(500).send({ message: error.message });
-    }
-})
-
-//Makes the poll closed to responses if requesting user created it.
-router.patch('/close/:id', checkSession, async (req, res) => {
-    const _id = req.params.id;
-    try {
-        const user = await User.findById(req.session.userId);
-
-        const poll = await Poll.findById(_id);
-        if (!user.created_poll_id.includes(poll._id)) {
-            return res.status(403).send("Forbidden");
+        // Update the poll's availability only if it's different
+        if (poll.available !== available) {
+            poll.available = available;
+            const updatedPoll = await poll.save();
+            res.send(updatedPoll);
+        } else {
+            // Do nothing if the current state matches the requested state
+            res.send({ message: "No changes made, poll availability is already set to " + available });
         }
-        poll.available = false;
-        const newPoll = await poll.save();
-        res.send(newPoll);
     }
     catch (error) {
         res.status(500).send({ message: error.message });
@@ -178,7 +171,7 @@ router.delete('/:id', checkSession, async (req, res) => {
         if (!poll) {
             return res.status(404).send({ message: "Can't delete poll: Poll not found" });
         }
-        if (poll.created_by != req.session.userId) {
+        if (req.session.userId !== poll.created_by.toString()) {
             return res.status(403).send({ message: "Can't delete poll: Unauthorized" });
         }
 
@@ -216,7 +209,7 @@ router.patch('/:id/clear', checkSession, async (req, res) => {
         if (!poll) {
             return res.status(404).send({ message: "Can't clear poll: Poll not found" });
         }
-        if (poll.created_by != req.session.userId) {
+        if (req.session.userId !== poll.created_by.toString()) {
             return res.status(403).send({ message: "Can't clear poll: Unauthorized" });
         }
         const result = await Poll.updateOne(
