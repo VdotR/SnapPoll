@@ -119,7 +119,7 @@ router.post('/', checkSession, checkCreateValidPoll, async (req, res) => {
     }
 });
 
-router.post('/quickpoll', checkSession, checkCreateValidPoll, async (req, res) => {
+router.post('/quickpoll', checkSession,  async (req, res) => {
     // Get current date
     let currentDate = new Date();
     let dateString = currentDate.toLocaleDateString();
