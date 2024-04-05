@@ -86,6 +86,8 @@ router.patch('/:id/available', checkSession, async (req, res) => {
     }
 })
 
+
+
 //Create a new poll with user-specified question and options.
 //Adds new poll to User created_poll_id
 // Constants
@@ -115,7 +117,7 @@ router.post('/', checkSession, checkCreateValidPoll, async (req, res) => {
     catch (error) {
         res.status(500).send({ message: error.message });
     }
-})
+});
 
 //Retrieve the poll by id 
 //Removes correct answer, responses in response if not poll creator

@@ -10,7 +10,7 @@ function CreatePoll() {
     const navigate = useNavigate();
     const [question, setQuestion] = useState('');
     const [options, setOptions] = useState(['']);
-    const [correctOption, setCorrectOption] = useState(null);
+    const [correctOption, setCorrectOption] = useState(-1);
     const {pushAlert } = useUserContext();
 
     const handleQuestionChange = (event) => {
@@ -40,7 +40,7 @@ function CreatePoll() {
         if (options.length > 1) {
             if (index === correctOption){
                 // Clear correct option if deleted old correct option
-                setCorrectOption(null); 
+                setCorrectOption(-1); 
             } else if (index < correctOption){
                 // Has to move correct option up if deleted options above correct option
                 setCorrectOption(correctOption - 1); 

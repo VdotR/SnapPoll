@@ -10,11 +10,11 @@ function checkSession(req, res, next) {
 function checkCreateValidPoll(req, res, next) {
     const MAX_QUESTION_LENGTH = 200;
     const MAX_OPTION_LENGTH = 80;
-    const { question, correct_option, options } = req.body;
+    const { question,  options } = req.body;
     // Check if any of the fields are empty or null
-    if (!question || correct_option === null || !Array.isArray(options) || options.length === 0) {
+    if (!question || !Array.isArray(options) || options.length === 0) {
         // If any field is empty or null, send a 400 Bad Request response
-        return res.status(400).send({ message: 'Question, correct option, and options must not be empty.' });
+        return res.status(400).send({ message: 'Question and options must not be empty.' });
     }
 
     // Additional validation to ensure options array does not contain empty strings
