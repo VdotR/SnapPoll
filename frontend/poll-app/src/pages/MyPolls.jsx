@@ -103,7 +103,7 @@ function MyPolls() {
                 }
                 return p;
             }));
-            pushAlert(`${action == 'close'? 'Closed' : 'Opened'} poll \"${truncate(poll.question)}\"`);
+            pushAlert(`${action === false ? 'Closed' : 'Opened'} poll \"${truncate(poll.question)}\"`);
         } catch (error) {
             console.error('Error:', error);
         }
