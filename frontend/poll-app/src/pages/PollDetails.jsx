@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useUserContext } from '../../context';
 import Loading from '../components/loading';
 import config from '../config';
-import { truncate } from '../utils/pollUtils';
+import { clearPoll, truncate } from '../utils/pollUtils';
 import { Chart as ChartJS } from 'chart.js/auto'; // needed for some reason
 import { Bar } from 'react-chartjs-2';
 import { FaRedo, FaEraser, FaTrashAlt } from 'react-icons/fa';
@@ -56,8 +56,8 @@ function PollDetails() {
         ]
     };
 
-    function fetchPoll(id) {
-        fetch(`http://localhost:3000/api/poll/${id}/`, {
+    async function fetchPoll(id) {
+        fetch(`${config.BACKEND_BASE_URL}/api/poll/${id}/`, {
             method: "GET",
             credentials: config.API_REQUEST_CREDENTIALS_SETTING
         })
@@ -69,7 +69,6 @@ function PollDetails() {
             return res.json();
         })
         .then(data => {
-            console.log(data);
             setPoll(data);
             let newCounts = {};
             data.options.forEach(option => {
@@ -78,33 +77,9 @@ function PollDetails() {
             data.responses.forEach(response => {
                 newCounts[data.options[response.answer]]++
             });
-            console.log(newCounts);
             setCounts(newCounts);
             setCorrectOption(data.correct_option);
         })
-    }
-
-    // TODO: move to common utils, also used in MyPolls
-    function clearPoll(poll) {
-        console.log(`http://localhost:3000/api/poll/${poll._id}/clear`)
-        fetch(`http://localhost:3000/api/poll/${poll._id}/clear`, {
-            method: "PATCH",
-            credentials: 'include'
-        })
-        .then(res => {
-            if (!res.ok) {
-                pushAlert('Failed to clear poll responses', 'error');
-            }
-        })
-        .then(() => pushAlert(`Cleared poll \"${truncate(poll.question)}\"`))
-        .then(() => setPolls(prevPolls => prevPolls.map(p => {
-            if (p._id === poll._id) {
-                // Return a new object with the updated available property
-                return { ...p, responses: [] };
-            }
-            return p;
-        })))
-        .catch(error => console.log(error))
     }
 
     useEffect(() => {

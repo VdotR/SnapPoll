@@ -6,11 +6,6 @@ import { useUserContext } from '../../context';
 import config from '../config';
 import '../css/CreatePoll.css';
 
-// Constants
-const MAX_QUESTION_LENGTH = 200;
-const MAX_OPTION_LENGTH = 80;
-
-
 function CreatePoll() {
     const navigate = useNavigate();
     const [question, setQuestion] = useState('');
@@ -60,29 +55,6 @@ function CreatePoll() {
     };
 
     const handleSubmit = async () => {
-        // Edge Cases
-        if (correctOption === null) {
-            pushAlert("You need to select a correct option!" , 'error')
-            return;
-        }
-
-        if (question === null){
-            pushAlert("Question should not be null!" , 'error')
-            return;
-        } else if (question.length > MAX_QUESTION_LENGTH){
-            pushAlert(`Question is too long! Max question length is ${MAX_QUESTION_LENGTH} characters while current question has ${question.length} characters` , 'error');
-        }
-        
-        for (let i = 0; i < options.length; i++){
-            if (options[i] === ""){
-                pushAlert("Please fill in all options.", 'error');
-                return;
-            } else if (options[i].length > MAX_OPTION_LENGTH){
-                pushAlert(`Option is too long! Each option should be under ${MAX_OPTION_LENGTH} characters`, 'error');
-                return;
-            }
-        }
-
         try {
             const response = await fetch(`${config.BACKEND_BASE_URL}/api/poll`, {
                 method: 'POST',
@@ -96,8 +68,12 @@ function CreatePoll() {
                     options
                 }),
             });
-
-            if (response.ok) {
+            console.log(response.status)
+            if(response.status === 400) {
+                const errorData = await response.json();
+                pushAlert(errorData.message, 'error');
+            }
+            else if (response.ok) {
                 const newPoll = await response.json();
                 pushAlert('Poll created successfully!');
                 console.log("created" + newPoll);

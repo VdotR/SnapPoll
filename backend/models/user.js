@@ -11,7 +11,7 @@ const userSchema = new Schema({
         unique: true,
         validate: {
             validator: function(email) {
-                return emailRegex.test(email);
+                return emailRegex.test(email); //allows most but not all emails, doesn't allow case sensitivity in local 
             },
             message: props => `${props.value} is not a valid email address!`
         }
@@ -53,17 +53,8 @@ userSchema.pre('save', async function (next) {
     next(); // Proceed to the next middleware or save the document
 });
 
-//save username/email in lowercase
-userSchema.pre('save', function (next) {
-    if (this.isModified('email')) {
-        this.email = this.email.toLowerCase();
-    }
-    if (this.isModified('username')) {
-        this.username = this.username.toLowerCase();
-    }
-
-    next(); // Proceed to the next middleware or save the document
-});
+userSchema.index({ username: 1 }, { unique: true, collation: { locale: 'en', strength: 2 } });
+userSchema.index({ email: 1 }, { unique: true, collation: { locale: 'en', strength: 2 } });
 
 const User = mongoose.model('User', userSchema);
 
