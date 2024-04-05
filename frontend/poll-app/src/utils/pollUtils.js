@@ -41,3 +41,8 @@ export function truncate(str) {
     }
     return str;
 }
+
+// Generate dialog text for some action
+export function getDialogText(message) {
+    return `Are you sure you want to ${message}?`;
+}

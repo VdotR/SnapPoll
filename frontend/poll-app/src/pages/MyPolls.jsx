@@ -4,10 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { useUserContext } from '../../context';
 import Loading from '../components/loading';
 import config from '../config';
-import { clearPoll, truncate } from '../utils/pollUtils';
+import { clearPoll, getDialogText, truncate } from '../utils/pollUtils';
 
 // https://react-icons.github.io/react-icons/icons/fa/
 import { FaPlus, FaRedo, FaAngleUp, FaAngleDown, FaEraser, FaTrashAlt } from 'react-icons/fa';
+import Dialog from '../components/dialog';
 
 function MyPolls() {
     const [polls, setPolls] = useState([]);
@@ -53,7 +54,8 @@ function MyPolls() {
 
     // Link to poll details, ignore clicks on checkbox and icons
     function handleRowClick(e, id) {
-        if (!['input', 'path'].includes(e.target.tagName.toLowerCase())) {
+        console.log(e.target.tagName.toLowerCase())
+        if (!['span', 'svg', 'button', 'input', 'path'].includes(e.target.tagName.toLowerCase())) {
             navigate(`/poll/${id}`);
         }
     }
@@ -154,7 +156,7 @@ function MyPolls() {
                     <tbody>
                         {polls.map(poll => {
                             return <tr onClick={(e) => handleRowClick(e, poll._id)} key={poll._id}>
-                                <td><span>{poll.question}</span></td>
+                                <td className='truncate'>{ poll.question }</td>
                                 <td className='table-date'> {
                                     new Date(poll.date_created).toLocaleString('en-US', {
                                         year: 'numeric',
@@ -168,8 +170,18 @@ function MyPolls() {
                                 {/* <td><input type='checkbox' onChange={() => toggleAvailable(poll)} checked={poll.available}></input></td> */}
                                 <td>{poll.responses.length}</td>
                                 <td><input type='checkbox' onChange={() => toggleAvailable(poll)} checked={poll.available}></input></td>
-                                <td><FaEraser onClick={() => clearPoll(poll)} /></td>
-                                <td><FaTrashAlt onClick={() => deletePoll(poll)} /></td>
+                                <td className='table-action'><Dialog
+                                    title='Confirm clear poll'
+                                    text={getDialogText(`clear the responses for "${truncate(poll.question)}"`)} 
+                                    onConfirm={() => clearPoll(poll)} 
+                                    target={<FaEraser />}
+                                /></td>
+                                <td className='table-action'><Dialog
+                                    title='Confirm poll deletion'
+                                    text={getDialogText(`delete the poll "${truncate(poll.question)}"`)} 
+                                    onConfirm={() => deletePoll(poll)} 
+                                    target={<FaTrashAlt />}
+                                /></td>
                             </tr>
                         })}
                     </tbody>

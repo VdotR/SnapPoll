@@ -118,16 +118,30 @@ td, th {
   padding: 0.5rem;
 }
 
+/* Keep date to one line in table */
 td.table-date {
   min-width: 210px;
 }
 
-td span {
-  max-width: 40vw; /* TODO: adjust */
-  display: inline-block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+/* Increase clickable area of table button */
+td.table-action {
+  padding: 0;
+}
+
+td.table-action span {
+  /* border-radius: 4px;
+  border: 1px solid darkgrey; */
+  padding: 0.5rem;
+}
+
+/* https://stackoverflow.com/questions/5239758/how-can-i-truncate-table-cells-but-fit-as-much-as-content-possible */
+td.truncate {
+	max-width: 0;
+	/* display: inline-block; */
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	min-width: 250px;
 }
 
 th svg {
@@ -152,6 +166,10 @@ td a {
   color: black;
   text-decoration: none;
   text-overflow: ellipsis;
+}
+
+td svg {
+  vertical-align: middle;
 }
 
 /* https://stackoverflow.com/questions/826782/how-to-disable-text-selection-highlighting */
@@ -183,4 +201,8 @@ td a {
 /* Larger checkbox for tables*/
 input[type=checkbox] {
   transform: scale(1.25);
+}
+
+input:hover {
+  cursor: pointer;
 }
