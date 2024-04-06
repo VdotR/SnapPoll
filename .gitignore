@@ -2,7 +2,7 @@
 # MongoDB
 backend/node_modules/*
 backend/.env
-
+backend/utils/config.json
 
 # Frontend
 # Mongodb

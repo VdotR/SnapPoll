@@ -116,7 +116,7 @@ function FindAvailablePoll() {
                 } else if (!data.available) {
                     pushAlert('Poll not available', 'error');
                 } else {
-                    navigate(`/vote/${pollId}`, { state: { pollDetails: data } }); // Navigate with poll details
+                    navigate(`/vote/${data._id}`, { state: { pollDetails: data } }); // Navigate with poll details
                 }
             })
             .catch(error => {

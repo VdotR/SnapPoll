@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUserContext } from '../../context';
 import Loading from '../components/loading';
 import config from '../config';
-import { clearPoll, getDialogText, truncate } from '../utils/pollUtils';
+import { clearPollRequest, getDialogText, truncate } from '../utils/pollUtils';
 
 // https://react-icons.github.io/react-icons/icons/fa/
 import { FaPlus, FaRedo, FaAngleUp, FaAngleDown, FaEraser, FaTrashAlt } from 'react-icons/fa';
@@ -59,7 +59,21 @@ function MyPolls() {
             navigate(`/poll/${id}`);
         }
     }
-
+    async function clearPoll(poll) {
+        clearPollRequest(poll).then(res => {
+            if (!res.ok) {
+                pushAlert('Failed to clear poll responses', 'error');
+            }
+        })
+        .then(() => pushAlert(`Cleared poll \"${truncate(poll.question)}\"`))
+        .then(() => setPolls(prevPolls => prevPolls.map(p => {
+            if (p._id === poll._id) {
+                // Return a new object with the updated available property
+                return { ...p, responses: [] };
+            }
+            return p;
+        })))
+    }
     // Delete a poll
     function deletePoll(poll) {
         fetch(`${config.BACKEND_BASE_URL}/api/poll/${poll._id}/`, {
@@ -103,7 +117,7 @@ function MyPolls() {
                 }
                 return p;
             }));
-            pushAlert(`${action == 'close'? 'Closed' : 'Opened'} poll \"${truncate(poll.question)}\"`);
+            pushAlert(`${action === false ? 'Closed' : 'Opened'} poll \"${truncate(poll.question)}\"`);
         } catch (error) {
             console.error('Error:', error);
         }
