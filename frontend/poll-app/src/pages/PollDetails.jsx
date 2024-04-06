@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useUserContext } from '../../context';
 import Loading from '../components/loading';
 import config from '../config';
-import { clearPoll, truncate } from '../utils/pollUtils';
+import { clearPollRequest, truncate } from '../utils/pollUtils';
 import { Chart as ChartJS } from 'chart.js/auto'; // needed for some reason
 import { Bar } from 'react-chartjs-2';
 import { FaRedo, FaEraser, FaTrashAlt } from 'react-icons/fa';
@@ -56,6 +56,17 @@ function PollDetails() {
         ]
     };
 
+    function countResponses(poll){
+        let newCounts = {};
+        poll.options.forEach(option => {
+            newCounts[option] = 0;
+        });
+        poll.responses.forEach(response => {
+            newCounts[poll.options[response.answer]]++
+        });
+        return newCounts;
+    }
+
     async function fetchPoll(id) {
         fetch(`${config.BACKEND_BASE_URL}/api/poll/${id}/`, {
             method: "GET",
@@ -70,20 +81,30 @@ function PollDetails() {
         })
         .then(data => {
             setPoll(data);
-            let newCounts = {};
-            data.options.forEach(option => {
-                newCounts[option] = 0;
-            });
-            data.responses.forEach(response => {
-                newCounts[data.options[response.answer]]++
-            });
-            setCounts(newCounts);
+            setCounts(countResponses(data));
             setCorrectOption(data.correct_option);
         })
     }
 
+    async function clearPoll(poll) {
+        clearPollRequest(poll).then(res => {
+            if (!res.ok) {
+                pushAlert('Failed to clear poll responses', 'error');
+            }
+        })
+        .then(() => pushAlert(`Cleared poll \"${truncate(poll.question)}\"`))
+        .then(() => setPoll(currentPoll => ({ ...currentPoll, responses: [] })));
+        const newCounts = Object.keys(counts).reduce((acc, option) => {
+            acc[option] = 0;
+            return acc;
+        }, {});
+
+        setCounts(newCounts);
+    }
+    
+    // 
     useEffect(() => {
-        fetchPoll(poll_id);
+        if (!poll) fetchPoll(poll_id);
     }, []);
 
     return (
@@ -99,7 +120,7 @@ function PollDetails() {
                     <div className='table-outer-container'>
                         <div className='toolbar'>
                             <button onClick={() => fetchPoll(poll_id)}><FaRedo /></button>
-                            <button onClick={() => {clearPoll(poll); fetchPoll(poll_id)}}><FaEraser /> Clear responses</button>
+                            <button onClick={() => {clearPoll(poll)}}><FaEraser /> Clear responses</button>
                         </div>
                         <div className='table-container'>
                             <table>

@@ -12,24 +12,11 @@ export async function fetchPollDetails(pollId) {
     }
 }
 
-export async function clearPoll(poll) {
-    fetch(`${config.BACKEND_BASE_URL}/api/poll/${poll._id}/clear`, {
+export async function clearPollRequest(poll) {
+    return fetch(`${config.BACKEND_BASE_URL}/api/poll/${poll._id}/clear`, {
         method: "PATCH",
-        credentials: 'include'
+        credentials: config.API_REQUEST_CREDENTIALS_SETTING
     })
-    .then(res => {
-        if (!res.ok) {
-            pushAlert('Failed to clear poll responses', 'error');
-        }
-    })
-    .then(() => pushAlert(`Cleared poll \"${truncate(poll.question)}\"`))
-    .then(() => setPolls(prevPolls => prevPolls.map(p => {
-        if (p._id === poll._id) {
-            // Return a new object with the updated available property
-            return { ...p, responses: [] };
-        }
-        return p;
-    })))
     .catch(error => console.log(error))
 }
 
