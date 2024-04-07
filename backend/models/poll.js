@@ -20,9 +20,9 @@ const pollSchema = new Schema({
     shortId: { type: String, unique: true }
 });
 
+pollSchema.index({ shortId: 1 }, { unique: true, sparse: true });
 
 // Pre-save hook to generate shortId
-
 pollSchema.pre('save', async function(next) {
     if (this.available && !this.shortId) {
         try {

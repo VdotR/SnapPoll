@@ -149,7 +149,7 @@ router.post('/signup/', async (req, res) => {
     }
 });
 
-//Deletes user if authorized (session has same userId) and password in body matches, destroys session
+//Deletes user if password in body matches, destroys session
 router.delete('/', checkSession, async (req, res) => {
     const password = req.body.password;
 
@@ -182,14 +182,6 @@ router.get('/created_polls/:id', checkSession, async (req, res) => {
         if (!existingUser) {
             return res.status(404).send("User not found.");
         }
-        if (existingUser.created_poll_id.length === 0) {
-            return res.status(400).send("User has not created any polls.");
-        }
-        /*
-        if (existingUser._id != req.session.userId) {
-            return res.status(401).send("Unauthorized")
-        }
-        */
         res.send(existingUser.created_poll_id.reverse());
     }
     catch (error) {

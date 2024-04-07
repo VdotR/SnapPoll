@@ -1,10 +1,10 @@
 import Page from '../components/page'
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchPollDetails } from '../utils/pollUtils';
+import { getPollRequest } from '../utils/pollUtils';
+import { getUserRequest } from '../utils/userUtils';
 import { useUserContext } from '../../context';
 import Loading from '../components/loading';
-import config from '../config';
 import { FaAngleUp, FaAngleDown } from 'react-icons/fa';
 
 function FindAvailablePoll() {
@@ -57,24 +57,19 @@ function FindAvailablePoll() {
         }
     }
 
-    async function fetchAnsweredPolls(username) {
+    async function fetchAnsweredPolls() {
         setIsLoading(true);
-        fetch(`${config.BACKEND_BASE_URL}/api/user/${userId}`, {
-            credentials: config.API_REQUEST_CREDENTIALS_SETTING
-        })
+        getUserRequest(userId)
             .then(res => {
                 if (res.status == 401) {
                     navigate('/login');
-                    throw new Error(res.statusText)
+                    throw new Error();
                 }
                 return res.json();
             })
             .then(data => {
-                // Assuming data.answered_poll_id is an array of poll IDs
                 const pollDetailsPromises = data.answered_poll_id.map(pollId =>
-                    fetch(`${config.BACKEND_BASE_URL}/api/poll/${pollId}`, {
-                        credentials: config.API_REQUEST_CREDENTIALS_SETTING
-                    })
+                    getPollRequest(pollId)
                         .then(response => {
                             if (!response.ok) {
                                 throw new Error('Failed to fetch poll details');
@@ -86,8 +81,6 @@ function FindAvailablePoll() {
                             return null; // Return a null or similar to indicate a failed fetch
                         })
                 );
-
-                // Wait for all poll detail fetches to complete, including those that might have failed
                 return Promise.all(pollDetailsPromises);
             })
             .then(pollDetails => {
@@ -102,16 +95,14 @@ function FindAvailablePoll() {
     }
 
     useEffect(() => {
-        fetchAnsweredPolls(username);
+        fetchAnsweredPolls();
     }, []);
-
-
 
     const handleSubmit = (e) => {
         e.preventDefault(); // Prevent default form submission behavior
-        fetchPollDetails(pollId)
+        getPollRequest(pollId)
             .then(data => {
-                if (data && !data._id) {
+                if (!data._id) {
                     pushAlert('Poll not found.', 'error');
                 } else if (!data.available) {
                     pushAlert('Poll not available', 'error');
@@ -119,11 +110,9 @@ function FindAvailablePoll() {
                     navigate(`/vote/${data._id}`, { state: { pollDetails: data } }); // Navigate with poll details
                 }
             })
-            .catch(error => {
-                console.error("Error fetching poll details:", error);
-                pushAlert('An error occurred while fetching poll details.', 'error');
-            });
+            .catch((error) => { pushAlert('An error occurred while fetching poll details.', 'error') });
     };
+
     return (
         // Input form for poll ID on /vote/
         <Page>
@@ -181,7 +170,6 @@ function FindAvailablePoll() {
             }
         </Page>
     );
-
 }
 
 export default FindAvailablePoll;

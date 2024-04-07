@@ -1,7 +1,7 @@
 import Page from '../components/page'
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import config from '../config';
+import { changePasswordRequest } from '../utils/userUtils';
 import { useUserContext } from '../../context';
 
 // As of now MyAccount's only purpose is to change user password
@@ -21,32 +21,20 @@ function MyAccount() {
             return;
         }
 
-        if (oldPassword === newPassword){
-            pushAlert("New password cannot be the same as your current password", "error");
-            return;
-        }
         // Check if new password matches with confirm new password
         if (newPassword !== confirmNewPassword){
             pushAlert("Passwords don't match!", "error");
             return;
         }
 
+        if (oldPassword === newPassword){
+            pushAlert("New password cannot be the same as your current password", "error");
+            return;
+        }
+        
         try {
             console.log("fetch");
-            const res = await fetch(`${config.BACKEND_BASE_URL}/api/user/change_password`, {
-                method: "PATCH",
-                credentials: config.API_REQUEST_CREDENTIALS_SETTING,
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json' 
-                },
-                body: JSON.stringify({
-                    old_password : oldPassword,
-                    new_password : newPassword
-                })
-            });
-
-            console.log(res);
+            const res = await changePasswordRequest(oldPassword, newPassword);
 
             if (res.status === 400) {
                 pushAlert(await res.text(), 'error');

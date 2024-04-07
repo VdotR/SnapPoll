@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaRegTrashAlt, FaPlus } from "react-icons/fa";
 import { useUserContext } from '../../context';
-import config from '../config';
+import { createPollRequest } from '../utils/pollUtils';
 import '../css/CreatePoll.css';
 
 function CreatePoll() {
@@ -11,7 +11,7 @@ function CreatePoll() {
     const [question, setQuestion] = useState('');
     const [options, setOptions] = useState(['']);
     const [correctOption, setCorrectOption] = useState(-1);
-    const {pushAlert } = useUserContext();
+    const { pushAlert } = useUserContext();
 
     const handleQuestionChange = (event) => {
         setQuestion(event.target.value);
@@ -35,15 +35,15 @@ function CreatePoll() {
         setOptions([...options, '']);
     };
 
-    const handleRemoveOption = (e, index) => {  
+    const handleRemoveOption = (e, index) => {
         e.preventDefault();
         if (options.length > 1) {
-            if (index === correctOption){
+            if (index === correctOption) {
                 // Clear correct option if deleted old correct option
-                setCorrectOption(-1); 
-            } else if (index < correctOption){
+                setCorrectOption(-1);
+            } else if (index < correctOption) {
                 // Has to move correct option up if deleted options above correct option
-                setCorrectOption(correctOption - 1); 
+                setCorrectOption(correctOption - 1);
             }
             const newOptions = options.filter((_, optIndex) => index !== optIndex);
             setOptions(newOptions);
@@ -56,36 +56,24 @@ function CreatePoll() {
 
     const handleSubmit = async () => {
         try {
-            const response = await fetch(`${config.BACKEND_BASE_URL}/api/poll`, {
-                method: 'POST',
-                credentials: config.API_REQUEST_CREDENTIALS_SETTING,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    question,
-                    correct_option: correctOption,
-                    options
-                }),
-            });
-            console.log(response.status)
-            if(response.status === 400) {
-                const errorData = await response.json();
-                pushAlert(errorData.message, 'error');
-            }
-            else if (response.ok) {
+            const response = await createPollRequest(question, correctOption, options);
+
+            if (response.ok) {
                 const newPoll = await response.json();
                 pushAlert('Poll created successfully!');
                 console.log("created" + newPoll);
                 // Redirect to polls page
                 navigate("/polls");
-            } else {
-                pushAlert('Failed to create the poll.', 'error');
             }
+            else if (response.status === 400) {
+                const errorData = await response.json();
+                pushAlert(errorData.message, 'error');
 
-        } catch (error) {
-            console.error('Error:', error);
-            pushAlert('Error creating the poll.', 'error');
+            } else {
+                throw new Error();
+            }
+        } catch (err) {
+            pushAlert('Failed to create the poll.', 'error');
         }
     };
 
@@ -93,7 +81,7 @@ function CreatePoll() {
         <Page title='Create a new poll' centerTitle={true}>
             <form id='create-poll-form'>
                 <div className='option'>
-                    <input style={{visibility: 'hidden'}} type="checkbox" className='option-check' />
+                    <input style={{ visibility: 'hidden' }} type="checkbox" className='option-check' />
                     <input
                         type="text"
                         value={question}
@@ -101,9 +89,9 @@ function CreatePoll() {
                         onChange={handleQuestionChange}
                         className='option-text'
                     />
-                    <button onClick={(e) => handleRemoveOption(e, index)} style={{visibility: 'hidden'}} className="option-delete"><FaRegTrashAlt type="button" /></button>
+                    <button onClick={(e) => handleRemoveOption(e, index)} style={{ visibility: 'hidden' }} className="option-delete"><FaRegTrashAlt type="button" /></button>
                 </div>
-                
+
                 {options.map((option, index) => {
                     return <div className='option' key={`option-${index}`}>
                         <input
@@ -122,16 +110,16 @@ function CreatePoll() {
                         <button onClick={(e) => handleRemoveOption(e, index)} className="option-delete"><FaRegTrashAlt type="button" /></button>
 
                     </div>
-                })}        
-            <button type="button" onClick={addOption} id='add-option-btn'>
-                <FaPlus /> Add an option
-            </button>
-            <button type="button" onClick={handleSubmit} id='create-poll-btn' className='submit-btn'>
-                Create Poll
-            </button>
-        </form>
+                })}
+                <button type="button" onClick={addOption} id='add-option-btn'>
+                    <FaPlus /> Add an option
+                </button>
+                <button type="button" onClick={handleSubmit} id='create-poll-btn' className='submit-btn'>
+                    Create Poll
+                </button>
+            </form>
         </Page>
-       
+
     );
 }
 
