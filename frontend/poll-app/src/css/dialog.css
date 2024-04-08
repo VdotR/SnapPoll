@@ -24,6 +24,37 @@
   box-sizing: border-box;
 }
 
+.dialog-big {
+  min-width: 70vw;
+  min-height: 70vh;
+  top: 15%;
+}
+
+.dialog-big p {
+  font-size: 2rem;
+  letter-spacing: 0.25rem;
+}
+
+.dialog-big p svg {
+  display: block;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+.dialog-top {
+  width: 100%;
+}
+
+.dialog-top svg {
+  display: block;
+  margin-left: auto;
+  padding: 0.5rem;
+}
+
+.dialog-top svg:hover {
+  cursor: pointer;
+} 
+
 .dialog-container p {
   margin-bottom: 2rem;
 }
@@ -34,13 +65,13 @@
   margin-bottom: 1rem;
 }
 
-.dialog-actions button:first-of-type {
-  margin-right: 2rem;
+.dialog-cancel {
+  margin-right: 2rem !important;
 }
 
-.dialog-target {
+/* .dialog-target {
   width: 100%;
-}
+} */
 
 @media screen and (max-width: 640px) {
   .dialog-container {
