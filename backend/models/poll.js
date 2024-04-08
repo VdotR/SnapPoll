@@ -47,7 +47,7 @@ async function generateUniqueShortId() {
 }
 
 function generateShortId(length = 6) {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const characters = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
     const charactersLength = characters.length;
     const bytes = crypto.randomBytes(length);
     let id = '';
