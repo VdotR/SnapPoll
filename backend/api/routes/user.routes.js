@@ -133,10 +133,13 @@ router.post('/signup/', async (req, res) => {
             // Handle validation errors for specific fields
             if (error.errors.username) {
                 console.log('Invalid username:', error.errors.username.message);
-                res.status(400).send('Invalid username.');
+                res.status(400).send(error.errors.username.message);
             } else if (error.errors.email) {
                 console.log('Invalid email:', error.errors.email.message);
-                res.status(400).send('Invalid email.');
+                res.status(400).send(error.errors.email.message);
+            } else if (error.errors.password) {
+                console.log('Invalid password:', error.errors.password.message);
+                res.status(400).send(error.errors.password.message);
             } else {
                 // Handle other validation errors
                 console.error('Validation error:', error.message);
