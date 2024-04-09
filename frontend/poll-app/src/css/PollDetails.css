@@ -2,16 +2,20 @@
   display: flex;
   flex-wrap: wrap;
   width: 100%;
+  justify-content: center;
 }
 
-.poll-details .table-outer-container {
+.table-outer-container {
   margin-left: 2rem;
-  width: min-content;
   flex-grow: 1;
 }
 
+.responses-plot {
+  flex-basis: 50%;
+}
+
 .responses-plot canvas {
-  max-width: 500px; /* canvas size can't be relative units :( */
+  width: 100% !important;
   height: 600px;
   margin: 0 auto;
 }
@@ -24,7 +28,11 @@
 }
 
 @media screen and (max-width: 900px) {
-.poll-details .table-outer-container {
+  .responses-plot {
+    flex-basis: 100%;
+  }
+
+  .table-outer-container {
     margin-left: 0rem;
     width: 100%;
   }
