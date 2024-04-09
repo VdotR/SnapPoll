@@ -101,6 +101,7 @@ function FindAvailablePoll() {
     const handleSubmit = (e) => {
         e.preventDefault(); // Prevent default form submission behavior
         getPollRequest(pollId)
+            .then(res => res.json())
             .then(data => {
                 if (!data._id) {
                     pushAlert('Poll not found.', 'error');
