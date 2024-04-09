@@ -20,7 +20,6 @@ export async function clearPollRequest(poll) {
     .catch(error => console.log(error))
 }
 
-
 // Truncate and add ellipsis for long poll or option name
 export function truncate(str) {
     if (str.length > 30) {
@@ -32,4 +31,10 @@ export function truncate(str) {
 // Generate dialog text for some action
 export function getDialogText(message) {
     return `Are you sure you want to ${message}?`;
+}
+
+// Convert decimal to rounded percent string
+export function percentOrZero(decimal, places=2) {
+    if (isNaN(decimal)) return "0%";
+    return (decimal * 100).toFixed(2) + "%";
 }

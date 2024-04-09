@@ -187,6 +187,8 @@ td svg {
   width: 100%;
   display: flex;
   justify-content: start;
+  align-items: center;
+  overflow-x: auto;
 }
 
 .toolbar svg {
@@ -196,10 +198,32 @@ td svg {
 .toolbar button {
   margin: 0.5rem;
   margin-left: 0;
+  white-space: nowrap;
+}
+
+.toolbar-checkbox {
+  font-size: 1rem;
+  background-color: white;
+  border-radius: 4px;
+  border: 1px solid darkgrey;
+  padding: 0.5rem;
+  display: block;
+  height: min-content;
+  margin: 0.5rem;
+  margin-left: 0;
+  white-space: nowrap;
+}
+
+.toolbar-checkbox span {
+  margin-left: 0.5rem;
+}
+
+.toolbar button span {
+  margin-left: 0.5rem;
 }
 
 /* Larger checkbox for tables*/
-input[type=checkbox] {
+table input[type=checkbox] {
   transform: scale(1.25);
 }
 
