@@ -20,9 +20,9 @@ const pollSchema = new Schema({
     shortId: { type: String, unique: true }
 });
 
+pollSchema.index({ shortId: 1 }, { unique: true, sparse: true });
 
 // Pre-save hook to generate shortId
-
 pollSchema.pre('save', async function(next) {
     if (this.available && !this.shortId) {
         try {
@@ -47,7 +47,7 @@ async function generateUniqueShortId() {
 }
 
 function generateShortId(length = 6) {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const characters = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
     const charactersLength = characters.length;
     const bytes = crypto.randomBytes(length);
     let id = '';

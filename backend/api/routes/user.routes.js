@@ -133,10 +133,13 @@ router.post('/signup/', async (req, res) => {
             // Handle validation errors for specific fields
             if (error.errors.username) {
                 console.log('Invalid username:', error.errors.username.message);
-                res.status(400).send('Invalid username.');
+                res.status(400).send(error.errors.username.message);
             } else if (error.errors.email) {
                 console.log('Invalid email:', error.errors.email.message);
-                res.status(400).send('Invalid email.');
+                res.status(400).send(error.errors.email.message);
+            } else if (error.errors.password) {
+                console.log('Invalid password:', error.errors.password.message);
+                res.status(400).send(error.errors.password.message);
             } else {
                 // Handle other validation errors
                 console.error('Validation error:', error.message);
@@ -149,7 +152,7 @@ router.post('/signup/', async (req, res) => {
     }
 });
 
-//Deletes user if authorized (session has same userId) and password in body matches, destroys session
+//Deletes user if password in body matches, destroys session
 router.delete('/', checkSession, async (req, res) => {
     const password = req.body.password;
 
@@ -182,14 +185,6 @@ router.get('/created_polls/:id', checkSession, async (req, res) => {
         if (!existingUser) {
             return res.status(404).send("User not found.");
         }
-        if (existingUser.created_poll_id.length === 0) {
-            return res.status(400).send("User has not created any polls.");
-        }
-        /*
-        if (existingUser._id != req.session.userId) {
-            return res.status(401).send("Unauthorized")
-        }
-        */
         res.send(existingUser.created_poll_id.reverse());
     }
     catch (error) {

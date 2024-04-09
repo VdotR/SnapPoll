@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useUserContext } from '../../context';
-import config from '../config';
+import { logoutUserRequest } from '../utils/userUtils';
 import { FaAngleDown, FaBars } from 'react-icons/fa';
 import useWindowDimensions from '../utils/dimensions';
 import '../css/header.css'
@@ -16,10 +16,7 @@ function Header() {
     const handleLogout = async () => {
         try {
             // Make a GET request to the logout endpoint
-            const response = await fetch(`${config.BACKEND_BASE_URL}/api/user/logout`, {
-                method: 'GET',
-                credentials: config.API_REQUEST_CREDENTIALS_SETTING, // Ensure cookies are sent with the request if sessions are used
-            });
+            const response = await logoutUserRequest();
 
             if (response.ok) {
                 console.log("Logged out successfully");

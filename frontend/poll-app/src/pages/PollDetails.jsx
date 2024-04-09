@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useUserContext } from '../../context';
 import Loading from '../components/loading';
 import config from '../config';
-import { clearPollRequest, getDialogText, percentOrZero, truncate } from '../utils/pollUtils';
+import { getPollRequest, clearPollRequest, availablePollRequest, getDialogText, percentOrZero, truncate } from '../utils/pollUtils';
 import { Chart as ChartJS } from 'chart.js/auto'; // needed for some reason
 import { Bar } from 'react-chartjs-2';
 import { FaRedo, FaEraser, FaExpandAlt } from 'react-icons/fa';
@@ -91,10 +91,7 @@ function PollDetails() {
     }
 
     async function fetchPoll(id) {
-        fetch(`${config.BACKEND_BASE_URL}/api/poll/${id}/`, {
-            method: "GET",
-            credentials: config.API_REQUEST_CREDENTIALS_SETTING
-        })
+        getPollRequest(id)
         .then(res => {
             if (res.status === 401) {
                 navigate("/login");
@@ -107,22 +104,14 @@ function PollDetails() {
             setCounts(countResponses(data));
             setCorrectOption(data.correct_option);
         })
+        .catch((error) => { pushAlert("Failed to retrieve poll.", 'error') })
     }
 
     // Toggle poll availability
     async function toggleAvailable(poll) {
         try {
             const action = poll.available ? false : true;
-            const response = await fetch(`${config.BACKEND_BASE_URL}/api/poll/${poll._id}/available`, {
-                method: "PATCH",
-                credentials: config.API_REQUEST_CREDENTIALS_SETTING,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    available: action
-                })
-            });
+            const response = await availablePollRequest(poll._id, action);
     
             if (response.status === 401) {
                 navigate('/login');
@@ -140,19 +129,20 @@ function PollDetails() {
     }
 
     async function clearPoll(poll) {
-        clearPollRequest(poll).then(res => {
-            if (!res.ok) {
-                pushAlert('Failed to clear poll responses', 'error');
-            }
+        clearPollRequest(poll._id).then(res => {
+            if (!res.ok) throw new Error();
         })
         .then(() => pushAlert(`Cleared poll \"${truncate(poll.question)}\"`))
-        .then(() => setPoll(currentPoll => ({ ...currentPoll, responses: [] })));
-        const newCounts = Object.keys(counts).reduce((acc, option) => {
-            acc[option] = 0;
-            return acc;
-        }, {});
-
-        setCounts(newCounts);
+        .then(() => setPoll(currentPoll => ({ ...currentPoll, responses: [] })))
+        .then (() => {
+            const newCounts = Object.keys(counts).reduce((acc, option) => {
+                acc[option] = 0;
+                return acc;
+            }, {});
+    
+            setCounts(newCounts);
+        })
+        .catch((error) => { pushAlert('Failed to clear poll responses', 'error') });
     }
     
     useEffect(() => {
