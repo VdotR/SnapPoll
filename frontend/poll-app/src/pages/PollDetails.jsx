@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useUserContext } from '../../context';
 import Loading from '../components/loading';
 import config from '../config';
-import { clearPollRequest, getDialogText, truncate } from '../utils/pollUtils';
+import { clearPollRequest, getDialogText, percentOrZero, truncate } from '../utils/pollUtils';
 import { Chart as ChartJS } from 'chart.js/auto'; // needed for some reason
 import { Bar } from 'react-chartjs-2';
 import { FaRedo, FaEraser, FaExpandAlt } from 'react-icons/fa';
@@ -103,11 +103,40 @@ function PollDetails() {
             return res.json();
         })
         .then(data => {
-            console.log(data)
             setPoll(data);
             setCounts(countResponses(data));
             setCorrectOption(data.correct_option);
         })
+    }
+
+    // Toggle poll availability
+    async function toggleAvailable(poll) {
+        try {
+            const action = poll.available ? false : true;
+            const response = await fetch(`${config.BACKEND_BASE_URL}/api/poll/${poll._id}/available`, {
+                method: "PATCH",
+                credentials: config.API_REQUEST_CREDENTIALS_SETTING,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    available: action
+                })
+            });
+    
+            if (response.status === 401) {
+                navigate('/login');
+                return; 
+            }
+            if (response.status != 200) {
+                alert("Failed to change vote availability.");
+                return;
+            }
+            fetchPoll(poll_id); // make request for shortId
+            pushAlert(`${action === false ? 'Closed' : 'Opened'} poll \"${truncate(poll.question)}\"`);
+        } catch (error) {
+            console.error('Error:', error);
+        }
     }
 
     async function clearPoll(poll) {
@@ -146,15 +175,6 @@ function PollDetails() {
                     <div className='table-outer-container'>
                         <div className='toolbar'>
                             <button onClick={() => fetchPoll(poll_id)}><FaRedo /></button>
-                            <Dialog
-                                title={"Vote now at <domain>/vote"}
-                                text={<>
-                                    {poll.shortId}
-                                    <QRCode value={`http://localhost:5173/vote/${poll.shortId}`} />
-                                </>}
-                                target={presentBtn}
-                                big
-                            />
                             <Dialog 
                                 title={"Confirm clear poll"}
                                 text={getDialogText(`clear the responses for "${truncate(poll.question)}"`)}
@@ -162,9 +182,22 @@ function PollDetails() {
                                 onConfirm={() => clearPoll(poll)}
                             />
                             <span className='toolbar-checkbox'>
+                                <input type="checkbox" defaultChecked={poll.available} onChange={() => toggleAvailable(poll)} /> 
+                                <span>Available</span>
+                            </span>
+                            {correctOption != -1 && <span className='toolbar-checkbox'>
                                 <input type="checkbox" defaultChecked={showCorrectOption} onChange={() => setShowCorrectOption(!showCorrectOption)} /> 
                                 <span>Show correct option</span>
-                            </span>                   
+                            </span>}           
+                            {poll.available && <Dialog
+                                title={"Vote now at <domain>/vote"}
+                                text={<>
+                                    {poll.shortId}
+                                    <QRCode value={`http://localhost:5173/vote/${poll.shortId}`} />
+                                </>}
+                                target={presentBtn}
+                                big
+                            />}
                         </div>
                         <div className='table-container'>
                             <table>
@@ -180,7 +213,7 @@ function PollDetails() {
                                         return <tr key={option} style={poll.options.indexOf(option) == correctOption && showCorrectOption ? correctOptionStyle : {}}>
                                             <td>{truncate(option)}</td>
                                             <td>{counts[option]}</td>
-                                            <td>{(counts[option] / poll.responses.length * 100).toFixed(2) + "%"}</td>
+                                            <td>{percentOrZero(counts[option]/poll.responses.length)}</td>
                                         </tr>
                                     })}
                                 </tbody>
