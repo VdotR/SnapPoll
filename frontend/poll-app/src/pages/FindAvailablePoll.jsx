@@ -180,7 +180,7 @@ function FindAvailablePoll() {
                 </tbody>
             </table>
             <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage===numPages} className='lazy_load_btn'>
-                Next
+                Load More
             </button>
             {isLoading ? <Loading /> :
                 polls.length == 0 ? <p> You haven't answered any polls.</p> : <></>
