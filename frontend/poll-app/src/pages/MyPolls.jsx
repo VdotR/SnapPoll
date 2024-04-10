@@ -5,9 +5,11 @@ import { useUserContext } from '../../context';
 import Loading from '../components/loading';
 import { availablePollRequest, clearPollRequest, createPollRequest, deletePollRequest, getDialogText, truncate } from '../utils/pollUtils';
 import { createdPollsRequest } from '../utils/userUtils';
+import '../css/MyPolls.css'
+
 
 // https://react-icons.github.io/react-icons/icons/fa/
-import { FaPlus, FaRedo, FaAngleUp, FaAngleDown, FaEraser, FaTrashAlt } from 'react-icons/fa';
+import { FaPlus, FaRedo, FaAngleUp, FaAngleDown, FaEraser, FaTrashAlt, FaAngleDoubleLeft, FaAngleLeft, FaAngleRight, FaAngleDoubleRight } from 'react-icons/fa';
 import Dialog from '../components/dialog';
 
 function MyPolls() {
@@ -16,14 +18,18 @@ function MyPolls() {
     const navigate = useNavigate();
     const { userId, username, pushAlert } = useUserContext();
     const [currentPage, setCurrentPage] = useState(1); // Start with page 1
+    const [numPages, setNumPages] = useState(1); 
     const pollsPerPage = 10; 
     const [currentPolls, setCurrentPolls] = useState([]); // Current polls to display
 
+
+    // Pagination effects
     useEffect(() => {
         const indexOfLastPoll = currentPage * pollsPerPage;
         const indexoffirstPoll = indexOfLastPoll - pollsPerPage;
         const updatedCurrentPolls = polls.slice(indexoffirstPoll, indexOfLastPoll);
 
+        setNumPages(Math.ceil(polls.length / pollsPerPage));
         setCurrentPolls(updatedCurrentPolls);
     }, [polls, currentPage, pollsPerPage]);
     
@@ -222,13 +228,20 @@ function MyPolls() {
                         </tbody>
                     </table>
                 </div>
-                <div>
-                    <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
-                        Previous
+                
+                <div className="pagination-controls">
+                    <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1} className="pagination-button">
+                        <FaAngleDoubleLeft />
                     </button>
-                    <span>Page {currentPage}</span>
-                    <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === Math.ceil(polls.length / pollsPerPage)}>
-                        Next
+                    <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1} className="pagination-button">
+                        <FaAngleLeft />
+                    </button>
+                    <span className='pagination-span'>Page {currentPage} / {numPages} </span>
+                    <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === numPages} className="pagination-button">
+                        <FaAngleRight />
+                    </button>
+                    <button onClick={() => setCurrentPage(numPages)} disabled={currentPage === numPages} className="pagination-button">
+                        <FaAngleDoubleRight />
                     </button>
                 </div>
                 {isLoading ? <Loading /> :
