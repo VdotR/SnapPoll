@@ -6,6 +6,7 @@ import { getUserRequest } from '../utils/userUtils';
 import { useUserContext } from '../../context';
 import Loading from '../components/loading';
 import { FaAngleUp, FaAngleDown } from 'react-icons/fa';
+import '../css/FindAvailablePoll.css';
 
 function FindAvailablePoll() {
     const navigate = useNavigate();
@@ -16,6 +17,18 @@ function FindAvailablePoll() {
     const [isLoading, setIsLoading] = useState(true);
     const dateCol = "date_answered"
     const tableCols = ["question", dateCol, "available", "chosen_answer"];
+    const [currentPage, setCurrentPage] = useState(1); // Start with page 1
+    const [numPages, setNumPages] = useState(1); 
+    const pollsPerPage = 5; 
+    const [currentPolls, setCurrentPolls] = useState([]); // Current polls to display
+
+    // Lazy Loading effects
+    useEffect(() => {
+        const indexOfLastPoll = currentPage * pollsPerPage;
+    
+        setNumPages(Math.ceil(polls.length / pollsPerPage));
+        setCurrentPolls(polls.slice(0, indexOfLastPoll));
+    }, [polls, currentPage, pollsPerPage]);
 
     // Replace underscore with space and capitalize each word 
     function toName(str) {
@@ -143,7 +156,7 @@ function FindAvailablePoll() {
                 </thead>
 
                 <tbody>
-                    {polls.map(poll => {
+                    {currentPolls.map(poll => {
                         const userResponse = poll.responses.find(response => response.user === userId);
                         return (
                             <tr onClick={(e) => handleRowClick(e, poll._id, poll.available)} key={poll._id}>
@@ -166,6 +179,9 @@ function FindAvailablePoll() {
                     })}
                 </tbody>
             </table>
+            <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage===numPages} className='lazy_load_btn'>
+                Next
+            </button>
             {isLoading ? <Loading /> :
                 polls.length == 0 ? <p> You haven't answered any polls.</p> : <></>
             }
