@@ -5,9 +5,11 @@ import { useUserContext } from '../../context';
 import Loading from '../components/loading';
 import { availablePollRequest, clearPollRequest, createPollRequest, deletePollRequest, getDialogText, truncate } from '../utils/pollUtils';
 import { createdPollsRequest } from '../utils/userUtils';
+import '../css/MyPolls.css'
+
 
 // https://react-icons.github.io/react-icons/icons/fa/
-import { FaPlus, FaRedo, FaAngleUp, FaAngleDown, FaEraser, FaTrashAlt } from 'react-icons/fa';
+import { FaPlus, FaRedo, FaAngleUp, FaAngleDown, FaEraser, FaTrashAlt, FaAngleDoubleLeft, FaAngleLeft, FaAngleRight, FaAngleDoubleRight } from 'react-icons/fa';
 import Dialog from '../components/dialog';
 
 function MyPolls() {
@@ -15,7 +17,22 @@ function MyPolls() {
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
     const { userId, username, pushAlert } = useUserContext();
+    const [currentPage, setCurrentPage] = useState(1); // Start with page 1
+    const [numPages, setNumPages] = useState(1); 
+    const pollsPerPage = 10; 
+    const [currentPolls, setCurrentPolls] = useState([]); // Current polls to display
 
+
+    // Pagination effects
+    useEffect(() => {
+        const indexOfLastPoll = currentPage * pollsPerPage;
+        const indexoffirstPoll = indexOfLastPoll - pollsPerPage;
+        const updatedCurrentPolls = polls.slice(indexoffirstPoll, indexOfLastPoll);
+
+        setNumPages(Math.ceil(polls.length / pollsPerPage));
+        setCurrentPolls(updatedCurrentPolls);
+    }, [polls, currentPage, pollsPerPage]);
+    
     // Table column names
     const dateCol = "date_created"
     const tableCols = ["question", dateCol, "responses", "available"];
@@ -178,7 +195,7 @@ function MyPolls() {
                         </thead>
 
                         <tbody>
-                            {polls.map(poll => {
+                            {currentPolls.map(poll => {
                                 return <tr onClick={(e) => handleRowClick(e, poll._id)} key={poll._id}>
                                     <td className='truncate'>{poll.question}</td>
                                     <td className='table-date'> {
@@ -210,6 +227,22 @@ function MyPolls() {
                             })}
                         </tbody>
                     </table>
+                </div>
+                
+                <div className="pagination-controls">
+                    <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1} className="pagination-button">
+                        <FaAngleDoubleLeft />
+                    </button>
+                    <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1} className="pagination-button">
+                        <FaAngleLeft />
+                    </button>
+                    <span className='pagination-span'>Page {currentPage} / {numPages} </span>
+                    <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === numPages} className="pagination-button">
+                        <FaAngleRight />
+                    </button>
+                    <button onClick={() => setCurrentPage(numPages)} disabled={currentPage === numPages} className="pagination-button">
+                        <FaAngleDoubleRight />
+                    </button>
                 </div>
                 {isLoading ? <Loading /> :
                     polls.length == 0 ? <p> You haven't created any polls.</p> : <></>
