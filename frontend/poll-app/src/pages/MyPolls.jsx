@@ -15,7 +15,18 @@ function MyPolls() {
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
     const { userId, username, pushAlert } = useUserContext();
+    const [currentPage, setCurrentPage] = useState(1); // Start with page 1
+    const pollsPerPage = 10; 
+    const [currentPolls, setCurrentPolls] = useState([]); // Current polls to display
 
+    useEffect(() => {
+        const indexOfLastPoll = currentPage * pollsPerPage;
+        const indexoffirstPoll = indexOfLastPoll - pollsPerPage;
+        const updatedCurrentPolls = polls.slice(indexoffirstPoll, indexOfLastPoll);
+
+        setCurrentPolls(updatedCurrentPolls);
+    }, [polls, currentPage, pollsPerPage]);
+    
     // Table column names
     const dateCol = "date_created"
     const tableCols = ["question", dateCol, "responses", "available"];
@@ -178,7 +189,7 @@ function MyPolls() {
                         </thead>
 
                         <tbody>
-                            {polls.map(poll => {
+                            {currentPolls.map(poll => {
                                 return <tr onClick={(e) => handleRowClick(e, poll._id)} key={poll._id}>
                                     <td className='truncate'>{poll.question}</td>
                                     <td className='table-date'> {
@@ -210,6 +221,15 @@ function MyPolls() {
                             })}
                         </tbody>
                     </table>
+                </div>
+                <div>
+                    <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
+                        Previous
+                    </button>
+                    <span>Page {currentPage}</span>
+                    <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === Math.ceil(polls.length / pollsPerPage)}>
+                        Next
+                    </button>
                 </div>
                 {isLoading ? <Loading /> :
                     polls.length == 0 ? <p> You haven't created any polls.</p> : <></>
