@@ -81,8 +81,7 @@ button:hover {
   border-radius: 4px;
   background-color: var(--submit-btn-bg);
   margin-top: 1rem;
-  width: 50%;
-  max-width: 150px;
+  min-width: 150px;
 }
 
 .submit-btn:hover {

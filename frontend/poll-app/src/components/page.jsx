@@ -1,12 +1,16 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { useUserContext } from '../../context';
 import Alert from './alert';
 import Header from './header'
 import '../css/page.css'
 
 function Page({ children, title, centerTitle, hideNav = false }) {
-    const { alert, setAlert } = useUserContext();
+    const { alert, popAlert } = useUserContext();
     const titleClass = 'title' + (centerTitle? ' center' : '');
+
+    useEffect(() => {
+        popAlert();
+    }, []);
 
     return (
         <>

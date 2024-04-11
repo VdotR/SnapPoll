@@ -7,7 +7,6 @@ import { availablePollRequest, clearPollRequest, createPollRequest, deletePollRe
 import { createdPollsRequest } from '../utils/userUtils';
 import '../css/MyPolls.css'
 
-
 // https://react-icons.github.io/react-icons/icons/fa/
 import { FaPlus, FaRedo, FaAngleUp, FaAngleDown, FaEraser, FaTrashAlt, FaAngleDoubleLeft, FaAngleLeft, FaAngleRight, FaAngleDoubleRight } from 'react-icons/fa';
 import Dialog from '../components/dialog';
@@ -16,22 +15,11 @@ function MyPolls() {
     const [polls, setPolls] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
-    const { userId, username, pushAlert } = useUserContext();
+    const { userId, pushAlert } = useUserContext();
     const [currentPage, setCurrentPage] = useState(1); // Start with page 1
     const [numPages, setNumPages] = useState(1); 
     const pollsPerPage = 10; 
     const [currentPolls, setCurrentPolls] = useState([]); // Current polls to display
-
-
-    // Pagination effects
-    useEffect(() => {
-        const indexOfLastPoll = currentPage * pollsPerPage;
-        const indexoffirstPoll = indexOfLastPoll - pollsPerPage;
-        const updatedCurrentPolls = polls.slice(indexoffirstPoll, indexOfLastPoll);
-
-        setNumPages(Math.ceil(polls.length / pollsPerPage));
-        setCurrentPolls(updatedCurrentPolls);
-    }, [polls, currentPage, pollsPerPage]);
     
     // Table column names
     const dateCol = "date_created"
@@ -149,6 +137,16 @@ function MyPolls() {
         fetchPolls(userId);
     }, []);
 
+    // Pagination effects
+    useEffect(() => {
+        const indexOfLastPoll = currentPage * pollsPerPage;
+        const indexoffirstPoll = indexOfLastPoll - pollsPerPage;
+        const updatedCurrentPolls = polls.slice(indexoffirstPoll, indexOfLastPoll);
+
+        setNumPages(Math.ceil(polls.length / pollsPerPage));
+        setCurrentPolls(updatedCurrentPolls);
+    }, [polls, currentPage, pollsPerPage]);
+
     const createQuickPoll = async () => {
         // Get current date
         let currentDate = new Date();
@@ -236,7 +234,7 @@ function MyPolls() {
                     <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1} className="pagination-button">
                         <FaAngleLeft />
                     </button>
-                    <span className='pagination-span'>Page {currentPage} / {numPages} </span>
+                    <span className='pagination-span'>{currentPage} / {numPages} </span>
                     <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === numPages} className="pagination-button">
                         <FaAngleRight />
                     </button>
