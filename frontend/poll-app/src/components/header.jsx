@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useUserContext } from '../../context';
-import config from '../config';
+import { logoutUserRequest } from '../utils/userUtils';
 import { FaAngleDown, FaBars } from 'react-icons/fa';
-import useWindowDimensions from '../utils/dimensions'
+import useWindowDimensions from '../utils/dimensions';
+import '../css/header.css'
 
 function Header() {
+    const navigate = useNavigate();
     const { username } = useUserContext();
     const { width } = useWindowDimensions();
     const isSmallDevice = width < 640;
@@ -14,10 +16,7 @@ function Header() {
     const handleLogout = async () => {
         try {
             // Make a GET request to the logout endpoint
-            const response = await fetch(`${config.BACKEND_BASE_URL}/api/user/logout`, {
-                method: 'GET',
-                credentials: config.API_REQUEST_CREDENTIALS_SETTING, // Ensure cookies are sent with the request if sessions are used
-            });
+            const response = await logoutUserRequest();
 
             if (response.ok) {
                 console.log("Logged out successfully");
@@ -32,6 +31,11 @@ function Header() {
         }
     };
 
+    // Redirect to MyAccount page
+    const handleMyAccount = () => {
+        navigate('/myaccount', { state : { message: 'Entered My Account Page'}});
+    };
+
     const navContents = <>
         <Link to='/'>Home</Link>
         <div className='nav-links'>
@@ -42,7 +46,7 @@ function Header() {
                     <span>Hi, {username}</span><FaAngleDown />
                 </div>
                 <div className="dropdown-content" >
-                    <span>My Account</span>
+                    <span onClick={handleMyAccount}>My Account</span>
                     <span onClick={handleLogout}>Logout</span>
                 </div>
             </div>

@@ -1,22 +1,34 @@
 import Page from '../components/page'
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchPollDetails } from '../utils/pollUtils';
+import { getPollRequest } from '../utils/pollUtils';
+import { getUserRequest } from '../utils/userUtils';
 import { useUserContext } from '../../context';
 import Loading from '../components/loading';
-import config from '../config';
-import { FaPlus, FaRedo, FaAngleUp, FaAngleDown, FaEraser, FaTrashAlt } from 'react-icons/fa';
+import { FaAngleUp, FaAngleDown } from 'react-icons/fa';
+import '../css/FindAvailablePoll.css';
 
 function FindAvailablePoll() {
     const navigate = useNavigate();
 
     const [polls, setPolls] = useState([]);
     const [pollId, setPollId] = useState("");
-    const [pollDetails, setPollDetails] = useState(null);
-    const { username, pushAlert } = useUserContext();
+    const { userId, username, pushAlert } = useUserContext();
     const [isLoading, setIsLoading] = useState(true);
-    const dateCol = "date_created"
-    const tableCols = ["question", dateCol, "available"];
+    const dateCol = "date_answered"
+    const tableCols = ["question", dateCol, "available", "chosen_answer"];
+    const [currentPage, setCurrentPage] = useState(1); // Start with page 1
+    const [numPages, setNumPages] = useState(1); 
+    const pollsPerPage = 5; 
+    const [currentPolls, setCurrentPolls] = useState([]); // Current polls to display
+
+    // Lazy Loading effects
+    useEffect(() => {
+        const indexOfLastPoll = currentPage * pollsPerPage;
+    
+        setNumPages(Math.ceil(polls.length / pollsPerPage));
+        setCurrentPolls(polls.slice(0, indexOfLastPoll));
+    }, [polls, currentPage, pollsPerPage]);
 
     // Replace underscore with space and capitalize each word 
     function toName(str) {
@@ -58,24 +70,19 @@ function FindAvailablePoll() {
         }
     }
 
-    async function fetchAnsweredPolls(username) {
+    async function fetchAnsweredPolls() {
         setIsLoading(true);
-        fetch(`${config.BACKEND_BASE_URL}/api/user/lookup/${username}`, {
-            credentials: config.API_REQUEST_CREDENTIALS_SETTING
-        })
+        getUserRequest(userId)
             .then(res => {
                 if (res.status == 401) {
                     navigate('/login');
-                    throw new Error(res.statusText)
+                    throw new Error();
                 }
                 return res.json();
             })
             .then(data => {
-                // Assuming data.answered_poll_id is an array of poll IDs
                 const pollDetailsPromises = data.answered_poll_id.map(pollId =>
-                    fetch(`${config.BACKEND_BASE_URL}/api/poll/${pollId}`, {
-                        credentials: config.API_REQUEST_CREDENTIALS_SETTING
-                    })
+                    getPollRequest(pollId)
                         .then(response => {
                             if (!response.ok) {
                                 throw new Error('Failed to fetch poll details');
@@ -87,16 +94,12 @@ function FindAvailablePoll() {
                             return null; // Return a null or similar to indicate a failed fetch
                         })
                 );
-
-                // Wait for all poll detail fetches to complete, including those that might have failed
                 return Promise.all(pollDetailsPromises);
             })
             .then(pollDetails => {
                 // Filter out any nulls (failed fetches) and update state with the successful fetches
                 const successfulPollDetails = pollDetails.filter(detail => detail !== null);
-                const pollsWithoutResponses = successfulPollDetails.map(({ responses, ...rest }) => rest);
-
-                setPolls(pollsWithoutResponses);
+                setPolls(successfulPollDetails);
             })
             .catch(error => console.log(error))
             .finally(() => {
@@ -105,30 +108,25 @@ function FindAvailablePoll() {
     }
 
     useEffect(() => {
-        fetchAnsweredPolls(username);
+        fetchAnsweredPolls();
     }, []);
-
-
 
     const handleSubmit = (e) => {
         e.preventDefault(); // Prevent default form submission behavior
-        fetchPollDetails(pollId)
+        getPollRequest(pollId)
+            .then(res => res.json())
             .then(data => {
-                setPollDetails(data);
-
-                if (data && !data._id) {
+                if (!data._id) {
                     pushAlert('Poll not found.', 'error');
                 } else if (!data.available) {
                     pushAlert('Poll not available', 'error');
                 } else {
-                    navigate(`/vote/${pollId}`, { state: { pollDetails: data } }); // Navigate with poll details
+                    navigate(`/vote/${data._id}`, { state: { pollDetails: data } }); // Navigate with poll details
                 }
             })
-            .catch(error => {
-                console.error("Error fetching poll details:", error);
-                pushAlert('An error occurred while fetching poll details.', 'error');
-            });
+            .catch((error) => { pushAlert('An error occurred while fetching poll details.', 'error') });
     };
+
     return (
         // Input form for poll ID on /vote/
         <Page>
@@ -158,30 +156,37 @@ function FindAvailablePoll() {
                 </thead>
 
                 <tbody>
-                    {polls.map(poll => {
-                        return <tr onClick={(e) => handleRowClick(e, poll._id, poll.available)} key={poll._id}>
-                            <td><span>{poll.question}</span></td>
-                            <td> {
-                                new Date(poll.date_created).toLocaleString('en-US', {
-                                    year: 'numeric',
-                                    month: '2-digit',
-                                    day: '2-digit',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                    second: '2-digit',
-                                })
-                            } </td>
-                            <td>{poll.available ? 'Yes' : 'No'}</td>
-                        </tr>
+                    {currentPolls.map(poll => {
+                        const userResponse = poll.responses.find(response => response.user === userId);
+                        return (
+                            <tr onClick={(e) => handleRowClick(e, poll._id, poll.available)} key={poll._id}>
+                                <td><span>{poll.question}</span></td>
+                                <td> {
+                                    new Date(userResponse.updatedAt).toLocaleString('en-US', {
+                                        year: 'numeric',
+                                        month: '2-digit',
+                                        day: '2-digit',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        second: '2-digit',
+                                    })
+                                } </td>
+                                <td>{poll.available ? 'Yes' : 'No'}</td>
+                                {/* Display the user's answer, if available */}
+                                <td>{poll.options[userResponse.answer]}</td>
+                            </tr>
+                        );
                     })}
                 </tbody>
             </table>
+            <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage===numPages} className='lazy_load_btn'>
+                Load More
+            </button>
             {isLoading ? <Loading /> :
                 polls.length == 0 ? <p> You haven't answered any polls.</p> : <></>
             }
         </Page>
     );
-
 }
 
 export default FindAvailablePoll;

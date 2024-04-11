@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FaX } from 'react-icons/fa6'
 import { useUserContext } from '../../context';
+import '../css/alert.css';
 
 // Font and bg color for each alert level
 const alertColor = {

@@ -2,8 +2,8 @@ import Page from '../components/page'
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useUserContext } from '../../context';
-import config from '../config';
-
+import { loginUserRequest } from '../utils/userUtils';
+import '../css/Login.css';
 
 function Login({ redirected }) {
     const [userIdentifier, setUserIdentifier] = useState("");
@@ -16,19 +16,8 @@ function Login({ redirected }) {
 
     async function handleLogin() {
         try {
-            const res = await fetch(`${config.BACKEND_BASE_URL}/api/user/login`, {
-                method: "POST",
-                credentials: config.API_REQUEST_CREDENTIALS_SETTING,
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    "identifier": userIdentifier,
-                    "password": password
-                })
-            })
-
+            const res = await loginUserRequest(userIdentifier, password);
+            
             // Login failed
             if (res.status === 400) {
                 pushAlert("Username/Email and password do not match", 'error');
@@ -72,7 +61,7 @@ function Login({ redirected }) {
                     Sign in
                 </button>
             </form>
-            <div className="signup-link">
+            <div className="prompt-link">
                 Not a Member? <Link to="/signup">Sign Up</Link>
             </div>
         </Page>

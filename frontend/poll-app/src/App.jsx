@@ -8,20 +8,22 @@ import FindAvailablePoll from './pages/FindAvailablePoll';
 import Vote from './pages/Vote'
 import CreatePoll from './pages/CreatePoll';
 import { useUserContext } from '../context'
-import './App.css'
-import config from './config';
+import { authUserRequest } from './utils/userUtils';
 import Page from './components/page';
 import Loading from './components/loading';
 import PollDetails from './pages/PollDetails';
+import MyAccount from './pages/MyAccount';
 
 function App() {
-  const { 
+  const {
     isLoggedIn,
     setIsLoggedIn,
     isLoading,
     setIsLoading,
     username,
-    setUsername
+    setUsername,
+    userId,
+    setUserId
   } = useUserContext();
 
   function pageifLoggedIn(path, page) {
@@ -30,19 +32,17 @@ function App() {
       return page;
     }
     else {
-      return <Navigate to="/login" replace={true} state={{ from: path }}/>
-    } 
+      return <Navigate to="/login" replace={true} state={{ from: path }} />
+    }
   }
 
   useEffect(() => {
-    fetch(`${config.BACKEND_BASE_URL}/api/user/auth/`, {
-      credentials: config.API_REQUEST_CREDENTIALS_SETTING 
-    })
+    authUserRequest()
       .then((response) => response.json())
       .then((data) => {
-        console.log("/auth response: " + data.isLoggedIn)
         setIsLoggedIn(data.isLoggedIn);
         setUsername(data.username);
+        setUserId(data.userId);
       })
       .catch((error) => {
         console.error('Error fetching auth status:', error);
@@ -68,7 +68,8 @@ function App() {
         <Route path="/poll/:poll_id" element={pageifLoggedIn("/polls/:poll_id", <PollDetails />)} />
         <Route path="/vote" element={pageifLoggedIn("/vote", <FindAvailablePoll />)} />
         <Route path="/vote/:poll_id" element={pageifLoggedIn("/vote/:poll_id", <Vote />)} />
-        <Route path="/polls/create" element={pageifLoggedIn("/polls/create", <CreatePoll />)} />        
+        <Route path="/polls/create" element={pageifLoggedIn("/polls/create", <CreatePoll />)} />
+        <Route path="/myaccount" element={pageifLoggedIn("/myaccount", <MyAccount />)} />
       </Routes>
     </Router>
   );

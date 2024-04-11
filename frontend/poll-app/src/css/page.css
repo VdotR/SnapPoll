@@ -1,0 +1,24 @@
+.content {
+  padding: 1rem 5rem;
+  padding-top: 5.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.content .title {
+  width: 100%;
+}
+
+.center {
+  text-align: center;
+}
+
+/* Reduce page padding for < 640px wide */
+@media screen and (max-width: 640px) {
+  .content {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+}

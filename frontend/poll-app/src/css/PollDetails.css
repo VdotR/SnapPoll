@@ -1,0 +1,39 @@
+.poll-details {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  justify-content: center;
+}
+
+.table-outer-container {
+  margin-left: 2rem;
+  flex-grow: 1;
+}
+
+.responses-plot {
+  flex-basis: 50%;
+}
+
+.responses-plot canvas {
+  width: 100% !important;
+  height: 600px;
+  margin: 0 auto;
+}
+
+@media screen and (max-width: 550px) {
+  .responses-plot canvas {
+    max-width: 300px;
+    height: 300px;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .responses-plot {
+    flex-basis: 100%;
+  }
+
+  .table-outer-container {
+    margin-left: 0rem;
+    width: 100%;
+  }
+}

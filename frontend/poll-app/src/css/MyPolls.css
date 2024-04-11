@@ -1,0 +1,30 @@
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    gap: 0.25rem;
+    width: 100%;
+    margin: 1rem 0;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+.pagination-controls button {
+    border: none;
+}
+
+.pagination-controls button:disabled{
+    cursor: default;
+    opacity: 0.5;
+    vertical-align: middle;
+    align-self: center;
+    line-height: 1;
+}
+
+.pagination-controls span {
+    font-size: 1rem;
+    vertical-align: middle;
+    align-self: center;
+    line-height: 1;
+    margin-top: -0.25rem;
+    margin: 0 0.5rem;
+}

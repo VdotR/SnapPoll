@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const Schema = mongoose.Schema;
 
-const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/; 
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 const userSchema = new Schema({
     email: {
@@ -10,23 +10,31 @@ const userSchema = new Schema({
         required: true,
         unique: true,
         validate: {
-            validator: function(email) {
-                return emailRegex.test(email);
+            validator: function (email) {
+                return emailRegex.test(email) && email.length < 150; //allows most but not all emails, doesn't allow case sensitivity in local 
             },
             message: props => `${props.value} is not a valid email address!`
         }
     },
-    password: { type: String, required: true },
+    password: {
+        type: String, required: true,
+        validate: {
+            validator: function (password) {
+                return password.length < 150;
+            },
+            message: props => `Password ${props.value} is invalid. It must be lower than 150 characters.`
+        }
+    },
     username: {
         type: String,
         required: true,
         unique: true,
         validate: {
-            validator: function(username) {
+            validator: function (username) {
                 // Check that username does not contain '@'
-                return username.length > 0 && !username.includes('@');
+                return username.length < 150 && !username.includes('@');
             },
-            message: props => `Username ${props.value} is invalid. '@' is not allowed.`
+            message: props => `Username ${props.value} is invalid. '@' is not allowed and it must be below 150 characters.`
         }
     },
     date_joined: { type: Date, default: Date.now },
@@ -53,17 +61,8 @@ userSchema.pre('save', async function (next) {
     next(); // Proceed to the next middleware or save the document
 });
 
-//save username/email in lowercase
-userSchema.pre('save', function (next) {
-    if (this.isModified('email')) {
-        this.email = this.email.toLowerCase();
-    }
-    if (this.isModified('username')) {
-        this.username = this.username.toLowerCase();
-    }
-
-    next(); // Proceed to the next middleware or save the document
-});
+userSchema.index({ username: 1 }, { unique: true, collation: { locale: 'en', strength: 2 } });
+userSchema.index({ email: 1 }, { unique: true, collation: { locale: 'en', strength: 2 } });
 
 const User = mongoose.model('User', userSchema);
 

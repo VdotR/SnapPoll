@@ -2,13 +2,15 @@
 # MongoDB
 backend/node_modules/*
 backend/.env
-
+backend/utils/config.json
 
 # Frontend
 # Mongodb
 frontend/node_modules/*
 frontend/.env
+frontend/poll-app/.vite
 
 
 # Others
 */.DS_Store
+.DS_Store

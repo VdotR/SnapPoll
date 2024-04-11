@@ -1,7 +1,7 @@
 import Page from '../components/page'
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import config from '../config';
+import { signupUserRequest } from '../utils/userUtils';
 import { useUserContext } from '../../context';
 
 function SignUp() {
@@ -23,19 +23,7 @@ function SignUp() {
         }
         try {
             console.log("fetch")
-            const res = await fetch(`${config.BACKEND_BASE_URL}/api/user/signup`, {
-                method: "POST",
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json' 
-                },
-                body: JSON.stringify({
-                    "username": username,
-                    "email" : email,
-                    "password": password
-                })
-            })
-            console.log(res);
+            const res = await signupUserRequest(username, email, password);
 
             if (res.status === 400) {
                 pushAlert(await res.text(), 'error'); 
@@ -64,7 +52,7 @@ function SignUp() {
                     Register
                 </button>                
             </form>
-            <div className="signup-link">
+            <div className="prompt-link">
                 Have an account? <Link to="/login">Log In</Link>
             </div>
         </Page>

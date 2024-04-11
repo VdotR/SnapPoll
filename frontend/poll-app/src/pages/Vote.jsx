@@ -1,69 +1,63 @@
 import Page from '../components/page'
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
-import { fetchPollDetails } from '../utils/pollUtils';
-import config from '../config';
+import { getPollRequest, votePollRequest } from '../utils/pollUtils';
 import Loading from '../components/loading';
 import { useUserContext } from '../../context';
+import '../css/Vote.css';
 
 function Vote() {
     const navigate = useNavigate();
     const location = useLocation();
     const { poll_id } = useParams();
-    const { pushAlert } = useUserContext();
+    const { userId, pushAlert } = useUserContext();
 
     const [pollDetails, setPollDetails] = useState(location.state?.pollDetails || null);
     const [selectedOption, setSelectedOption] = useState(null);
 
     useEffect(() => {
         if (!pollDetails) {
-            fetchPollDetails(poll_id)
-                .then(data => {
-                    setPollDetails(data);
-                    //setSelectedOption();
+            (async () => {
+                try {
+                    const response = await getPollRequest(poll_id);
+                    const data = await response.json();
 
-                    if (data && !data._id) {
+                    if (!data._id) {
                         pushAlert('Poll not found.', 'error');
                         navigate(`/vote`);
-                    }
-                    else if (!data.available) {
+                        return;
+                    } else if (!data.available) {
                         pushAlert('Poll not available', 'error');
                         navigate(`/vote`);
+                        return;
                     }
-                })
-                .catch(error => {
-                    console.error("Error fetching poll details:", error);
+
+                    setPollDetails(data);
+                    const userResponse = data.responses.find(response => response.user === userId);
+                    if (userResponse) {
+                        setSelectedOption(userResponse.answer);
+                    }
+                } catch (error) {
+                    console.error('An error occurred while fetching poll details:', error);
                     pushAlert('An error occurred while fetching poll details.', 'error');
-                });
+                }
+            })();
         }
     }, [pollDetails]);
 
     // Function to handle answer submission
     const submitAnswer = async (answerIndex) => {
         try {
-            const response = await fetch(`${config.BACKEND_BASE_URL}/api/poll/vote/${poll_id}`, {
-                method: "PATCH",
-                credentials: config.API_REQUEST_CREDENTIALS_SETTING,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    answer: answerIndex,
-                })
-            });
+            const response = await votePollRequest(poll_id, answerIndex);
+            if (response.status === 200) pushAlert('Vote submitted successfully!');
+            else if (response.status === 400) {
+                pushAlert('Poll not available.', 'error');
+            }
+            else throw new Error();
 
-            if (response.status === 400) {
-                throw new Error('Poll not available.');
-            }
-            else if (response.status === 500) {
-                throw new Error('Error: Response was not recorded.');
-            }
-            const result = await response.json();
-            pushAlert('Vote submitted successfully!');
             setSelectedOption(answerIndex); // Update the selected option state
-        } catch (error) {
-            console.error("Error submitting vote:", error);
-            pushAlert(error.message, 'error');
+        } catch (err) {
+            pushAlert('Error: Response was not recorded.', 'error');
         }
     };
 
