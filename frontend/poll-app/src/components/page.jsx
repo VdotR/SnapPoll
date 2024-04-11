@@ -3,10 +3,16 @@ import { useUserContext } from '../../context';
 import Alert from './alert';
 import Header from './header'
 import '../css/page.css'
+import { useBeforeUnload } from 'react-router-dom';
 
 function Page({ children, title, centerTitle, hideNav = false }) {
-    const { alert, setAlert } = useUserContext();
+    const { alert, popAlert } = useUserContext();
     const titleClass = 'title' + (centerTitle? ' center' : '');
+
+    useBeforeUnload(() => {
+        console.log("leaving page, clearing alerts")
+        popAlert();
+    }, []);
 
     return (
         <>
