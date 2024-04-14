@@ -72,11 +72,12 @@ export async function authUserRequest() {
     });
 }
 
-export async function lookupUserRequest(identifier) {
-    return fetch(`${baseUserAPIUrl}/lookup/${identifier}`, {
-        credentials: config.API_REQUEST_CREDENTIALS_SETTING
-    });
-}
+// Uncomment if needed
+// export async function lookupUserRequest(identifier) {
+//     return fetch(`${baseUserAPIUrl}/lookup/${identifier}`, {
+//         credentials: config.API_REQUEST_CREDENTIALS_SETTING
+//     });
+// }
 
 export async function deleteUserRequest(password) {
     return fetch(`$${baseUserAPIUrl}/delete`, {

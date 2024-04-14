@@ -55,31 +55,32 @@ router.get('/logout/', checkSession, async (req, res) => {
     });
 });
 
+// Disabled for now, uncomment if needed
 // Returns information (excluding password hash) about the user matching email or username (identifier)
-router.get('/lookup/:identifier', async (req, res) => {
-    const identifier = req.params.identifier;
-    let query = {};
+// router.get('/lookup/:identifier', async (req, res) => {
+//     const identifier = req.params.identifier;
+//     let query = {};
 
-    // Check if the identifier contains '@'
-    if (identifier.includes('@')) {
-        // Prepare to find the user by email
-        query.email = identifier;
-    } else {
-        // Prepare to find the user by username
-        query.username = identifier;
-    }
+//     // Check if the identifier contains '@'
+//     if (identifier.includes('@')) {
+//         // Prepare to find the user by email
+//         query.email = identifier;
+//     } else {
+//         // Prepare to find the user by username
+//         query.username = identifier;
+//     }
 
-    try {
-        const existingUser = await User.findOne(query, { password: 0 }).collation({ locale: 'en', strength: 2 }); // Exclude the password hash from the result
-        if (!existingUser) {
-            res.status(404).send("User not found.");
-        } else {
-            res.status(200).send(existingUser);
-        }
-    } catch (error) {
-        res.status(500).send("Something went wrong");
-    }
-});
+//     try {
+//         const existingUser = await User.findOne(query, { password: 0 }).collation({ locale: 'en', strength: 2 }); // Exclude the password hash from the result
+//         if (!existingUser) {
+//             res.status(404).send("User not found.");
+//         } else {
+//             res.status(200).send(existingUser);
+//         }
+//     } catch (error) {
+//         res.status(500).send("Something went wrong");
+//     }
+// });
 
 //Returns information (excluding password hash) about the user matching id
 router.get('/:id', async (req, res) => {
