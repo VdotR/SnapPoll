@@ -20,11 +20,11 @@ app.use(session({
   secret: 'secret', //TODO: change
   resave: false,
   saveUninitialized: true,
-cookie: { secure: false, httpOnly: true, maxAge: 1210000000 /*2 weeks*/ } // TODO: Change secure to true when done testing
+  cookie: { secure: false, httpOnly: true, maxAge: 1210000000 /*2 weeks*/ } // TODO: Change secure to true when done testing
 }));
 
 app.use((req, res, next) => {
-    setTimeout(next, process.env.RESPONSE_DELAY); 
+  setTimeout(next, process.env.RESPONSE_DELAY);
 });
 
 // Connect to mongodb
@@ -37,6 +37,8 @@ mongoose.connect(process.env.CONNECTION_STRING, {
 app.use('/api/poll', pollRoutes);
 app.use('/api/user', userRoutes);
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
+
+module.exports = { app, server };
