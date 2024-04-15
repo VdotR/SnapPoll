@@ -1,18 +1,10 @@
 // Sends some sample data to mongodb server
 const mongoose = require('mongoose');
-require('dotenv').config();
 const User = require("../../models/user.js");
 const Poll = require("../../models/poll.js")
 const express = require("express");
 const router = express.Router();
 const { checkSession, checkCreateValidPoll } = require('../middleware.js')
-
-// Connect to mongodb
-mongoose.connect(process.env.CONNECTION_STRING, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-}).then(() => console.log('Connected to MongoDB'))
-    .catch(err => console.error('Could not connect to MongoDB...', err));
 
 //Record a vote from a user. If sucessful, appends _id to  the created_poll_id and answered_poll_id of this user. 
 //Also updates the responses of the poll with the request body.

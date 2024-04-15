@@ -1,5 +1,4 @@
 // Imports
-require('dotenv').config();
 const User = require("../../models/user.js");
 const express = require("express");
 const bcrypt = require('bcrypt');
