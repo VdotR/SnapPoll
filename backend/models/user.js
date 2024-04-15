@@ -8,7 +8,7 @@ const userSchema = new Schema({
     email: {
         type: String,
         required: true,
-        unique: true,
+        index: { unique: true, collation: { locale: 'en', strength: 2 } },
         validate: {
             validator: function (email) {
                 return emailRegex.test(email) && email.length < 150; //allows most but not all emails, doesn't allow case sensitivity in local 
@@ -20,15 +20,15 @@ const userSchema = new Schema({
         type: String, required: true,
         validate: {
             validator: function (password) {
-                return password.length < 150;
+                return password.length < 70;
             },
-            message: props => `Password ${props.value} is invalid. It must be lower than 150 characters.`
+            message: props => `Password ${props.value} is invalid. It must be lower than 70 characters.`
         }
     },
     username: {
         type: String,
         required: true,
-        unique: true,
+        index: { unique: true, collation: { locale: 'en', strength: 2 } },
         validate: {
             validator: function (username) {
                 // Check that username does not contain '@'
@@ -60,9 +60,6 @@ userSchema.pre('save', async function (next) {
 
     next(); // Proceed to the next middleware or save the document
 });
-
-userSchema.index({ username: 1 }, { unique: true, collation: { locale: 'en', strength: 2 } });
-userSchema.index({ email: 1 }, { unique: true, collation: { locale: 'en', strength: 2 } });
 
 const User = mongoose.model('User', userSchema);
 

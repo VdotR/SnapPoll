@@ -36,7 +36,7 @@ app.use('/api/user', userRoutes);
 
 function startServer(mongoUri, port = defaultPort) {
   // Connect to mongodb
-  mongoose.connect(mongoUri)
+  mongoose.connect(mongoUri, { autoIndex: true })
     .catch(err => console.error('Could not connect to MongoDB...', err));
 
   return new Promise(resolve => {

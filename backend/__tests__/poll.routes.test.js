@@ -18,7 +18,6 @@ describe('Poll Routes', () => {
 
         // Start the Express server
         server = await startServer(mongoUri, 3001);
-        agent = request.agent(app);
     });
     afterAll(async () => {
         await mongoose.connection.close();
@@ -30,6 +29,7 @@ describe('Poll Routes', () => {
         // Ensure the database is in a known state before each test
         await Poll.deleteMany({});
         await User.deleteMany({});
+        agent = request.agent(app);
     });
 
     it('GET on valid /:id', async () => {
