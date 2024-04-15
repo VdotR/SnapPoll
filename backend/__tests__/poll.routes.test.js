@@ -95,7 +95,6 @@ describe('Poll Routes', () => {
             .expect('Content-Type', /json/)
             .expect(200)
             .expect(response => {
-                console.log(response.body);
                 expect(response.body).toHaveProperty('_id', newPoll._id.toString());
                 expect(response.body).toHaveProperty('question', 'question?');
                 expect(response.body.options).toEqual(['A', 'B', 'C']);

@@ -138,7 +138,7 @@ router.get('/:id', checkSession, async (req, res) => {
         // Conditionally modify the poll object based on who is requesting
         if (req.session.userId !== poll.created_by.toString()) {
             // If the user is not the creator of the poll, delete the correct answer and filter the responses
-            delete poll.correct_answer;
+            delete poll.correct_option;
             poll.responses = poll.responses.filter(response => response.user.toString() === req.session.userId);
         }
 
