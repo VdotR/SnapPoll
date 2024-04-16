@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const { app, startServer } = require('../routeServer');
 const User = require('../models/user');
+const Poll = require('../models/poll');
 
 let agent;
 
@@ -27,6 +28,7 @@ describe('User Routes', () => {
     beforeEach(async () => {
         // Ensure the database is in a known state before each test
         await User.deleteMany({});
+        //Reset cookies before each test
         agent = request.agent(app);
     });
 
@@ -42,7 +44,6 @@ describe('User Routes', () => {
             .get('/api/user/lookup/sample_user')
             .expect('Content-Type', /json/)
             .expect(200);
-
 
         expect(response.body).toHaveProperty('username');
         expect(response.body.username).toBe('sample_user');
@@ -181,5 +182,381 @@ describe('User Routes', () => {
             .send({ email: 'sampleuser@ucsd.edu', username: 'Sample_user', password: 'sample' })
             .expect(400);
         expect(await User.countDocuments()).toBe(1);
+    });
+
+    it('reject invalid signups', async () => {
+
+        //no @ in email
+        await agent
+            .post('/api/user/signup')
+            .send({ email: 'sampleuserucsd.edu', username: 'sample_user', password: 'sample' })
+            .expect(400);
+        expect(await User.countDocuments()).toBe(0);
+
+        //@ in username
+        await agent
+            .post('/api/user/signup')
+            .send({ email: 'sAmPleuser@ucsd.edu', username: '@not_sample_user', password: 'sample' })
+            .expect(400);
+        expect(await User.countDocuments()).toBe(0);
+
+        //email too long
+        await agent
+            .post('/api/user/signup')
+            .send({
+                email: 'sampleuser' + "9".repeat(150) + '@ucsd.edu',
+                username: 'Sample_user', password: 'sample'
+            })
+            .expect(400);
+        expect(await User.countDocuments()).toBe(0);
+
+        //username too long
+        await agent
+            .post('/api/user/signup')
+            .send({
+                email: 'sampleuser@ucsd.edu',
+                username: 'Sample_user' + "9".repeat(150), password: 'sample'
+            })
+            .expect(400);
+        expect(await User.countDocuments()).toBe(0);
+
+        //password too long
+        await agent
+            .post('/api/user/signup')
+            .send({
+                email: 'sampleuser@ucsd.edu',
+                username: 'Sample_user', password: 'sample' + "9".repeat(75)
+            })
+            .expect(400);
+        expect(await User.countDocuments()).toBe(0);
+
+        //empty string email
+        await agent
+            .post('/api/user/signup')
+            .send({
+                email: '',
+                username: 'sample_user',
+                password: 'sample'
+            })
+            .expect(400);
+        expect(await User.countDocuments()).toBe(0);
+
+        //empty string username
+        await agent
+            .post('/api/user/signup')
+            .send({
+                email: 'sampleuser@ucsd.edu',
+                username: '',
+                password: 'sample'
+            })
+            .expect(400);
+        expect(await User.countDocuments()).toBe(0);
+
+        //empty string password
+        await agent
+            .post('/api/user/signup')
+            .send({
+                email: 'sampleuser@ucsd.edu',
+                username: 'sample_user',
+                password: ''
+            })
+            .expect(400);
+        expect(await User.countDocuments()).toBe(0);
+
+        //non-string email
+        await agent
+            .post('/api/user/signup')
+            .send({
+                email: 1,
+                username: 'sample_user',
+                password: 'sample'
+            })
+            .expect(400);
+        expect(await User.countDocuments()).toBe(0);
+
+        //non-string username
+        await agent
+            .post('/api/user/signup')
+            .send({
+                email: 'sampleuser@ucsd.edu',
+                username: 1,
+                password: 'sample'
+            })
+            .expect(400);
+        expect(await User.countDocuments()).toBe(0);
+
+        //non-string password
+        await agent
+            .post('/api/user/signup')
+            .send({
+                email: 'sampleuser@ucsd.edu',
+                username: 'sample_user',
+                password: 1
+            })
+            .expect(400);
+        expect(await User.countDocuments()).toBe(0);
+    });
+
+    it('valid DELETE on /', async () => {
+        const newUser = new User({
+            username: 'sample_user',
+            email: 'sampleuser@ucsd.edu',
+            password: 'sample'
+        });
+        await newUser.save();
+        expect(await User.countDocuments()).toBe(1);
+        await agent
+            .post('/api/user/login')
+            .send({ identifier: 'sample_user', password: 'sample' })
+            .expect(200);
+
+        await agent
+            .delete('/api/user/')
+            .send({ password: 'sample' })
+            .expect(200);
+
+        expect(await User.countDocuments()).toBe(0);
+    });
+
+    it('invalid DELETE on /', async () => {
+        const newUser = new User({
+            username: 'sample_user',
+            email: 'sampleuser@ucsd.edu',
+            password: 'sample'
+        });
+        await newUser.save();
+        expect(await User.countDocuments()).toBe(1);
+
+        //make sure random delete w/o login doesn't do anything
+        await agent
+            .delete('/api/user/')
+            .send({ password: 'sample' })
+            .expect(401);
+        expect(await User.countDocuments()).toBe(1);
+
+        await agent
+            .post('/api/user/login')
+            .send({ identifier: 'sample_user', password: 'sample' })
+            .expect(200);
+
+        //make sure wrong password doesn't do anything
+        await agent
+            .delete('/api/user/')
+            .send({ password: 'samplent' })
+            .expect(403);
+
+        expect(await User.countDocuments()).toBe(1);
+    });
+
+    it('invalid DELETE on /', async () => {
+        const newUser = new User({
+            username: 'sample_user',
+            email: 'sampleuser@ucsd.edu',
+            password: 'sample'
+        });
+        await newUser.save();
+        expect(await User.countDocuments()).toBe(1);
+
+        //make sure random delete w/o login doesn't do anything
+        await agent
+            .delete('/api/user/')
+            .send({ password: 'sample' })
+            .expect(401);
+        expect(await User.countDocuments()).toBe(1);
+
+        await agent
+            .post('/api/user/login')
+            .send({ identifier: 'sample_user', password: 'sample' })
+            .expect(200);
+
+        //make sure wrong password doesn't do anything
+        await agent
+            .delete('/api/user/')
+            .send({ password: 'samplent' })
+            .expect(403);
+
+        expect(await User.countDocuments()).toBe(1);
+    });
+
+    it('get on created_polls', async () => {
+        //user with poll to get
+        const user_1 = new User({
+            username: 'sample_user',
+            email: 'sampleuser@ucsd.edu',
+            password: 'sample'
+        });
+        await user_1.save();
+
+        //user who answers poll
+        const user_2 = new User({
+            username: 'sample_user1',
+            email: 'sampleuser1@ucsd.edu',
+            password: 'sample'
+        });
+        await user_2.save();
+
+        const poll_1 = new Poll({
+            question: 'question_1',
+            options: ['A', 'B'],
+            correct_option: 1,
+            created_by: user_1._id,
+            responses: [{ user: user_2.id, answer: 0 }]
+        });
+        await poll_1.save();
+
+        await User.updateOne(
+            { _id: user_1._id },
+            { $addToSet: { created_poll_id: poll_1._id } }
+        );
+        await User.updateOne(
+            { _id: user_2._id },
+            { $addToSet: { answered_poll_id: poll_1._id } }
+        );
+
+        await agent
+            .post('/api/user/login')
+            .send({ identifier: 'sample_user', password: 'sample' })
+            .expect(200);
+
+        await agent
+            .get(`/api/user/created_polls/${user_1._id}`)
+            .expect(200)
+            .expect(response => {
+                expect(Array.isArray(response.body)).toBe(true);
+                expect(response.body.length).toBe(1);
+                expect(response.body[0]).toHaveProperty('_id', poll_1._id.toString());
+                expect(response.body[0]).toHaveProperty('question', 'question_1');
+                expect(response.body[0]).toHaveProperty('options', ['A', 'B']);
+                expect(response.body[0]).toHaveProperty('correct_option', 1);
+                expect(response.body[0]).toHaveProperty('available', false);
+                expect(response.body[0]).toHaveProperty('created_by', user_1._id.toString());
+                expect(response.body[0].responses.length).toBe(1);
+                expect(response.body[0].responses[0]).toHaveProperty('user', user_2._id.toString());
+                expect(response.body[0].responses[0]).toHaveProperty('answer', 0);
+            });
+
+        await agent
+            .get('/api/user/logout')
+            .expect(200);
+
+        //try getting from other user
+        await agent
+            .post('/api/user/login')
+            .send({ identifier: 'sample_user1', password: 'sample' })
+            .expect(200);
+
+        await agent
+            .get(`/api/user/created_polls/${user_1._id}`)
+            .expect(403);
+    });
+
+    it('change_password', async () => {
+        const newUser = new User({
+            username: 'sample_user',
+            email: 'sampleuser@ucsd.edu',
+            password: 'sample'
+        });
+        await newUser.save();
+
+        await agent
+            .post('/api/user/login')
+            .send({ identifier: 'sample_user', password: 'sample' })
+            .expect(200);
+
+        //try incorrect old password
+        await agent
+            .patch('/api/user/change_password')
+            .send({ old_password: 'samplent', new_password: 'samplenew' })
+            .expect(400);
+
+        await agent
+            .get('/api/user/logout')
+            .expect(200);
+
+        await agent
+            .post('/api/user/login')
+            .send({ identifier: 'sample_user', password: 'sample' })
+            .expect(200);
+
+        //try empty new password
+        await agent
+            .patch('/api/user/change_password')
+            .send({ old_password: 'sample', new_password: '' })
+            .expect(400);
+
+        await agent
+            .get('/api/user/logout')
+            .expect(200);
+
+        await agent
+            .post('/api/user/login')
+            .send({ identifier: 'sample_user', password: 'sample' })
+            .expect(200);
+
+        //try same new password
+        await agent
+            .patch('/api/user/change_password')
+            .send({ old_password: 'sample', new_password: 'sample' })
+            .expect(400);
+
+        await agent
+            .get('/api/user/logout')
+            .expect(200);
+
+        await agent
+            .post('/api/user/login')
+            .send({ identifier: 'sample_user', password: 'sample' })
+            .expect(200);
+
+        //try too long new password
+        await agent
+            .patch('/api/user/change_password')
+            .send({ old_password: 'sample', new_password: 'sample'.repeat(20) })
+            .expect(400);
+
+        await agent
+            .get('/api/user/logout')
+            .expect(200);
+
+        await agent
+            .post('/api/user/login')
+            .send({ identifier: 'sample_user', password: 'sample' })
+            .expect(200);
+
+        //try not string new password
+        await agent
+            .patch('/api/user/change_password')
+            .send({ old_password: 'sample', new_password: 2 })
+            .expect(400);
+
+        await agent
+            .get('/api/user/logout')
+            .expect(200);
+
+        await agent
+            .post('/api/user/login')
+            .send({ identifier: 'sample_user', password: 'sample' })
+            .expect(200);
+
+        //try valid attempt
+        await agent
+            .patch('/api/user/change_password')
+            .send({ old_password: 'sample', new_password: 'samplenew' })
+            .expect(200);
+
+        await agent
+            .get('/api/user/logout')
+            .expect(200);
+
+        //old password shouldn't work
+        await agent
+            .post('/api/user/login')
+            .send({ identifier: 'sample_user', password: 'sample' })
+            .expect(400);
+
+        await agent
+            .post('/api/user/login')
+            .send({ identifier: 'sample_user', password: 'samplenew' })
+            .expect(200);
     });
 });

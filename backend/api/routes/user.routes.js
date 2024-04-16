@@ -109,6 +109,9 @@ router.post('/signup/', async (req, res) => {
             return res.status(400).send('Username must not contain an @ symbol.');
         }
 
+        if(typeof password !== 'string') {
+            return res.status(400).send('Password must be a string.');
+        }
         const newUser = new User({
             email: email,
             username: username,
@@ -121,23 +124,18 @@ router.post('/signup/', async (req, res) => {
     catch (error) {
         if (error.code === 11000) { //Duplicate key error
             if (error.keyPattern.username) {
-                console.log('Username already exists.');
                 res.status(400).send('Username already exists.');
             } else if (error.keyPattern.email) {
-                console.log('Email already exists.');
                 res.status(400).send('Email already exists.');
             }
         }
         else if (error.name === 'ValidationError') {
             // Handle validation errors for specific fields
             if (error.errors.username) {
-                console.log('Invalid username:', error.errors.username.message);
                 res.status(400).send(error.errors.username.message);
             } else if (error.errors.email) {
-                console.log('Invalid email:', error.errors.email.message);
                 res.status(400).send(error.errors.email.message);
             } else if (error.errors.password) {
-                console.log('Invalid password:', error.errors.password.message);
                 res.status(400).send(error.errors.password.message);
             } else {
                 // Handle other validation errors
@@ -145,7 +143,6 @@ router.post('/signup/', async (req, res) => {
                 res.status(400).send('Invalid input data.');
             }
         } else {
-            console.error('Error adding user:', error);
             res.status(400).send('Error adding user.');
         }
     }
@@ -179,6 +176,12 @@ router.delete('/', checkSession, async (req, res) => {
 // TODO: should this be here? want to retrieve all polls a user created from newest to oldest
 router.get('/created_polls/:id', checkSession, async (req, res) => {
     try {
+
+        //for now allow only self get
+        if(req.session.userId !== req.params.id) {
+            return res.status(403).send("Forbidden.");
+        } 
+
         const existingUser = await User.findById(req.params.id).select('-password')
             .populate('created_poll_id');
         if (!existingUser) {
@@ -205,6 +208,14 @@ router.patch("/change_password", checkSession, async (req, res) => {
         const user = await User.findById(id);
         if (!await bcrypt.compare(old_password, user.password)) {
             return res.status(400).send('Current Password is invalid! Please re-enter!');
+        }
+
+        if(old_password === new_password) {
+            return res.status(400).send('New password cannot be the same as old password!');
+        }
+
+        if(typeof new_password !== 'string') {
+            return res.status(400).send('New password must be a string.');
         }
 
         // password check passes, now update password
