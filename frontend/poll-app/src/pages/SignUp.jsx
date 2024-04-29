@@ -12,6 +12,10 @@ function SignUp() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const { pushAlert, popAlert } = useUserContext();
 
+    async function sendVerificationEmail(email) {
+
+    }
+
     async function handleSignUp() {
         if (password !== confirmPassword) {
             pushAlert("Passwords don't match!", 'error');

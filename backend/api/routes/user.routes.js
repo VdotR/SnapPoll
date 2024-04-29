@@ -5,6 +5,9 @@ const express = require("express");
 const bcrypt = require('bcrypt');
 const router = express.Router();
 const { checkSession } = require('../middleware.js')
+const { v4: uuidv4 } = require('uuid');
+const { sendCustomEmail } = require('../services/email.js');
+
 
 //Check if requester is logged in, return id and username
 router.get('/auth/', async (req, res) => {
@@ -219,5 +222,43 @@ router.patch("/change_password", checkSession, async (req, res) => {
     }
 });
 
+router.patch("/verify/:token", async (req, res) => {
+    // Retrieve token
+    const token = req.params.token;
+
+    try {
+        // Find user with token
+        const user = await User.findOne({ token });
+        // Check whether user exists
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
+        // Make user to be verified
+        user.verified = true;
+
+        // Generate new token
+        user.token = user.token = () => uuidv4();
+        await user.save();
+
+        // Confirmation message
+        res.send(`User ${user.username} verified`);
+    }
+    catch (error) {
+        res.status(400).send("Invalid request while verifying token");
+    }
+});
+
+// Send email
+router.post('/send_email', async (req, res) => {
+    const { email, subject, text } = req.body;
+
+    try {
+        await sendCustomEmail(email, subject, text);
+        res.send('Email sent successfully');
+    }
+    catch (error) {
+        res.status(400).send("Invalid request while sending email");
+    }
+});
 
 module.exports = router;
