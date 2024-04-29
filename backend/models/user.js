@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const Schema = mongoose.Schema;
+const { v4: uuidv4 } = require('uuid');
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -47,7 +48,9 @@ const userSchema = new Schema({
         type: Schema.Types.ObjectId,
         default: [],
         ref: "Poll"
-    }]
+    }],
+    verified: { type: Boolean, default: false},
+    token: {type: String, default: () => uuidv4()},
 });
 
 // Password encryption middleware
