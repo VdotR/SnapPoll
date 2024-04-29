@@ -20,7 +20,7 @@ const userSchema = new Schema({
         type: String, required: true,
         validate: {
             validator: function (password) {
-                return typeof password === 'string' && password.length < 70;
+                return password.length < 70;
             },
             message: props => `Password is invalid. It must be lower than 70 characters.`
         }
