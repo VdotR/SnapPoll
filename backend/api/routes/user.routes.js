@@ -99,6 +99,9 @@ router.post('/signup/', async (req, res) => {
     try {
         const { email, username, password } = req.body;
 
+        if(typeof email !== 'string' || typeof username !== 'string' || typeof password !== 'string') {
+            return res.status(400).send('Invalid body.');
+        }
         // Check if email contains '@'
         if (!email.includes('@')) {
             return res.status(400).send('Email must contain an @ symbol.');
@@ -143,6 +146,7 @@ router.post('/signup/', async (req, res) => {
                 res.status(400).send('Invalid input data.');
             }
         } else {
+            console.error('Error:', error.message);
             res.status(400).send('Error adding user.');
         }
     }
