@@ -84,6 +84,23 @@ describe('Poll Routes', () => {
             });        
     });
 
+    it('GET on nonexisting /:id', async () => {
+        await loginWith(creatingUser.username);
+        await agent
+            .get(`/api/poll/000000000000000000000000`)
+            .expect('Content-Type', /json/)
+            .expect(404);
+   
+    });   
+
+    it('GET on invalid /:id', async () => {
+        await loginWith(creatingUser.username);
+        await agent
+            .get(`/api/poll/123`)
+            .expect('Content-Type', /json/)
+            .expect(400);
+    });   
+
     it('vote on available poll', async () => {
         let foundResponse = false;
         let answerer;
