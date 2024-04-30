@@ -92,3 +92,10 @@ export async function deleteUserRequest(password) {
         })
     });
 }    
+
+export async function verifyNewUser(token) {
+    return fetch(`${baseUserAPIUrl}/verify/${token}`, {
+        method: 'PATCH',
+        credentials: config.API_REQUEST_CREDENTIALS_SETTING
+    });
+}

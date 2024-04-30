@@ -1,5 +1,5 @@
 // Imports
-require('dotenv').config();
+require('dotenv').config( { path: require('find-config')('.env') });
 const User = require("../../models/user.js");
 const express = require("express");
 const bcrypt = require('bcrypt');
@@ -121,6 +121,14 @@ router.post('/signup/', async (req, res) => {
         });
 
         await newUser.save();
+
+        // Send verification email
+        const subject = 'Verify your email';
+        // Construct the VerifyEmail page
+        const text = `Click the link to verify your email: ${process.env.FRONTEND_BASE_URL}/verify/${newUser.token}`;
+
+        await sendCustomEmail(email, subject, text);
+
         res.send("User registration successful.")
     }
     catch (error) {
