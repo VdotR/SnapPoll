@@ -94,7 +94,7 @@ describe('User Routes', () => {
     it('GET on invalid /:id', async () => {
         const response = await request(app)
             .get(`/api/user/123`)
-            .expect(500);
+            .expect(400);
     });
 
     it('login, auth valid user', async () => {

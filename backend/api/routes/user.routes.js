@@ -3,6 +3,7 @@ const User = require("../../models/user.js");
 const express = require("express");
 const bcrypt = require('bcrypt');
 const router = express.Router();
+const mongoose = require('mongoose');
 const { checkSession } = require('../middleware.js')
 
 //Check if requester is logged in, return id and username
@@ -82,13 +83,18 @@ router.get('/lookup/:identifier', async (req, res) => {
 
 //Returns information (excluding password hash) about the user matching id
 router.get('/:id', async (req, res) => {
+    const id = req.params.id;
     try {
-        const existingUser = await User.findById(req.params.id).select('-password');
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).send({ message: 'Invalid ID format' });
+        }
+        const existingUser = await User.findById(id).select('-password');
         if (!existingUser) res.status(404).send("User not found.");
         else res.send(existingUser);
     }
     catch (error) {
         res.status(500).send("Something went wrong");
+        console.log(error.message);
     }
 });
 
