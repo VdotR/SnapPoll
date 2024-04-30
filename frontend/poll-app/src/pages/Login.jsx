@@ -22,6 +22,10 @@ function Login({ redirected }) {
             if (res.status === 400) {
                 pushAlert("Username/Email and password do not match", 'error');
                 return;
+            } 
+            else if (res.status === 403) {
+                pushAlert("User not verified. Please check your mailbox for verification email.", 'error');
+                return;
             }
 
             // Login success, change global state

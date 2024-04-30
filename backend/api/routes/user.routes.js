@@ -36,6 +36,10 @@ router.post('/login/', async (req, res) => {
         if (!user || !await bcrypt.compare(password, user.password)) {
             return res.status(400).send('Invalid credentials');
         }
+
+        if (!user.verified) {
+            return res.status(403).send('User not verified. Please check your mailbox for verification email.');
+        }
         req.session.userId = user._id; // Create a session
         req.session.username = user.username;
         res.send('Login successful');
