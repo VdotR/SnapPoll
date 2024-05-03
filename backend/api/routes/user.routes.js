@@ -299,17 +299,17 @@ router.patch("/verify/:token", async (req, res) => {
     }
 });
 
-// Send email
-router.post('/send_email', async (req, res) => {
-    const { email, subject, text } = req.body;
+// // Send email - reserved for future use
+// router.post('/send_email', async (req, res) => {
+//     const { email, subject, text } = req.body;
 
-    try {
-        await sendCustomEmail(email, subject, text);
-        res.send('Email sent successfully');
-    }
-    catch (error) {
-        res.status(400).send("Invalid request while sending email");
-    }
-});
+//     try {
+//         await sendCustomEmail(email, subject, text);
+//         res.send('Email sent successfully');
+//     }
+//     catch (error) {
+//         res.status(400).send("Invalid request while sending email");
+//     }
+// });
 
 module.exports = router;

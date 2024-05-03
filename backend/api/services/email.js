@@ -26,11 +26,6 @@ const sendCustomEmail = async (email, subject, text) => {
         subject: subject, // Subject line
         text: text, // plain text body
     });
-
-    console.log("Message sent: %s", info.messageId);
 }
-
-// Example Usage
-// sendCustomEmail("victorren2002@gmail.com", "Test", "Hello")
 
 module.exports = { sendCustomEmail };
