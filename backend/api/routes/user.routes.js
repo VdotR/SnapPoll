@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 const router = express.Router();
 const { checkSession } = require('../middleware.js')
 const { v4: uuidv4 } = require('uuid');
-const { sendCustomEmail, sendVerificationEmail } = require('../services/email.js');
+const { sendVerificationEmail } = require('../services/email.js');
 
 
 //Check if requester is logged in, return id and username
@@ -94,7 +94,7 @@ router.get('/lookup/', async (req, res) => {
 //Returns information (excluding password hash) about the user matching id
 router.get('/:id', async (req, res) => {
     try {
-        const existingUser = await User.findById(req.params.id).select('-password');
+        const existingUser = await User.findById(req.params.id).select('-password -token');
         if (!existingUser) res.status(404).send("User not found.");
         else res.send(existingUser);
     }

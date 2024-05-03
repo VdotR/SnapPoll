@@ -50,7 +50,7 @@ const userSchema = new Schema({
         ref: "Poll"
     }],
     verified: { type: Boolean, default: false},
-    token: {type: String, default: () => uuidv4()},
+    token: {type: String, default: () => uuidv4()}
 });
 
 // Password encryption middleware
