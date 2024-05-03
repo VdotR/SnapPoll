@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 const router = express.Router();
 const { checkSession } = require('../middleware.js')
 const { v4: uuidv4 } = require('uuid');
-const { sendCustomEmail } = require('../services/email.js');
+const { sendCustomEmail, sendVerificationEmail } = require('../services/email.js');
 
 
 //Check if requester is logged in, return id and username
@@ -125,12 +125,7 @@ router.patch('/resend_verification', async (req, res) => {
         user.token = uuidv4();
         await user.save();
 
-        // Send verification email
-        const subject = 'Verify your email';
-        // Construct the VerifyEmail page
-        const text = `Click the link to verify your email: ${process.env.FRONTEND_BASE_URL}/verify/${user.token}`;
-
-        await sendCustomEmail(user.email, subject, text);
+        await sendVerificationEmail(user.email, user.token);
 
         res.send("User registration successful.");
     }
@@ -165,12 +160,7 @@ router.post('/signup/', async (req, res) => {
 
         await newUser.save();
 
-        // Send verification email
-        const subject = 'Verify your email';
-        // Construct the VerifyEmail page
-        const text = `Click the link to verify your email: ${process.env.FRONTEND_BASE_URL}/verify/${newUser.token}`;
-
-        await sendCustomEmail(email, subject, text);
+        await sendVerificationEmail(newUser.email, newUser.token);
 
         res.send("User registration successful.")
     }

@@ -28,4 +28,14 @@ const sendCustomEmail = async (email, subject, text) => {
     });
 }
 
-module.exports = { sendCustomEmail };
+const sendVerificationEmail = async(email, token) => {
+    // Send verification email
+    const subject = 'Verify your email';
+    // Construct the VerifyEmail page
+    const text = `Click the link to verify your email: ${process.env.FRONTEND_BASE_URL}/verify/${token}`;
+
+    await sendCustomEmail(email, subject, text);
+}
+
+
+module.exports = { sendCustomEmail, sendVerificationEmail };
