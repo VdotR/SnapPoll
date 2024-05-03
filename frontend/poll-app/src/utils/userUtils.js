@@ -99,3 +99,4 @@ export async function verifyNewUser(token) {
         credentials: config.API_REQUEST_CREDENTIALS_SETTING
     });
 }
+
