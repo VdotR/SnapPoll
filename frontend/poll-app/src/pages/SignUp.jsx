@@ -30,7 +30,7 @@ function SignUp() {
             } else if (res.ok) {
                 // redirect to Login Page
                 popAlert();
-                navigate('/login', { state: { message: 'Signup successful. Please log in.' } });
+                navigate('/login', { state: { message: 'Signup successful. Please check your mailbox for verification email.' } });
             } else {
                 // Handle other errors or statuses here
                 console.log("Error Signing Up");
