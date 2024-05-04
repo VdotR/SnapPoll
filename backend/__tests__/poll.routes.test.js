@@ -165,6 +165,7 @@ describe('Poll Routes', () => {
     })
 
     it("vote on unavailable poll", async () => {
+        // Cannot vote on unavailable poll
         newPoll.available = false;
         await newPoll.save();
         await loginWith(creatingUser.username)
@@ -226,6 +227,7 @@ describe('Poll Routes', () => {
     });
 
     it('change poll availability as non-creator', async () => {
+        // Cannot change poll availability as answering user
         await loginWith(answeringUser.username);
         await agent
             .patch(`/api/poll/${newPoll._id}/available`)
@@ -264,6 +266,7 @@ describe('Poll Routes', () => {
     });
 
     it('invalid POST on /', async () => {
+        // Cannot create poll with long question
         const body = {
             question: Array(500).fill('a').toString(),
             correct_option: 1,
@@ -275,6 +278,7 @@ describe('Poll Routes', () => {
             .send(body)
             .expect(400)
         
+        // Cannot create poll with long option text
         body.question = 'Test'
         body.options = [Array(200).fill('a').toString()]
         await agent
@@ -282,6 +286,7 @@ describe('Poll Routes', () => {
             .send(body)
             .expect(400)
 
+        // Cannot create poll with empty question and options
         body.question = ''
         body.options = ['', '']
         await agent
@@ -315,10 +320,13 @@ describe('Poll Routes', () => {
     });
 
     it('invalid DELETE on /:id', async () => {
+        // Non-creating user cannot delete poll
         await loginWith(answeringUser.username);
         await agent
             .delete(`/api/poll/${newPoll._id}`)
             .expect(403)
+
+        // Cannot delete nonexistent poll 
         await agent
             .delete(`/api/polls/ABCDEFG`)
             .expect(404)
@@ -351,10 +359,13 @@ describe('Poll Routes', () => {
     });
     
     it('invalid poll clear', async () => {
+        // Non-creating user cannot clear poll
         await loginWith(answeringUser.username);
         await agent
             .patch(`/api/poll/${newPoll._id}/clear`)
             .expect(403)
+
+        // Cannot clear nonexistent poll
         await agent
             .delete(`/api/polls/ABCDEFG/clear`)
             .expect(404)
