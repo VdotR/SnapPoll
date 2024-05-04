@@ -1,10 +1,14 @@
 // Imports
+require('dotenv').config( { path: require('find-config')('.env') });
 const User = require("../../models/user.js");
 const express = require("express");
 const bcrypt = require('bcrypt');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { checkSession } = require('../middleware.js')
+const { v4: uuidv4 } = require('uuid');
+const { sendVerificationEmail } = require('../services/email.js');
+
 
 //Check if requester is logged in, return id and username
 router.get('/auth/', async (req, res) => {
@@ -33,6 +37,10 @@ router.post('/login/', async (req, res) => {
         if (!user || !await bcrypt.compare(password, user.password)) {
             return res.status(400).send('Invalid credentials');
         }
+
+        if (!user.verified) {
+            return res.status(403).send('User not verified. Please check your mailbox for verification email.');
+        }
         req.session.userId = user._id; // Create a session
         req.session.username = user.username;
         res.send('Login successful');
@@ -56,12 +64,13 @@ router.get('/logout/', checkSession, async (req, res) => {
 });
 
 // Returns information (excluding password hash) about the user matching email or username (identifier)
-router.get('/lookup/:identifier', async (req, res) => {
-    const identifier = req.params.identifier;
+router.get('/lookup/', async (req, res) => {
+    const identifier = req.query.identifier; // Use query instead of params
     let query = {};
+    console.log('Identifier:', identifier);
 
     // Check if the identifier contains '@'
-    if (identifier.includes('@')) {
+    if (identifier && identifier.includes('@')) {
         // Prepare to find the user by email
         query.email = identifier;
     } else {
@@ -72,8 +81,10 @@ router.get('/lookup/:identifier', async (req, res) => {
     try {
         const existingUser = await User.findOne(query, { password: 0 }).collation({ locale: 'en', strength: 2 }); // Exclude the password hash from the result
         if (!existingUser) {
+            console.log('User not found.');
             res.status(404).send("User not found.");
         } else {
+            console.log('User found:', existingUser);
             res.status(200).send(existingUser);
         }
     } catch (error) {
@@ -88,7 +99,7 @@ router.get('/:id', async (req, res) => {
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).send({ message: 'Invalid ID format' });
         }
-        const existingUser = await User.findById(id).select('-password');
+        const existingUser = await User.findById(req.params.id).select('-password -token');
         if (!existingUser) res.status(404).send("User not found.");
         else res.send(existingUser);
     }
@@ -97,6 +108,38 @@ router.get('/:id', async (req, res) => {
         console.log(error.message);
     }
 });
+
+// Do resend verification email
+router.patch('/resend_verification', async (req, res) => {
+    // Only email should be enough
+    try {
+        const { identifier } = req.body;
+        let user = null;
+
+        if (identifier.includes('@')) {
+            user = await User.findOne({ email: identifier });
+        } else {
+            user = await User.findOne({ username: identifier });
+        }
+        if (!user) {
+            console.log('User not found');
+            return res.status(404).send('User not found');
+        }
+
+
+        // Regenerate token
+        user.token = uuidv4();
+        await user.save();
+
+        await sendVerificationEmail(user.email, user.token);
+
+        res.send("User registration successful.");
+    }
+    catch (error) {
+        res.status(400).send("Error " + error.message);
+    }
+});
+
 
 //Creates new user with given information
 //@ char restriciton placed on email/username to prevent case where email and username are the same 
@@ -128,6 +171,9 @@ router.post('/signup/', async (req, res) => {
         });
 
         await newUser.save();
+
+        await sendVerificationEmail(newUser.email, newUser.token);
+
         res.send("User registration successful.")
     }
     catch (error) {
@@ -238,5 +284,43 @@ router.patch("/change_password", checkSession, async (req, res) => {
     }
 });
 
+router.patch("/verify/:token", async (req, res) => {
+    // Retrieve token
+    const token = req.params.token;
+
+    try {
+        // Find user with token
+        const user = await User.findOne({ token });
+        // Check whether user exists
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
+        // Make user to be verified
+        user.verified = true;
+
+        // Generate new token
+        user.token = uuidv4();
+        await user.save();
+
+        // Confirmation message
+        res.send(`User ${user.username} verified`);
+    }
+    catch (error) {
+        res.status(400).send("Invalid request while verifying token");
+    }
+});
+
+// // Send email - reserved for future use
+// router.post('/send_email', async (req, res) => {
+//     const { email, subject, text } = req.body;
+
+//     try {
+//         await sendCustomEmail(email, subject, text);
+//         res.send('Email sent successfully');
+//     }
+//     catch (error) {
+//         res.status(400).send("Invalid request while sending email");
+//     }
+// });
 
 module.exports = router;
