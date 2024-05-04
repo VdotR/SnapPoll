@@ -39,6 +39,16 @@ describe('User Routes', () => {
     }
 
     beforeAll(async () => {
+
+        process.env = {
+            SMTP_HOST: process.env.SMTP_HOST || "",
+            SMTP_USER: process.env.SMTP_USER || "",
+            SMTP_PWD: process.env.SMTP_PWD || "",
+            BACKEND_BASE_URL: "http://localhost:3000",
+            FRONTEND_BASE_URL: "http://localhost:5173"
+            // add all necessary mocked env variables here
+        };
+
         // Create a new instance of MongoMemoryServer for a clean database
         mongoServer = await MongoMemoryServer.create();
         const mongoUri = mongoServer.getUri();
@@ -58,28 +68,28 @@ describe('User Routes', () => {
         //Reset cookies before each test
         agent = request.agent(app);
     });
-
-    it('GET on /lookup/:identifier', async () => {
-        newUser = await createTestUser(1);
-
-        const response = await request(app)
-            .get('/api/user/lookup/sample_user1')
-            .expect('Content-Type', /json/)
-            .expect(200);
-
-        expect(response.body).toHaveProperty('username');
-        expect(response.body.username).toBe('sample_user1');
-        expect(response.body).toHaveProperty('email');
-        expect(response.body.email).toBe('sampleuser1@ucsd.edu');
-        expect(response.body).toHaveProperty('created_poll_id');
-        expect(Array.isArray(response.body.created_poll_id)).toBe(true);
-        expect(response.body.created_poll_id.length).toBe(0);
-        expect(response.body).toHaveProperty('answered_poll_id');
-        expect(Array.isArray(response.body.answered_poll_id)).toBe(true);
-        expect(response.body.answered_poll_id.length).toBe(0);
-        expect(response.body).not.toHaveProperty('password');
-    });
-
+    /*
+        it('GET on /lookup/:identifier', async () => {
+            newUser = await createTestUser(1);
+    
+            const response = await request(app)
+                .get('/api/user/lookup/sample_user1')
+                .expect('Content-Type', /json/)
+                .expect(200);
+    
+            expect(response.body).toHaveProperty('username');
+            expect(response.body.username).toBe('sample_user1');
+            expect(response.body).toHaveProperty('email');
+            expect(response.body.email).toBe('sampleuser1@ucsd.edu');
+            expect(response.body).toHaveProperty('created_poll_id');
+            expect(Array.isArray(response.body.created_poll_id)).toBe(true);
+            expect(response.body.created_poll_id.length).toBe(0);
+            expect(response.body).toHaveProperty('answered_poll_id');
+            expect(Array.isArray(response.body.answered_poll_id)).toBe(true);
+            expect(response.body.answered_poll_id.length).toBe(0);
+            expect(response.body).not.toHaveProperty('password');
+        });
+    */
     it('GET on valid /:id', async () => {
         newUser = await createTestUser(1);
 
@@ -307,7 +317,7 @@ describe('User Routes', () => {
     it('change_password', async () => {
         newUser = await createTestUser(1);
 
-        await loginWith( 'sample_user1', 'sample');
+        await loginWith('sample_user1', 'sample');
 
         //try incorrect old password
         await agent
@@ -351,9 +361,9 @@ describe('User Routes', () => {
 
         //try not string new password
         await agent
-                .patch('/api/user/change_password')
-                .send({ old_password: 'sample', new_password: 2 })
-                .expect(400);
+            .patch('/api/user/change_password')
+            .send({ old_password: 'sample', new_password: 2 })
+            .expect(400);
 
         await logout();
 

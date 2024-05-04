@@ -17,10 +17,8 @@ const pollSchema = new Schema({
     date_created: { type: Date, default: Date.now, required: true },
     created_by: {type: Schema.Types.ObjectId, ref: "User", required: true},
     responses: { type: [responseSchema], default: [] },
-    shortId: { type: String, unique: true }
+    shortId: { type: String, index: { unique: true, sparse: true }}
 });
-
-pollSchema.index({ shortId: 1 }, { unique: true, sparse: true });
 
 // Pre-save hook to generate shortId
 pollSchema.pre('save', async function(next) {
