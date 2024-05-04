@@ -18,7 +18,6 @@ const transporter = nodemailer.createTransport({
  * Example usage: sendCustomEmail("xxxx@gmail.com", "Test", "Hello World");
  */
 const sendCustomEmail = async (email, subject, text) => {
-    console.log("Sending email to " + email + " with subject " + subject + " and text " + text);
     // send mail with defined transport object
     let info = await transporter.sendMail({
         from: process.env.SMTP_USER, // sender address

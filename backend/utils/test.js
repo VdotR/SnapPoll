@@ -10,7 +10,8 @@ async function createTestUser(count=1) {
             username: `sample_user${i+1}`,
             email: `sampleuser${i+1}@ucsd.edu`,
             password: password
-        })
+        });
+        user.verified = true;
         users.push(user);
         await user.save();
     } 

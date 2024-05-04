@@ -105,5 +105,21 @@ describe('Poll Model', () => {
         await expect(poll.save()).rejects.toThrow();        
     });
 
-  
+    it('swapping availability generates shortId, and uniqueness check holds', async () => {
+        const userId = '6631cb7ff596a04bc0550f7a';
+
+        let poll_1; 
+        poll_1 = await savePoll('non empty string', ['A', 'B'], 1, userId);
+        expect(poll_1.available).toBe(false);
+        expect(poll_1.shortId).toBe(undefined);        
+        poll_1.available = true;
+        await poll_1.save();
+        expect(poll_1.available).toBe(true);
+        expect(poll_1.shortId).not.toBe(undefined);   
+        const shortId = poll_1.shortId;
+     
+        let poll_2;
+        poll_2 = await savePoll('non empty string', ['A', 'B'], 1, userId);
+        await expect(Poll.findOneAndUpdate({ _id: poll_2._id }, { $set: { shortId: shortId } })).rejects.toThrow();           
+    });  
 });
