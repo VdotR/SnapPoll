@@ -143,7 +143,7 @@ function MyPolls() {
         const indexoffirstPoll = indexOfLastPoll - pollsPerPage;
         const updatedCurrentPolls = polls.slice(indexoffirstPoll, indexOfLastPoll);
 
-        setNumPages(Math.ceil(polls.length / pollsPerPage));
+        setNumPages(Math.ceil(polls.length / pollsPerPage) || 1);
         setCurrentPolls(updatedCurrentPolls);
     }, [polls, currentPage, pollsPerPage]);
 
