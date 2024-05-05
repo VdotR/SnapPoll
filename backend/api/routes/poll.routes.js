@@ -11,12 +11,15 @@ const { checkSession, checkCreateValidPoll } = require('../middleware.js')
 router.patch('/:id/vote', checkSession, async (req, res) => {
     const _id = req.params.id;
     try {
+        if (!mongoose.Types.ObjectId.isValid(_id)) {
+            return res.status(400).send({ message: 'Invalid ID format' });
+        }
         // Check if the poll is available directly
         const poll = await Poll.findById(_id);
         if (!poll) {
-            return res.status(400).json({ message: "Poll is not available" });
+            return res.status(403).json({ message: "Poll is not available" });
         } else if (!poll.available) {
-            return res.status(400).json({ message: "Poll is not accepting responses" });
+            return res.status(403).json({ message: "Poll is not accepting responses" });
         }
 
         // Update user's answered_poll_id without adding duplicates (like adding to a set)
@@ -45,7 +48,8 @@ router.patch('/:id/vote', checkSession, async (req, res) => {
         res.send(newPoll);
 
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Error voting on poll:', error);
+        res.status(500).send();
     }
 });
 
@@ -54,11 +58,14 @@ router.patch('/:id/available', checkSession, async (req, res) => {
     const _id = req.params.id;
     const { available } = req.body;
 
-    if (typeof available !== 'boolean') {
-        return res.status(400).send({ message: "'available' must be true or false." });
-    }    
-
     try {
+        if (!mongoose.Types.ObjectId.isValid(_id)) {
+            return res.status(400).send({ message: 'Invalid ID format' });
+        }
+        if (typeof available !== 'boolean') {
+            return res.status(400).send({ message: "'available' must be true or false." });
+        }
+
         const poll = await Poll.findById(_id);
         if (req.session.userId !== poll.created_by.toString()) {
             return res.status(403).send("Forbidden");
@@ -74,7 +81,8 @@ router.patch('/:id/available', checkSession, async (req, res) => {
         }
     }
     catch (error) {
-        res.status(500).send({ message: error.message });
+        console.error('Error changing poll availability:', error);
+        res.status(500).send();
     }
 })
 
@@ -104,10 +112,11 @@ router.post('/', checkSession, checkCreateValidPoll, async (req, res) => {
             { $push: { created_poll_id: newPoll._id } }
         );
 
-        res.json(newPoll);
+        res.status(201).json(newPoll);
     }
     catch (error) {
-        res.status(500).send({ message: error.message });
+        console.error('Error creating poll:', error);
+        res.status(500).send();
     }
 });
 
@@ -117,7 +126,7 @@ router.get('/:id', checkSession, async (req, res) => {
     const _id = req.params.id;
     try {
         let query = {};
-        if (_id.length === 6) {
+        if (typeof _id === 'string' &&_id.length === 6) {
             query.shortId = _id.toUpperCase();
         }
         else {
@@ -144,7 +153,8 @@ router.get('/:id', checkSession, async (req, res) => {
 
         res.send(poll);
     } catch (error) {
-        res.status(500).send({ message: error.message });
+        console.error('Error retrieving poll:', error);
+        res.status(500).send();
     }
 });
 
@@ -152,17 +162,19 @@ router.get('/:id', checkSession, async (req, res) => {
 router.delete('/:id', checkSession, async (req, res) => {
     try {
         const _id = req.params.id;
+        if (!mongoose.Types.ObjectId.isValid(_id)) {
+            return res.status(400).send({ message: 'Invalid ID format' });
+        }
         const poll = await Poll.findById(_id).select('created_by');
         if (!poll) {
             return res.status(404).send({ message: "Can't delete poll: Poll not found" });
         }
         if (req.session.userId !== poll.created_by.toString()) {
-            return res.status(403).send({ message: "Can't delete poll: Unauthorized" });
+            return res.status(403).send({ message: "Can't delete poll: Forbidden" });
         }
 
         // Poll Side
         await Poll.findOneAndDelete({ _id: _id })
-
 
         // User side 
         // Each poll is created by ONLY 1 user
@@ -182,20 +194,23 @@ router.delete('/:id', checkSession, async (req, res) => {
         res.send({ message: "Poll and references deleted successfully.", poll });
 
     } catch (error) {
-        // If there's an error, it might be because the `id` is not a valid ObjectId
-        res.status(500).send({ message: error.message });
+        console.error('Error deleting poll:', error);
+        res.status(500).send();
     }
 })
 
 router.patch('/:id/clear', checkSession, async (req, res) => {
     try {
         const _id = req.params.id;
+        if (!mongoose.Types.ObjectId.isValid(_id)) {
+            return res.status(400).send({ message: 'Invalid ID format' });
+        }
         const poll = await Poll.findById(_id).select('created_by');
         if (!poll) {
             return res.status(404).send({ message: "Can't clear poll: Poll not found" });
         }
         if (req.session.userId !== poll.created_by.toString()) {
-            return res.status(403).send({ message: "Can't clear poll: Unauthorized" });
+            return res.status(403).send({ message: "Can't clear poll: Forbidden." });
         }
         const result = await Poll.updateOne(
             { _id: _id },
@@ -216,8 +231,7 @@ router.patch('/:id/clear', checkSession, async (req, res) => {
 
     } catch (error) {
         console.error('Error clearing poll responses:', error);
-        // If there's an error, it might be because the `id` is not a valid ObjectId
-        res.status(500).send({ message: error.message });
+        res.status(500).send();
     }
 })
 
