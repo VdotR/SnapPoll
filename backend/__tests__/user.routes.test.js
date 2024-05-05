@@ -28,7 +28,7 @@ describe('User Routes', () => {
             .expect(expected_code);
     }
 
-    const signup = async (email, username, password, expected_code = 200) => {
+    const signup = async (email, username, password, expected_code = 201) => {
         await agent
             .post('/api/user/signup')
             .send({
@@ -139,8 +139,8 @@ describe('User Routes', () => {
 
     });
 
-    it('login, auth invalid user', async () => {
-        await loginWith('sample_user', 'sample', 400);
+    it('dont login, auth invalid user', async () => {
+        await loginWith('sample_user', 'sample', 401);
 
         await agent
             .get('/api/user/auth')
@@ -170,11 +170,11 @@ describe('User Routes', () => {
         expect(validUser.username).toBe('sample_user');
         expect(validUser.password.length).toBe(60);
 
-        await signup('sAmPleuser@ucsd.edu', 'not_sample_user', 'sample', 400);
+        await signup('sAmPleuser@ucsd.edu', 'not_sample_user', 'sample', 403);
 
         expect(await User.countDocuments()).toBe(1);
 
-        await signup('sampleuser@ucsd.edu', 'Sample_user', 'sample', 400);
+        await signup('sampleuser@ucsd.edu', 'Sample_user', 'sample', 403);
 
         expect(await User.countDocuments()).toBe(1);
     });
@@ -323,7 +323,7 @@ describe('User Routes', () => {
         await agent
             .patch('/api/user/change_password')
             .send({ old_password: 'samplent', new_password: 'samplenew' })
-            .expect(400);
+            .expect(403);
 
         await logout();
 
@@ -343,7 +343,7 @@ describe('User Routes', () => {
         await agent
             .patch('/api/user/change_password')
             .send({ old_password: 'sample', new_password: 'sample' })
-            .expect(400);
+            .expect(405);
 
         await logout();
 
@@ -378,7 +378,7 @@ describe('User Routes', () => {
         await logout();
 
         //old password shouldn't work
-        await loginWith('sample_user1', 'sample', 400);
+        await loginWith('sample_user1', 'sample', 401);
 
         await loginWith('sample_user1', 'samplenew');
     });
