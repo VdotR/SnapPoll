@@ -12,14 +12,14 @@ router.patch('/:id/vote', checkSession, async (req, res) => {
     const _id = req.params.id;
     try {
         if (!mongoose.Types.ObjectId.isValid(_id)) {
-            return res.status(400).send({ message: 'Invalid ID format' });
+            return res.status(400).send({ message: 'Invalid ID format.' });
         }
         // Check if the poll is available directly
         const poll = await Poll.findById(_id);
         if (!poll) {
-            return res.status(403).json({ message: "Poll is not available" });
+            return res.status(403).json({ message: "Poll does not exist." });
         } else if (!poll.available) {
-            return res.status(403).json({ message: "Poll is not accepting responses" });
+            return res.status(403).json({ message: "Poll is not accepting responses." });
         }
 
         // Update user's answered_poll_id without adding duplicates (like adding to a set)
