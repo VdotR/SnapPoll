@@ -10,10 +10,15 @@ const { checkSession, checkCreateValidPoll } = require('../middleware.js')
 //Also updates the responses of the poll with the request body.
 router.patch('/:id/vote', checkSession, async (req, res) => {
     const _id = req.params.id;
+    const answer = req.body.answer;
     try {
         if (!mongoose.Types.ObjectId.isValid(_id)) {
             return res.status(400).json({ message: 'Invalid ID format.' });
         }
+        if(!Number.isInteger(answer)) {
+            return res.status(400).json({ message: 'Answer must be an integer.' });
+        }
+
         // Check if the poll is available directly
         const poll = await Poll.findById(_id);
         if (!poll) {
@@ -33,13 +38,13 @@ router.patch('/:id/vote', checkSession, async (req, res) => {
 
         if (existingResponse) {
             // Update the existing response
-            existingResponse.answer = req.body.answer;
+            existingResponse.answer = answer;
             existingResponse.updatedAt = Date.now();
         } else {
             // Add new response
             poll.responses.push({
                 user: req.session.userId,
-                answer: req.body.answer,
+                answer: answer,
                 updatedAt: Date.now()
             });
         }
@@ -126,7 +131,7 @@ router.get('/:id', checkSession, async (req, res) => {
     const _id = req.params.id;
     try {
         let query = {};
-        if (typeof _id === 'string' &&_id.length === 6) {
+        if (_id.length === 6) {
             query.shortId = _id.toUpperCase();
         }
         else {

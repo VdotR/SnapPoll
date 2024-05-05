@@ -1,11 +1,11 @@
 // Imports
-require('dotenv').config( { path: require('find-config')('.env') });
+require('dotenv').config({ path: require('find-config')('.env') });
 const User = require("../../models/user.js");
 const express = require("express");
 const bcrypt = require('bcrypt');
 const router = express.Router();
 const mongoose = require('mongoose');
-const { checkSession } = require('../middleware.js')
+const { checkSession, checkAreAllStrings } = require('../middleware.js')
 const { v4: uuidv4 } = require('uuid');
 const { sendVerificationEmail } = require('../services/email.js');
 
@@ -20,7 +20,7 @@ router.get('/auth/', async (req, res) => {
 });
 
 //login the user by creating a server side cookie
-router.post('/login/', async (req, res) => {
+router.post('/login/', checkAreAllStrings, async (req, res) => {
     try {
         const { identifier, password } = req.body;
         let user;
@@ -112,7 +112,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Do resend verification email
-router.patch('/resend_verification', async (req, res) => {
+router.patch('/resend_verification', checkAreAllStrings, async (req, res) => {
     // Only email should be enough
     try {
         const { identifier } = req.body;
@@ -145,13 +145,10 @@ router.patch('/resend_verification', async (req, res) => {
 //Creates new user with given information
 //@ char restriciton placed on email/username to prevent case where email and username are the same 
 //TODO: Password restrictions (minimum strength) 
-router.post('/signup/', async (req, res) => {
+router.post('/signup/', checkAreAllStrings, async (req, res) => {
     try {
         const { email, username, password } = req.body;
 
-        if(typeof email !== 'string' || typeof username !== 'string' || typeof password !== 'string') {
-            return res.status(400).send('Invalid body.');
-        }
         // Check if email contains '@'
         if (!email.includes('@')) {
             return res.status(400).send('Email must contain an @ symbol.');
@@ -162,9 +159,6 @@ router.post('/signup/', async (req, res) => {
             return res.status(400).send('Username must not contain an @ symbol.');
         }
 
-        if(typeof password !== 'string') {
-            return res.status(400).send('Password must be a string.');
-        }
         const newUser = new User({
             email: email,
             username: username,
@@ -206,14 +200,14 @@ router.post('/signup/', async (req, res) => {
 });
 
 //Deletes user if password in body matches, destroys session
-router.delete('/', checkSession, async (req, res) => {
+router.delete('/', checkSession, checkAreAllStrings, async (req, res) => {
     const password = req.body.password;
 
     try {
         const user = await User.findById(req.session.userId);
         if (!user || !await bcrypt.compare(password, user.password)) {
             return res.status(403).send('Invalid credentials');
-        }         
+        }
         //TODO: Also delete user responses from polls   
         const deletedUser = await User.findOneAndDelete({ _id: req.session.userId });
         if (deletedUser) {
@@ -240,9 +234,9 @@ router.get('/created_polls/:id', checkSession, async (req, res) => {
             return res.status(400).json({ message: 'Invalid ID format' });
         }
         //for now allow only self get
-        if(req.session.userId !== id) {
+        if (req.session.userId !== id) {
             return res.status(403).send("Forbidden.");
-        } 
+        }
 
         const existingUser = await User.findById(id).select('-password')
             .populate('created_poll_id');
@@ -258,7 +252,7 @@ router.get('/created_polls/:id', checkSession, async (req, res) => {
 })
 
 // Update user password
-router.patch("/change_password", checkSession, async (req, res) => {
+router.patch("/change_password", checkSession, checkAreAllStrings, async (req, res) => {
     const id = req.session.userId
     try {
         const { old_password, new_password } = req.body;
@@ -273,15 +267,11 @@ router.patch("/change_password", checkSession, async (req, res) => {
             return res.status(403).send('Current Password is invalid!');
         }
 
-        if(old_password === new_password) {
+        if (old_password === new_password) {
             return res.status(405).send('New password cannot be the same as old password!');
         }
 
-        if(typeof new_password !== 'string') {
-            return res.status(400).send('New password must be a string.');
-        }
-
-        if(new_password.length > 70) {
+        if (new_password.length > 70) {
             return res.status(400).send('Password must be under 70 characters.');
         }
 
@@ -289,7 +279,7 @@ router.patch("/change_password", checkSession, async (req, res) => {
         user.password = new_password;
         await user.save();
         res.send('Password updated successfully');
-    } 
+    }
     catch (error) {
         res.status(500).send();
         console.error("Error changing password", error.message);
