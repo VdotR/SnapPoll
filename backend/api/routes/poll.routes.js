@@ -12,7 +12,7 @@ router.patch('/:id/vote', checkSession, async (req, res) => {
     const _id = req.params.id;
     try {
         if (!mongoose.Types.ObjectId.isValid(_id)) {
-            return res.status(400).send({ message: 'Invalid ID format.' });
+            return res.status(400).json({ message: 'Invalid ID format.' });
         }
         // Check if the poll is available directly
         const poll = await Poll.findById(_id);
@@ -60,10 +60,10 @@ router.patch('/:id/available', checkSession, async (req, res) => {
 
     try {
         if (!mongoose.Types.ObjectId.isValid(_id)) {
-            return res.status(400).send({ message: 'Invalid ID format' });
+            return res.status(400).json({ message: 'Invalid ID format' });
         }
         if (typeof available !== 'boolean') {
-            return res.status(400).send({ message: "'available' must be true or false." });
+            return res.status(400).json({ message: "'available' must be true or false." });
         }
 
         const poll = await Poll.findById(_id);
@@ -77,7 +77,7 @@ router.patch('/:id/available', checkSession, async (req, res) => {
             res.send(updatedPoll);
         } else {
             // Do nothing if the current state matches the requested state
-            res.send({ message: "No changes made, poll availability is already set to " + available });
+            res.json({ message: "No changes made, poll availability is already set to " + available });
         }
     }
     catch (error) {

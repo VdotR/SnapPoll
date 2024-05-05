@@ -41,7 +41,7 @@ router.post('/login/', async (req, res) => {
         if (!user.verified) {
             return res.status(403).send('User not verified. Please check your mailbox for verification email.');
         }
-        
+
         req.session.userId = user._id; // Create a session
         req.session.username = user.username;
         res.send('Login successful');
@@ -99,7 +99,7 @@ router.get('/:id', async (req, res) => {
     const id = req.params.id;
     try {
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).send({ message: 'Invalid ID format' });
+            return res.status(400).json({ message: 'Invalid ID format' });
         }
         const existingUser = await User.findById(req.params.id).select('-password -token');
         if (!existingUser) res.status(404).send("User not found.");
@@ -237,7 +237,7 @@ router.get('/created_polls/:id', checkSession, async (req, res) => {
     const id = req.params.id;
     try {
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).send({ message: 'Invalid ID format' });
+            return res.status(400).json({ message: 'Invalid ID format' });
         }
         //for now allow only self get
         if(req.session.userId !== id) {
