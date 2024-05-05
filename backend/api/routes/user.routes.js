@@ -62,7 +62,7 @@ router.get('/logout/', checkSession, async (req, res) => {
         }
     });
 });
-
+/*
 // Returns information (excluding password hash) about the user matching email or username (identifier)
 router.get('/lookup/', async (req, res) => {
     const identifier = req.query.identifier; // Use query instead of params
@@ -91,7 +91,7 @@ router.get('/lookup/', async (req, res) => {
         res.status(500).send("Something went wrong");
     }
 });
-
+*/
 //Returns information (excluding password hash) about the user matching id
 router.get('/:id', async (req, res) => {
     const id = req.params.id;
