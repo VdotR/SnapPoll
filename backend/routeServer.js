@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const app = express();
 const cors = require('cors');
+const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require("helmet")
 const defaultPort = process.env.PORT || 3000;
 require('dotenv').config();
 
@@ -11,7 +13,10 @@ const pollRoutes = require('./api/routes/poll.routes');
 const userRoutes = require('./api/routes/user.routes');
 
 // Middleware
-app.use(express.json());
+app.use(helmet());
+app.use(express.urlencoded({ extended: true, limit: "2kb" }));
+app.use(express.json({ limit: "2kb" }));
+app.use(mongoSanitize());
 app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
   credentials: true

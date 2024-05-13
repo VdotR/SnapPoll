@@ -42,7 +42,7 @@ function Login({ redirected }) {
             const res = await loginUserRequest(userIdentifier, password);
             
             // Login failed
-            if (res.status === 400) {
+            if (res.status === 401) {
                 pushAlert("Username/Email and password do not match", 'error');
                 return;
             } 

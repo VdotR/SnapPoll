@@ -174,7 +174,7 @@ describe('Poll Routes', () => {
             .send({
                 answer: 2
             })
-            .expect(400)
+            .expect(403)
     });
 
     it('change poll availability', async () => {
@@ -250,7 +250,7 @@ describe('Poll Routes', () => {
         await agent
             .post('/api/poll')
             .send(body)
-            .expect(200)
+            .expect(201)
             .expect(response => {
                 expect(response.body).toHaveProperty('question', body.question);
                 expect(response.body).toHaveProperty('correct_option', body.correct_option);

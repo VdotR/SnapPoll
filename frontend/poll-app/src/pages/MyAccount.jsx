@@ -36,7 +36,7 @@ function MyAccount() {
             console.log("fetch");
             const res = await changePasswordRequest(oldPassword, newPassword);
 
-            if (res.status === 400) {
+            if (res.status >= 400 &&  res.status <= 405) {
                 pushAlert(await res.text(), 'error');
             } else if (res.ok) {
                 // redirect to Login Page
@@ -51,7 +51,6 @@ function MyAccount() {
                 e.target.reset();
             
             } else {
-                // Handle other errors or statuses here
                 console.log("Error Changing Password");
             }
 
