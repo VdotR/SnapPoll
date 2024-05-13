@@ -7,7 +7,6 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { checkSession } = require('../middleware.js')
 const { v4: uuidv4 } = require('uuid');
-import "random_info.js"
 
 
 //Check if requester is logged in, return id and username

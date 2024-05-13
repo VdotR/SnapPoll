@@ -19,7 +19,17 @@ function generateRandomUsername() {
     return generateRandomString(8); // Generate 8-character username
 }
 
+function generateRandomQuestion() {
+    return `Question ${generateRandomString(8)}`
+}
+
+function generateRandomAnswer(max = 5) {
+    return Math.floor(Math.random() * max);
+}
+
 module.exports = {
     generateRandomUsername,
-    generateRandomEmail
+    generateRandomEmail,
+    generateRandomQuestion,
+    generateRandomAnswer
 }
