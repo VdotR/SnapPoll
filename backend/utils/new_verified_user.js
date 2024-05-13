@@ -21,18 +21,40 @@ if (args.length > 3){
     username = args[0];
 }
 
-// Connect to mongodb
+// Connect to MongoDB
 mongoose.connect(process.env.CONNECTION_STRING, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-  }).then(() => console.log('Connected to MongoDB'))
-    .catch(err => console.error('Could not connect to MongoDB...', err));
+}).then(() => {
+    console.log('Connected to MongoDB');
 
-const sampleUser = new User({
-    email : email,
-    password : password,
-    username : username,
-    verified : true
+    const sampleUser = new User({
+        email: email,
+        password: password,
+        username: username,
+        verified: true
+    });
+
+    // Save the sample user and handle the promise
+    sampleUser.save().then(() => {
+        console.log('User successfully added.');
+        mongoose.disconnect().then(() => {
+            console.log('MongoDB connection closed.');
+            console.log('Created verified user');
+            console.log(`Username: ${sampleUser.username}`);
+            console.log(`email: ${sampleUser.email}`);
+            console.log(`password: ${password}`);
+            process.exit(0); // Exit the process after the connection is closed
+        });
+    }).catch(err => {
+        console.error('Error saving user:', err);
+        mongoose.disconnect().then(() => {
+            console.log('MongoDB connection closed.');
+            process.exit(1); // Exit the process with an error code
+        });
+    });
+
+}).catch(err => {
+    console.error('Could not connect to MongoDB...', err);
+    process.exit(1); // Exit the process with an error code
 });
-
-sampleUser.save();
