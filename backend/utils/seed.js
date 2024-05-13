@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 const User = require("../models/user.js");
-const Poll = require("../models/poll.js")
+const Poll = require("../models/poll.js");
 
 
 // Connect to mongodb
