@@ -4,7 +4,7 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 const { app, startServer } = require('../routeServer');
 const User = require('../models/user');
 const Poll = require('../models/poll');
-const { createTestUser, createTestPoll } = require('../utils/test');
+const { createTestUser, createTestPoll, password } = require('../utils/test');
 
 let agent, newUser;
 
@@ -409,5 +409,15 @@ describe('User Routes', () => {
 
         // Check if token has been updated
         expect(oldToken).not.toEqual(user_verified.token);
+    });
+
+    it("check non-verified user cannot login", async () => {
+        newUser = await createTestUser(1);
+        newUser.verified = false;
+        let newUserUsername = newUser.username;
+        let newUserPassword = newUser.password;
+        await newUser.save();
+
+        await loginWith('sample_user1', 'sample', 403);
     });
 });
