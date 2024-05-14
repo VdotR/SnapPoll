@@ -30,6 +30,16 @@ describe('Poll Routes', () => {
 
 
     beforeAll(async () => {
+        process.env = {
+            SMTP_HOST: process.env.SMTP_HOST || "",
+            SMTP_USER: process.env.SMTP_USER || "",
+            SMTP_PWD: process.env.SMTP_PWD || "",
+            NODE_ENV: 'production',            
+            BACKEND_BASE_URL: "http://localhost:3000",
+            FRONTEND_BASE_URL: "http://localhost:5173"
+            // add all necessary mocked env variables here
+        };
+
         // Create a new instance of MongoMemoryServer for a clean database
         mongoServer = await MongoMemoryServer.create();
         const mongoUri = mongoServer.getUri();

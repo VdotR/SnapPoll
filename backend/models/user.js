@@ -5,6 +5,31 @@ const { v4: uuidv4 } = require('uuid');
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
+const validatePassword = function(password) {
+    if (process.env.NODE_ENV !== 'production') {
+        return true;
+    }
+
+    const errors = [];
+    if (password.length < 8 || password.length > 70) {
+        errors.push('Password must be between 8 and 70 characters long.');
+    }
+    if (!/[A-Z]/.test(password)) {
+        errors.push('Password must contain at least one uppercase letter.');
+    }
+    if (!/[a-z]/.test(password)) {
+        errors.push('Password must contain at least one lowercase letter.');
+    }
+    if (!/[0-9]/.test(password)) {
+        errors.push('Password must contain at least one number.');
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+        errors.push('Password must contain at least one symbol.');
+    }
+
+    return errors.length === 0 || errors;
+};
+
 const userSchema = new Schema({
     email: {
         type: String,
@@ -20,10 +45,11 @@ const userSchema = new Schema({
     password: {
         type: String, required: true,
         validate: {
-            validator: function (password) {
-                return password.length < 70;
+            validator: function(value) {
+                const result = validatePassword(value);
+                return result === true;
             },
-            message: props => `Password is invalid. It must be lower than 70 characters.`
+            message: props => validatePassword(props.value)
         }
     },
     username: {
@@ -49,7 +75,9 @@ const userSchema = new Schema({
         default: [],
         ref: "Poll"
     }],
-    verified: { type: Boolean, default: false},
+    verified: { type: Boolean, default: function() {
+        return process.env.NODE_ENV !== 'production';
+    }},
     token: {type: String, default: () => uuidv4()}
 });
 
