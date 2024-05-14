@@ -9,25 +9,74 @@ const responseSchema = new Schema({
     updatedAt: { type: Date, default: Date.now, required: true }
 });
 
+const MAX_QUESTION_LENGTH = 200;
+const MAX_OPTION_LENGTH = 80;
+
 const pollSchema = new Schema({
-    question: { type: String, required: true },
-    options: [{ type: String, default: [] }],
-    correct_option: { type: Number, default: -1 },
-    available: { type: Boolean, default: false, required: true },
-    date_created: { type: Date, default: Date.now, required: true },
-    created_by: {type: Schema.Types.ObjectId, ref: "User", required: true},
-    responses: { type: [responseSchema], default: [] },
-    shortId: { type: String, index: { unique: true, sparse: true }}
+    question: { 
+        type: String, 
+        required: [true, 'Question is required.'],
+        validate: {
+            validator: function(v) {
+                return v.length <= MAX_QUESTION_LENGTH;
+            },
+            message: `Question must be less than ${MAX_QUESTION_LENGTH} characters.`
+        }
+    },
+    options: {
+        type: [String],
+        default: [],
+        validate: {
+            validator: function(arr) {
+                return arr.every(option => typeof option === 'string'
+                 && option.length > 0 && option.length <= MAX_OPTION_LENGTH);
+            },
+            message: `Each option must be a non-empty string and less than ${MAX_OPTION_LENGTH} characters.`
+        }
+    },
+    correct_option: { 
+        type: Number, 
+        default: -1,
+        validate: {
+            validator: function(v) {
+                return Number.isInteger(v);
+            },
+            message: 'Correct_option must be an integer.'
+        }
+    },
+    available: { 
+        type: Boolean, 
+        default: false, 
+        required: true 
+    },
+    date_created: { 
+        type: Date, 
+        default: Date.now, 
+        required: true 
+    },
+    created_by: { 
+        type: Schema.Types.ObjectId, 
+        ref: "User", 
+        required: true 
+    },
+    responses: { 
+        type: [responseSchema], 
+        default: [] 
+    },
+    shortId: { 
+        type: String, 
+        index: { unique: true, sparse: true }
+    }
 });
 
 // Pre-save hook to generate shortId
-pollSchema.pre('save', async function(next) {
+pollSchema.pre('save', async function (next) {
     if (this.available && !this.shortId) {
         try {
             this.shortId = await generateUniqueShortId();
         } catch (error) {
             next(error);
-            return; 
+            return;
         }
     } else if (!this.available) {
         this.shortId = undefined;
