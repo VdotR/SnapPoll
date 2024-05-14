@@ -449,4 +449,13 @@ describe('User Routes', () => {
 
         expect(sendVerificationEmail).toHaveBeenCalledWith(identifier, newUser1.token);
     });
+
+    it("Check signup sends verification email", async () => {
+        await signup('sampleuser@ucsd.edu', 'sample_user', 'sample', 201);
+
+        let newUser = await User.findOne( {username : "sample_user"});
+
+        expect(sendVerificationEmail).toHaveBeenCalledWith('sampleuser@ucsd.edu', newUser.token);
+    })
 });
+
