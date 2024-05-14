@@ -178,14 +178,20 @@ describe('User Routes', () => {
         expect(validUser.email).toBe('sampleuser@ucsd.edu');
         expect(validUser.username).toBe('sample_user');
         expect(validUser.password.length).toBe(60);
+        expect(sendVerificationEmail).toHaveBeenCalledWith(validUser.email, validUser.token);
+        jest.clearAllMocks();
 
         await signup('sAmPleuser@ucsd.edu', 'not_sample_user', 'sample', 403);
 
         expect(await User.countDocuments()).toBe(1);
+        expect(sendVerificationEmail).not.toHaveBeenCalled();
+        jest.clearAllMocks();
 
         await signup('sampleuser@ucsd.edu', 'Sample_user', 'sample', 403);
 
         expect(await User.countDocuments()).toBe(1);
+        expect(sendVerificationEmail).not.toHaveBeenCalled();
+        jest.clearAllMocks()        
     });
 
     it('reject invalid signups', async () => {
@@ -450,12 +456,15 @@ describe('User Routes', () => {
         expect(sendVerificationEmail).toHaveBeenCalledWith(identifier, newUser1.token);
     });
 
-    it("Check signup sends verification email", async () => {
-        await signup('sampleuser@ucsd.edu', 'sample_user', 'sample', 201);
+    it("Resend_verification does not send email for non-existent identifier", async () => {
+        let identifier = 'nonexistinguser@no.com';
+        // verify api call 
+        await agent
+            .patch(`/api/user/resend_verification`)
+            .send({ identifier })
+            .expect(404);
 
-        let newUser = await User.findOne( {username : "sample_user"});
-
-        expect(sendVerificationEmail).toHaveBeenCalledWith('sampleuser@ucsd.edu', newUser.token);
-    })
+        expect(sendVerificationEmail).not.toHaveBeenCalled();
+    });
 });
 
