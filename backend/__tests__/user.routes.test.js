@@ -5,6 +5,10 @@ const { app, startServer } = require('../routeServer');
 const User = require('../models/user');
 const Poll = require('../models/poll');
 const { createTestUser, createTestPoll, password } = require('../utils/test');
+const { sendVerificationEmail } = require('../api/services/email');
+
+// Jest mocks
+jest.mock('../api/services/email')
 
 let agent, newUser;
 
@@ -68,6 +72,11 @@ describe('User Routes', () => {
         //Reset cookies before each test
         agent = request.agent(app);
     });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
     /*
         it('GET on /lookup/:identifier', async () => {
             newUser = await createTestUser(1);
@@ -414,10 +423,30 @@ describe('User Routes', () => {
     it("check non-verified user cannot login", async () => {
         newUser = await createTestUser(1);
         newUser.verified = false;
-        let newUserUsername = newUser.username;
-        let newUserPassword = newUser.password;
         await newUser.save();
 
         await loginWith('sample_user1', 'sample', 403);
+    });
+
+    it("Check resend_verification sends email", async () => {
+        newUser = await createTestUser(1);
+        newUser.verified = false;
+        await newUser.save();
+
+        let identifier = newUser.email;
+        let oldToken = newUser.token;
+
+        // verify api call 
+        await agent
+            .patch(`/api/user/resend_verification`)
+            .send({ identifier })
+            .expect(200);
+
+
+        let newUser1 = await User.findOne( {email : identifier});
+        
+        expect(oldToken).not.toEqual(newUser1.token);
+
+        expect(sendVerificationEmail).toHaveBeenCalledWith(identifier, newUser1.token);
     });
 });
