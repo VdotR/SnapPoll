@@ -1,6 +1,5 @@
 const nodemailer = require('nodemailer');
 const { sendCustomEmail, sendVerificationEmail } = require('../api/services/email');
-const nodemailerMock = require('../__mocks__/nodemailer')
 
 // Mock nodemailer
 jest.mock('nodemailer');
@@ -30,9 +29,6 @@ describe('Email Service', () => {
         const token = '123456';
 
         await sendVerificationEmail(email, token);
-
-        console.log('Mock calls:', nodemailer.createTransport().sendMail.mock.calls);
-
 
         expect(nodemailer.createTransport().sendMail).toHaveBeenCalledWith({
             from: process.env.SMTP_USER,

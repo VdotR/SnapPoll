@@ -382,4 +382,32 @@ describe('User Routes', () => {
 
         await loginWith('sample_user1', 'samplenew');
     });
+
+    it("Check verify api works", async () => {
+        newUser = await createTestUser(1);
+        newUser.verified = false;
+        let newUserId = newUser._id;
+        let oldToken = newUser.token;
+        await newUser.save();
+
+        let user_unverified = await User.findOne({ _id: newUserId })
+        
+        // Check if verified updated to false
+        expect(user_unverified.verified).toBe(false);
+
+        // verify api call 
+        await agent
+            .patch(`/api/user/verify/${newUser.token}`)
+            .send({ })
+            .expect(200);
+
+        // Get user, should be verified
+        let user_verified = await User.findOne({ _id: newUserId })
+
+        // Check if user is verified
+        expect(user_verified.verified).toBe(true);
+
+        // Check if token has been updated
+        expect(oldToken).not.toEqual(user_verified.token);
+    });
 });
