@@ -4,7 +4,11 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 const { app, startServer } = require('../routeServer');
 const User = require('../models/user');
 const Poll = require('../models/poll');
-const { createTestUser, createTestPoll } = require('../utils/test');
+const { createTestUser, createTestPoll, password } = require('../utils/test');
+const { sendVerificationEmail } = require('../api/services/email');
+
+// Jest mocks
+jest.mock('../api/services/email')
 
 let agent, newUser;
 
@@ -68,6 +72,11 @@ describe('User Routes', () => {
         //Reset cookies before each test
         agent = request.agent(app);
     });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
     /*
         it('GET on /lookup/:identifier', async () => {
             newUser = await createTestUser(1);
@@ -382,4 +391,71 @@ describe('User Routes', () => {
 
         await loginWith('sample_user1', 'samplenew');
     });
+
+    it("Check verify api works", async () => {
+        newUser = await createTestUser(1);
+        newUser.verified = false;
+        let newUserId = newUser._id;
+        let oldToken = newUser.token;
+        await newUser.save();
+
+        let user_unverified = await User.findOne({ _id: newUserId })
+        
+        // Check if verified updated to false
+        expect(user_unverified.verified).toBe(false);
+
+        // verify api call 
+        await agent
+            .patch(`/api/user/verify/${newUser.token}`)
+            .send({ })
+            .expect(200);
+
+        // Get user, should be verified
+        let user_verified = await User.findOne({ _id: newUserId })
+
+        // Check if user is verified
+        expect(user_verified.verified).toBe(true);
+
+        // Check if token has been updated
+        expect(oldToken).not.toEqual(user_verified.token);
+    });
+
+    it("check non-verified user cannot login", async () => {
+        newUser = await createTestUser(1);
+        newUser.verified = false;
+        await newUser.save();
+
+        await loginWith('sample_user1', 'sample', 403);
+    });
+
+    it("Check resend_verification sends email", async () => {
+        newUser = await createTestUser(1);
+        newUser.verified = false;
+        await newUser.save();
+
+        let identifier = newUser.email;
+        let oldToken = newUser.token;
+
+        // verify api call 
+        await agent
+            .patch(`/api/user/resend_verification`)
+            .send({ identifier })
+            .expect(200);
+
+
+        let newUser1 = await User.findOne( {email : identifier});
+        
+        expect(oldToken).not.toEqual(newUser1.token);
+
+        expect(sendVerificationEmail).toHaveBeenCalledWith(identifier, newUser1.token);
+    });
+
+    it("Check signup sends verification email", async () => {
+        await signup('sampleuser@ucsd.edu', 'sample_user', 'sample', 201);
+
+        let newUser = await User.findOne( {username : "sample_user"});
+
+        expect(sendVerificationEmail).toHaveBeenCalledWith('sampleuser@ucsd.edu', newUser.token);
+    })
 });
+
