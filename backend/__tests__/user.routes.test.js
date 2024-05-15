@@ -6,6 +6,7 @@ const User = require('../models/user');
 const Poll = require('../models/poll');
 const { createTestUser, createTestPoll, password } = require('../utils/test');
 const { sendVerificationEmail } = require('../api/services/email');
+const { v4: uuidv4 } = require('uuid');
 
 // Jest mocks
 jest.mock('../api/services/email')
@@ -425,6 +426,14 @@ describe('User Routes', () => {
 
         // Check if token has been updated
         expect(oldToken).not.toEqual(user_verified.token);
+    });
+
+    it("Check nonexisting token does nothing", async () => {
+        // verify api call 
+        await agent
+            .patch(`/api/user/verify/${uuidv4()}`)
+            .send({ })
+            .expect(404);
     });
 
     it("check non-verified user cannot login", async () => {

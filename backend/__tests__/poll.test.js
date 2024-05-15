@@ -58,12 +58,8 @@ describe('Poll Model', () => {
         expect(poll.created_by.toString()).toBe(userId);
         expect(poll.responses.length).toBe(0);
 
-        poll = await savePoll('non empty string', [], 1, userId); //empty options
-        poll = await savePoll('non empty string', undefined, 1, userId); //options not defined
-        expect(poll.options).toStrictEqual([]);  
-
         poll = await savePoll('non empty string', ['A', 'B'], -1, userId); 
-        poll = await savePoll('non empty string', ['A', 'B'], undefined, userId); //correct option not defined
+        poll = await savePoll('non empty string', ['A', 'B'], undefined, userId); //correct option not defined (defaults to -1)
         expect(poll.correct_option).toBe(-1);                
     });
     it('does not save invalid polls', async () => {
@@ -72,6 +68,8 @@ describe('Poll Model', () => {
         await expect(savePoll('', ['A', 'B'], 1, userId)).rejects.toThrow(); //empty question
         await expect(savePoll('non empty string', ['A', 'B'], 1, '123')).rejects.toThrow(); //invalid created_by
         await expect(savePoll('non empty string', ['A', 'B'], 1, undefined)).rejects.toThrow(); //no created_by
+        await expect(savePoll('non empty string', [], -1, userId)).rejects.toThrow(); //empty options
+        await expect(savePoll('non empty string', undefined, -1, userId)).rejects.toThrow(); //options not defined  
     });
 
     it('does save valid responseSchema', async () => {
