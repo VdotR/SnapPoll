@@ -1,14 +1,40 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const Schema = mongoose.Schema;
+const { v4: uuidv4 } = require('uuid');
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+const validatePassword = function(password) {
+    if (process.env.NODE_ENV !== 'production') {
+        return true;
+    }
+
+    const errors = [];
+    if (password.length < 8 || password.length > 70) {
+        errors.push('Password must be between 8 and 70 characters long.');
+    }
+    if (!/[A-Z]/.test(password)) {
+        errors.push('Password must contain at least one uppercase letter.');
+    }
+    if (!/[a-z]/.test(password)) {
+        errors.push('Password must contain at least one lowercase letter.');
+    }
+    if (!/[0-9]/.test(password)) {
+        errors.push('Password must contain at least one number.');
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+        errors.push('Password must contain at least one symbol.');
+    }
+
+    return errors.length === 0 || errors;
+};
 
 const userSchema = new Schema({
     email: {
         type: String,
         required: true,
-        unique: true,
+        index: { unique: true, collation: { locale: 'en', strength: 2 } },
         validate: {
             validator: function (email) {
                 return emailRegex.test(email) && email.length < 150; //allows most but not all emails, doesn't allow case sensitivity in local 
@@ -19,16 +45,17 @@ const userSchema = new Schema({
     password: {
         type: String, required: true,
         validate: {
-            validator: function (password) {
-                return password.length < 150;
+            validator: function(value) {
+                const result = validatePassword(value);
+                return result === true;
             },
-            message: props => `Password ${props.value} is invalid. It must be lower than 150 characters.`
+            message: props => validatePassword(props.value)
         }
     },
     username: {
         type: String,
         required: true,
-        unique: true,
+        index: { unique: true, collation: { locale: 'en', strength: 2 } },
         validate: {
             validator: function (username) {
                 // Check that username does not contain '@'
@@ -47,7 +74,11 @@ const userSchema = new Schema({
         type: Schema.Types.ObjectId,
         default: [],
         ref: "Poll"
-    }]
+    }],
+    verified: { type: Boolean, default: function() {
+        return process.env.NODE_ENV !== 'production';
+    }},
+    token: {type: String, default: () => uuidv4()}
 });
 
 // Password encryption middleware
@@ -60,9 +91,6 @@ userSchema.pre('save', async function (next) {
 
     next(); // Proceed to the next middleware or save the document
 });
-
-userSchema.index({ username: 1 }, { unique: true, collation: { locale: 'en', strength: 2 } });
-userSchema.index({ email: 1 }, { unique: true, collation: { locale: 'en', strength: 2 } });
 
 const User = mongoose.model('User', userSchema);
 

@@ -4,6 +4,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useUserContext } from '../../context';
 import { loginUserRequest } from '../utils/userUtils';
 import '../css/Login.css';
+import config from '../config';
 
 function Login({ redirected }) {
     const [userIdentifier, setUserIdentifier] = useState("");
@@ -14,13 +15,39 @@ function Login({ redirected }) {
     const { isLoggedIn, setIsLoggedIn, setIsLoading, pushAlert, popAlert } = useUserContext();
     const successMessage = location.state?.message;
 
+    const handleResendEmail = async () => {
+        try {
+            const res = await fetch(`${config.BACKEND_BASE_URL}/api/user/resend_verification`, {
+                method: 'PATCH',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ identifier: userIdentifier })
+            })
+
+            if (res.ok) {
+                pushAlert('Verification email resent. Please check your mailbox.', 'info');
+            } else {
+                pushAlert(`Failed to resend verification email. Please try again later.`, 'error');
+            }
+        }
+        catch (err) {
+            console.error(err);
+        }
+    }
+
     async function handleLogin() {
         try {
             const res = await loginUserRequest(userIdentifier, password);
             
             // Login failed
-            if (res.status === 400) {
+            if (res.status === 401) {
                 pushAlert("Username/Email and password do not match", 'error');
+                return;
+            } 
+            else if (res.status === 403) {
+                pushAlert(<div><p>User not verified. Please check your mailbox for verification email. Click <a href="#" onClick={handleResendEmail} >here</a> to resend verification email.</p></div>, 'error');
                 return;
             }
 

@@ -25,14 +25,13 @@ function SignUp() {
             console.log("fetch")
             const res = await signupUserRequest(username, email, password);
 
-            if (res.status === 400) {
+            if (res.status === 400 || res.status === 403) {
                 pushAlert(await res.text(), 'error'); 
-            } else if (res.ok) {
+            } else if (res.status === 201) {
                 // redirect to Login Page
                 popAlert();
-                navigate('/login', { state: { message: 'Signup successful. Please log in.' } });
+                navigate('/login', { state: { message: 'Signup successful. Please check your mailbox for verification email.' } });
             } else {
-                // Handle other errors or statuses here
                 console.log("Error Signing Up");
             }
         }

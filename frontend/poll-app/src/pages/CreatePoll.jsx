@@ -58,7 +58,7 @@ function CreatePoll() {
         try {
             const response = await createPollRequest(question, correctOption, options);
 
-            if (response.ok) {
+            if (response.status === 201) {
                 const newPoll = await response.json();
                 pushAlert('Poll created successfully!');
                 console.log("created" + newPoll);

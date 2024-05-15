@@ -18,14 +18,14 @@ function FindAvailablePoll() {
     const dateCol = "date_answered"
     const tableCols = ["question", dateCol, "available", "chosen_answer"];
     const [currentPage, setCurrentPage] = useState(1); // Start with page 1
-    const [numPages, setNumPages] = useState(1); 
-    const pollsPerPage = 5; 
+    const [numPages, setNumPages] = useState(1);
+    const pollsPerPage = 5;
     const [currentPolls, setCurrentPolls] = useState([]); // Current polls to display
 
     // Lazy Loading effects
     useEffect(() => {
         const indexOfLastPoll = currentPage * pollsPerPage;
-    
+
         setNumPages(Math.ceil(polls.length / pollsPerPage));
         setCurrentPolls(polls.slice(0, indexOfLastPoll));
     }, [polls, currentPage, pollsPerPage]);
@@ -179,9 +179,14 @@ function FindAvailablePoll() {
                     })}
                 </tbody>
             </table>
-            <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage===numPages} className='lazy_load_btn'>
-                Load More
-            </button>
+            {numPages > 0 && (
+                <button
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    disabled={currentPage === numPages}
+                    className='lazy_load_btn'>
+                    Load More
+                </button>
+            )}
             {isLoading ? <Loading /> :
                 polls.length == 0 ? <p> You haven't answered any polls.</p> : <></>
             }

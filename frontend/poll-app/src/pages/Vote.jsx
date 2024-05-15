@@ -50,9 +50,12 @@ function Vote() {
         try {
             const response = await votePollRequest(poll_id, answerIndex);
             if (response.status === 200) pushAlert('Vote submitted successfully!');
-            else if (response.status === 400) {
+            else if (response.status === 403) {
                 pushAlert('Poll not available.', 'error');
             }
+            else if (response.status === 400) {
+                pushAlert('Invalid ID.', 'error');
+            }            
             else throw new Error();
 
             setSelectedOption(answerIndex); // Update the selected option state
