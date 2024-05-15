@@ -123,8 +123,8 @@ router.patch('/resend_verification', checkAreAllStrings, async (req, res) => {
         } else {
             user = await User.findOne({ username: identifier });
         }
-        if (!user) {
-            return res.status(404).send('User not found');
+        if (!user || user.verified == true) {
+            return res.status(404).send('No non-verified user with this identifier exists.');
         }
 
 
