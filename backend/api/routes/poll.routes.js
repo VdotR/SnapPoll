@@ -53,8 +53,13 @@ router.patch('/:id/vote', checkSession, async (req, res) => {
         res.send(newPoll);
 
     } catch (error) {
-        console.error('Error voting on poll:', error);
-        res.status(500).send();
+        if (error.name === 'ValidationError') {
+            const messages = Object.values(error.errors).map(error => error.message);
+            res.status(400).json({ errors: messages });
+        } else {
+            console.error('Error voting on poll:', error);
+            res.status(500).send();
+        }
     }
 });
 
@@ -120,8 +125,13 @@ router.post('/', checkSession, checkCreateValidPoll, async (req, res) => {
         res.status(201).json(newPoll);
     }
     catch (error) {
-        console.error('Error creating poll:', error);
-        res.status(500).send();
+        if (error.name === 'ValidationError') {
+            const messages = Object.values(error.errors).map(error => error.message);
+            res.status(400).json({ errors: messages });
+        } else {
+            console.error('Error creating poll:', error);
+            res.status(500).send();
+        }
     }
 });
 

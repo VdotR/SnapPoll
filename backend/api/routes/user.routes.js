@@ -123,8 +123,8 @@ router.patch('/resend_verification', checkAreAllStrings, async (req, res) => {
         } else {
             user = await User.findOne({ username: identifier });
         }
-        if (!user) {
-            return res.status(404).send('User not found');
+        if (!user || user.verified == true) {
+            return res.status(404).send('No non-verified user with this identifier exists.');
         }
 
 
@@ -148,16 +148,6 @@ router.patch('/resend_verification', checkAreAllStrings, async (req, res) => {
 router.post('/signup/', checkAreAllStrings, async (req, res) => {
     try {
         const { email, username, password } = req.body;
-
-        // Check if email contains '@'
-        if (!email.includes('@')) {
-            return res.status(400).send('Email must contain an @ symbol.');
-        }
-
-        // Check if username contains '@'
-        if (username.includes('@')) {
-            return res.status(400).send('Username must not contain an @ symbol.');
-        }
 
         const newUser = new User({
             email: email,
@@ -256,10 +246,6 @@ router.patch("/change_password", checkSession, checkAreAllStrings, async (req, r
     const id = req.session.userId
     try {
         const { old_password, new_password } = req.body;
-        // Check whether both are valid
-        if (!old_password || !new_password) {
-            return res.status(400).send('Invalid request');
-        }
 
         // Compare old password with current password in database
         const user = await User.findById(id);
@@ -271,32 +257,41 @@ router.patch("/change_password", checkSession, checkAreAllStrings, async (req, r
             return res.status(405).send('New password cannot be the same as old password!');
         }
 
-        if (new_password.length > 70) {
-            return res.status(400).send('Password must be under 70 characters.');
-        }
-
         // password check passes, now update password
         user.password = new_password;
         await user.save();
         res.send('Password updated successfully');
     }
     catch (error) {
-        res.status(500).send();
-        console.error("Error changing password", error.message);
+        if (error.name === 'ValidationError') {
+            // Handle validation errors for specific fields
+            if (error.errors.password) {
+                res.status(400).send(error.errors.password.message);
+            } else {
+                // Handle other validation errors
+                console.error('Validation error:', error.message);
+                res.status(400).send('Invalid input data.');
+            }
+        }
+        else {
+            res.status(500).send();
+            console.error("Error changing password", error.message);
+        }
     }
 });
 
 router.patch("/verify/:token", async (req, res) => {
     // Retrieve token
     const token = req.params.token;
-
+    if (typeof token !== 'string') return res.status(400).send();
     try {
         // Find user with token
         const user = await User.findOne({ token });
         // Check whether user exists
-        if (!user) {
-            return res.status(404).send('User not found');
+        if (!user || user.verified === true) {
+            return res.status(404).send('No non-verified user with this token exists.');
         }
+      
         // Make user to be verified
         user.verified = true;
 

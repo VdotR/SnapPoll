@@ -19,6 +19,16 @@ describe('Poll Model', () => {
     };
     
     beforeAll(async () => {
+        process.env = {
+            SMTP_HOST: process.env.SMTP_HOST || "",
+            SMTP_USER: process.env.SMTP_USER || "",
+            SMTP_PWD: process.env.SMTP_PWD || "",
+            NODE_ENV: 'production',            
+            BACKEND_BASE_URL: "http://localhost:3000",
+            FRONTEND_BASE_URL: "http://localhost:5173"
+            // add all necessary mocked env variables here
+        };
+        
         // Create a new instance of MongoMemoryServer for a clean database
         mongoServer = await MongoMemoryServer.create();
         const mongoUri = mongoServer.getUri();
@@ -48,12 +58,8 @@ describe('Poll Model', () => {
         expect(poll.created_by.toString()).toBe(userId);
         expect(poll.responses.length).toBe(0);
 
-        poll = await savePoll('non empty string', [], 1, userId); //empty options
-        poll = await savePoll('non empty string', undefined, 1, userId); //options not defined
-        expect(poll.options).toStrictEqual([]);  
-
         poll = await savePoll('non empty string', ['A', 'B'], -1, userId); 
-        poll = await savePoll('non empty string', ['A', 'B'], undefined, userId); //correct option not defined
+        poll = await savePoll('non empty string', ['A', 'B'], undefined, userId); //correct option not defined (defaults to -1)
         expect(poll.correct_option).toBe(-1);                
     });
     it('does not save invalid polls', async () => {
@@ -62,6 +68,8 @@ describe('Poll Model', () => {
         await expect(savePoll('', ['A', 'B'], 1, userId)).rejects.toThrow(); //empty question
         await expect(savePoll('non empty string', ['A', 'B'], 1, '123')).rejects.toThrow(); //invalid created_by
         await expect(savePoll('non empty string', ['A', 'B'], 1, undefined)).rejects.toThrow(); //no created_by
+        await expect(savePoll('non empty string', [], -1, userId)).rejects.toThrow(); //empty options
+        await expect(savePoll('non empty string', undefined, -1, userId)).rejects.toThrow(); //options not defined  
     });
 
     it('does save valid responseSchema', async () => {

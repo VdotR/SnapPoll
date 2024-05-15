@@ -30,6 +30,16 @@ describe('Poll Routes', () => {
 
 
     beforeAll(async () => {
+        process.env = {
+            SMTP_HOST: process.env.SMTP_HOST || "",
+            SMTP_USER: process.env.SMTP_USER || "",
+            SMTP_PWD: process.env.SMTP_PWD || "",
+            NODE_ENV: 'production',            
+            BACKEND_BASE_URL: "http://localhost:3000",
+            FRONTEND_BASE_URL: "http://localhost:5173"
+            // add all necessary mocked env variables here
+        };
+
         // Create a new instance of MongoMemoryServer for a clean database
         mongoServer = await MongoMemoryServer.create();
         const mongoUri = mongoServer.getUri();
@@ -68,6 +78,21 @@ describe('Poll Routes', () => {
                 expect(response.body.responses[0].user).toEqual(answeringUser._id.toString());
                 expect(response.body.responses[0].answer).toBe(1);
             });
+
+            await agent
+            .get(`/api/poll/${newPoll.shortId}`)
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .expect(response => {
+                expect(response.body).toHaveProperty('_id', newPoll._id.toString());
+                expect(response.body).toHaveProperty('question', 'Test Poll 1');
+                expect(response.body.options).toEqual(['A', 'B', 'C']);
+                expect(response.body).toHaveProperty('correct_option', 0);
+                expect(response.body).toHaveProperty('created_by', creatingUser._id.toString());
+                expect(response.body.responses.length).toBe(1);
+                expect(response.body.responses[0].user).toEqual(answeringUser._id.toString());
+                expect(response.body.responses[0].answer).toBe(1);
+            });            
         await logout();
 
         await loginWith(answeringUser.username);
@@ -81,7 +106,18 @@ describe('Poll Routes', () => {
                 expect(response.body.options).toEqual(['A', 'B', 'C']);
                 expect(response.body).not.toHaveProperty('correct_option');
                 expect(response.body).toHaveProperty('created_by', creatingUser._id.toString());
-            });        
+            });    
+            await agent
+            .get(`/api/poll/${newPoll.shortId}`)
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .expect(response => {
+                expect(response.body).toHaveProperty('_id', newPoll._id.toString());
+                expect(response.body).toHaveProperty('question', 'Test Poll 1');
+                expect(response.body.options).toEqual(['A', 'B', 'C']);
+                expect(response.body).not.toHaveProperty('correct_option');
+                expect(response.body).toHaveProperty('created_by', creatingUser._id.toString());
+            });                
     });
 
     it('GET on nonexisting /:id', async () => {
@@ -175,6 +211,31 @@ describe('Poll Routes', () => {
                 answer: 2
             })
             .expect(403)
+    });
+
+    it("invalid vote on available poll doesn't work", async () => {
+        // Answer is not an integer
+        await loginWith(creatingUser.username)
+        await agent
+            .patch(`/api/poll/${newPoll._id}/vote`)
+            .send({
+                answer: 2.5
+            })
+            .expect(400)
+
+        await agent
+            .patch(`/api/poll/${newPoll._id}/vote`)
+            .send({
+                answer: 'string'
+            })
+            .expect(400)
+        //answer is out of bounds of options
+        await agent
+            .patch(`/api/poll/${newPoll._id}/vote`)
+            .send({
+                answer: 6
+            })
+            .expect(400)
     });
 
     it('change poll availability', async () => {
@@ -276,23 +337,72 @@ describe('Poll Routes', () => {
         await agent
             .post('/api/poll')
             .send(body)
-            .expect(400)
+            .expect(400);
         
         // Cannot create poll with long option text
-        body.question = 'Test'
-        body.options = [Array(200).fill('a').toString()]
+        body.question = 'Test';
+        body.options = [Array(200).fill('a').toString()];
         await agent
             .post('/api/poll')
             .send(body)
-            .expect(400)
+            .expect(400);
 
-        // Cannot create poll with empty question and options
-        body.question = ''
-        body.options = ['', '']
+        // Cannot create poll with empty options
+        body.question = 'Test';
+        body.options = ['', ''];
         await agent
             .post('/api/poll')
             .send(body)
-            .expect(400)
+            .expect(400);
+
+        // Cannot create poll with empty question
+        body.question = '';
+        body.options = ['A', 'B'];
+        await agent
+            .post('/api/poll')
+            .send(body)
+            .expect(400);       
+            
+        // Cannot create poll with no options
+        body.question = '';
+        body.options = [];
+        await agent
+            .post('/api/poll')
+            .send(body)
+            .expect(400);       
+            
+        // Cannot create poll with invalid correct_option
+        body.question = 'Test';
+        body.options = ['A','B'];
+        body.correct_option = 4; //not within bounds of options
+        await agent
+            .post('/api/poll')
+            .send(body)
+            .expect(400);      
+            
+        // Cannot create poll with incorrect variable type(s)
+        body.question = 1;
+        body.options = ['A','B'];
+        body.correct_option = 1;
+        await agent
+            .post('/api/poll')
+            .send(body)
+            .expect(400);   
+            
+        body.question = 'Test';
+        body.options = [1.3, 2.6];
+        body.correct_option = 4; 
+        await agent
+            .post('/api/poll')
+            .send(body)
+            .expect(400);    
+            body.question = 'Test';
+            body.options = ['A','B'];
+            body.correct_option = 'no';
+            await agent
+                .post('/api/poll')
+                .send(body)
+                .expect(400);               
     });
 
     it('valid DELETE on /:id', async () => {

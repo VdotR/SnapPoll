@@ -1,6 +1,6 @@
 const User = require('../models/user')
 const Poll = require('../models/poll')
-const password = 'sample'
+const password = 'Sample1!'
 
 // Returns array of test users or one user
 async function createTestUser(count=1) {

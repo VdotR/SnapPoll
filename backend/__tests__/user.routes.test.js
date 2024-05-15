@@ -6,6 +6,7 @@ const User = require('../models/user');
 const Poll = require('../models/poll');
 const { createTestUser, createTestPoll, password } = require('../utils/test');
 const { sendVerificationEmail } = require('../api/services/email');
+const { v4: uuidv4 } = require('uuid');
 
 // Jest mocks
 jest.mock('../api/services/email')
@@ -48,6 +49,7 @@ describe('User Routes', () => {
             SMTP_HOST: process.env.SMTP_HOST || "",
             SMTP_USER: process.env.SMTP_USER || "",
             SMTP_PWD: process.env.SMTP_PWD || "",
+            NODE_ENV: 'production',
             BACKEND_BASE_URL: "http://localhost:3000",
             FRONTEND_BASE_URL: "http://localhost:5173"
             // add all necessary mocked env variables here
@@ -135,7 +137,7 @@ describe('User Routes', () => {
 
     it('login, auth valid user', async () => {
         newUser = await createTestUser(1);
-        await loginWith('sample_user1', 'sample');
+        await loginWith('sample_user1', password);
 
         await agent
             .get('/api/user/auth')
@@ -149,7 +151,7 @@ describe('User Routes', () => {
     });
 
     it('dont login, auth invalid user', async () => {
-        await loginWith('sample_user', 'sample', 401);
+        await loginWith('sample_user', password, 401);
 
         await agent
             .get('/api/user/auth')
@@ -166,63 +168,69 @@ describe('User Routes', () => {
 
         await logout(401);
 
-        await loginWith('sample_user1', 'sample');
+        await loginWith('sample_user1', password);
 
         await logout();
     });
 
     it('signup valid user & do not sign up duplicates', async () => {
-        await signup('sampleuser@ucsd.edu', 'sample_user', 'sample');
+        await signup('sampleuser@ucsd.edu', 'sample_user', password);
 
         const validUser = await User.findOne({ email: 'sampleuser@ucsd.edu' }).collation({ locale: 'en', strength: 2 });
         expect(validUser.email).toBe('sampleuser@ucsd.edu');
         expect(validUser.username).toBe('sample_user');
         expect(validUser.password.length).toBe(60);
+        expect(sendVerificationEmail).toHaveBeenCalledWith(validUser.email, validUser.token);
+        jest.clearAllMocks();
 
-        await signup('sAmPleuser@ucsd.edu', 'not_sample_user', 'sample', 403);
-
-        expect(await User.countDocuments()).toBe(1);
-
-        await signup('sampleuser@ucsd.edu', 'Sample_user', 'sample', 403);
+        await signup('sAmPleuser@ucsd.edu', 'not_sample_user', password, 403);
 
         expect(await User.countDocuments()).toBe(1);
+        expect(sendVerificationEmail).not.toHaveBeenCalled();
+        jest.clearAllMocks();
+
+        await signup('sampleuser@ucsd.edu', 'Sample_user', password, 403);
+
+        expect(await User.countDocuments()).toBe(1);
+        expect(sendVerificationEmail).not.toHaveBeenCalled();
+        jest.clearAllMocks()        
     });
 
     it('reject invalid signups', async () => {
         //no @ in email
-        await signup('sampleuserucsd.edu', 'sample_user', 'sample', 400);
+        await signup('sampleuserucsd.edu', 'sample_user', password, 400);
 
         expect(await User.countDocuments()).toBe(0);
 
         //@ in username
-        await signup('sAmPleuser@ucsd.edu', '@not_sample_user', 'sample', 400);
+        await signup('sAmPleuser@ucsd.edu', '@not_sample_user', password, 400);
 
         expect(await User.countDocuments()).toBe(0);
 
         //email too long
         await signup('sampleuser' + "9".repeat(150) + '@ucsd.edu',
-            'Sample_user', 'sample', 400);
+            'Sample_user', password, 400);
 
         expect(await User.countDocuments()).toBe(0);
 
         //username too long
         await signup('sampleuser@ucsd.edu',
-            'Sample_user' + "9".repeat(150), 'sample', 400);
+            'Sample_user' + "9".repeat(150), password, 400);
 
         expect(await User.countDocuments()).toBe(0);
 
         //password too long
         await signup('sampleuser@ucsd.edu',
-            'Sample_user', 'sample' + "9".repeat(75), 400);
+            'Sample_user', password + "9".repeat(75), 400);
         expect(await User.countDocuments()).toBe(0);
 
         //empty string email
-        await signup('', 'sample_user', 'sample', 400);
+        await signup('', 'sample_user', password, 400);
 
         expect(await User.countDocuments()).toBe(0);
 
         //empty string username
-        await signup('sampleuser@ucsd.edu', '', 'sample', 400);
+        await signup('sampleuser@ucsd.edu', '', password, 400);
 
         expect(await User.countDocuments()).toBe(0);
 
@@ -232,12 +240,12 @@ describe('User Routes', () => {
         expect(await User.countDocuments()).toBe(0);
 
         //non-string email
-        await signup(1, 'sample_user', 'sample', 400);
+        await signup(1, 'sample_user', password, 400);
 
         expect(await User.countDocuments()).toBe(0);
 
         //non-string username
-        await signup('sampleuser@ucsd.edu', 1, 'sample', 400);
+        await signup('sampleuser@ucsd.edu', 1, password, 400);
 
         expect(await User.countDocuments()).toBe(0);
 
@@ -249,11 +257,11 @@ describe('User Routes', () => {
     it('valid DELETE on /', async () => {
         newUser = await createTestUser(1);
         expect(await User.countDocuments()).toBe(1);
-        await loginWith('sample_user1', 'sample');
+        await loginWith('sample_user1', password);
 
         await agent
             .delete('/api/user/')
-            .send({ password: 'sample' })
+            .send({ password: password })
             .expect(200);
 
         expect(await User.countDocuments()).toBe(0);
@@ -266,11 +274,11 @@ describe('User Routes', () => {
         //make sure random delete w/o login doesn't do anything
         await agent
             .delete('/api/user/')
-            .send({ password: 'sample' })
+            .send({ password: password })
             .expect(401);
         expect(await User.countDocuments()).toBe(1);
 
-        await loginWith('sample_user1', 'sample');
+        await loginWith('sample_user1', password);
 
         await agent
             .get('/api/user/auth')
@@ -294,7 +302,7 @@ describe('User Routes', () => {
         const poll_1 = await createTestPoll(user_1, user_2);
         //user_1 poll creator, user_2 poll answerer
 
-        await loginWith('sample_user1', 'sample');
+        await loginWith('sample_user1', password);
 
         await agent
             .get(`/api/user/created_polls/${user_1._id}`)
@@ -316,7 +324,7 @@ describe('User Routes', () => {
         await logout();
 
         //try getting from other user
-        await loginWith('sample_user2', 'sample');
+        await loginWith('sample_user2', password);
 
         await agent
             .get(`/api/user/created_polls/${user_1._id}`)
@@ -326,7 +334,7 @@ describe('User Routes', () => {
     it('change_password', async () => {
         newUser = await createTestUser(1);
 
-        await loginWith('sample_user1', 'sample');
+        await loginWith('sample_user1', password);
 
         //try incorrect old password
         await agent
@@ -336,60 +344,60 @@ describe('User Routes', () => {
 
         await logout();
 
-        await loginWith('sample_user1', 'sample');
+        await loginWith('sample_user1', password);
 
         //try empty new password
         await agent
             .patch('/api/user/change_password')
-            .send({ old_password: 'sample', new_password: '' })
+            .send({ old_password: password, new_password: '' })
             .expect(400);
 
         await logout();
 
-        await loginWith('sample_user1', 'sample');
+        await loginWith('sample_user1', password);
 
         //try same new password
         await agent
             .patch('/api/user/change_password')
-            .send({ old_password: 'sample', new_password: 'sample' })
+            .send({ old_password: password, new_password: password })
             .expect(405);
 
         await logout();
 
-        await loginWith('sample_user1', 'sample');
+        await loginWith('sample_user1', password);
 
         //try too long new password
         await agent
             .patch('/api/user/change_password')
-            .send({ old_password: 'sample', new_password: 'sample'.repeat(20) })
+            .send({ old_password: password, new_password: password.repeat(20) })
             .expect(400);
 
         await logout();
 
-        await loginWith('sample_user1', 'sample');
+        await loginWith('sample_user1', password);
 
         //try not string new password
         await agent
             .patch('/api/user/change_password')
-            .send({ old_password: 'sample', new_password: 2 })
+            .send({ old_password: password, new_password: 2 })
             .expect(400);
 
         await logout();
 
-        await loginWith('sample_user1', 'sample');
+        await loginWith('sample_user1', password);
 
         //try valid attempt
         await agent
             .patch('/api/user/change_password')
-            .send({ old_password: 'sample', new_password: 'samplenew' })
+            .send({ old_password: password, new_password: password + 'new' })
             .expect(200);
 
         await logout();
 
         //old password shouldn't work
-        await loginWith('sample_user1', 'sample', 401);
+        await loginWith('sample_user1', password, 401);
 
-        await loginWith('sample_user1', 'samplenew');
+        await loginWith('sample_user1', password + 'new');
     });
 
     it("Check verify api works", async () => {
@@ -420,12 +428,20 @@ describe('User Routes', () => {
         expect(oldToken).not.toEqual(user_verified.token);
     });
 
+    it("Check nonexisting token does nothing", async () => {
+        // verify api call 
+        await agent
+            .patch(`/api/user/verify/${uuidv4()}`)
+            .send({ })
+            .expect(404);
+    });
+
     it("check non-verified user cannot login", async () => {
         newUser = await createTestUser(1);
         newUser.verified = false;
         await newUser.save();
 
-        await loginWith('sample_user1', 'sample', 403);
+        await loginWith('sample_user1', password, 403);
     });
 
     it("Check resend_verification sends email", async () => {
@@ -450,12 +466,15 @@ describe('User Routes', () => {
         expect(sendVerificationEmail).toHaveBeenCalledWith(identifier, newUser1.token);
     });
 
-    it("Check signup sends verification email", async () => {
-        await signup('sampleuser@ucsd.edu', 'sample_user', 'sample', 201);
+    it("Resend_verification does not send email for non-existent identifier", async () => {
+        let identifier = 'nonexistinguser@no.com';
+        // verify api call 
+        await agent
+            .patch(`/api/user/resend_verification`)
+            .send({ identifier })
+            .expect(404);
 
-        let newUser = await User.findOne( {username : "sample_user"});
-
-        expect(sendVerificationEmail).toHaveBeenCalledWith('sampleuser@ucsd.edu', newUser.token);
-    })
+        expect(sendVerificationEmail).not.toHaveBeenCalled();
+    });
 });
 
