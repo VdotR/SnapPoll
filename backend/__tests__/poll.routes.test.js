@@ -70,7 +70,7 @@ describe('Poll Routes', () => {
             .expect(200)
             .expect(response => {
                 expect(response.body).toHaveProperty('_id', newPoll._id.toString());
-                expect(response.body).toHaveProperty('question', 'Test Poll 1');
+                expect(response.body).toHaveProperty('title', 'Test Poll 1');
                 expect(response.body.options).toEqual(['A', 'B', 'C']);
                 expect(response.body).toHaveProperty('correct_option', 0);
                 expect(response.body).toHaveProperty('created_by', creatingUser._id.toString());
@@ -85,7 +85,7 @@ describe('Poll Routes', () => {
             .expect(200)
             .expect(response => {
                 expect(response.body).toHaveProperty('_id', newPoll._id.toString());
-                expect(response.body).toHaveProperty('question', 'Test Poll 1');
+                expect(response.body).toHaveProperty('title', 'Test Poll 1');
                 expect(response.body.options).toEqual(['A', 'B', 'C']);
                 expect(response.body).toHaveProperty('correct_option', 0);
                 expect(response.body).toHaveProperty('created_by', creatingUser._id.toString());
@@ -102,7 +102,7 @@ describe('Poll Routes', () => {
             .expect(200)
             .expect(response => {
                 expect(response.body).toHaveProperty('_id', newPoll._id.toString());
-                expect(response.body).toHaveProperty('question', 'Test Poll 1');
+                expect(response.body).toHaveProperty('title', 'Test Poll 1');
                 expect(response.body.options).toEqual(['A', 'B', 'C']);
                 expect(response.body).not.toHaveProperty('correct_option');
                 expect(response.body).toHaveProperty('created_by', creatingUser._id.toString());
@@ -113,7 +113,7 @@ describe('Poll Routes', () => {
             .expect(200)
             .expect(response => {
                 expect(response.body).toHaveProperty('_id', newPoll._id.toString());
-                expect(response.body).toHaveProperty('question', 'Test Poll 1');
+                expect(response.body).toHaveProperty('title', 'Test Poll 1');
                 expect(response.body.options).toEqual(['A', 'B', 'C']);
                 expect(response.body).not.toHaveProperty('correct_option');
                 expect(response.body).toHaveProperty('created_by', creatingUser._id.toString());
@@ -160,7 +160,7 @@ describe('Poll Routes', () => {
                 })
                 expect(foundResponse).toEqual(true)
                 expect(response.body).toHaveProperty('_id', newPoll._id.toString());
-                expect(response.body).toHaveProperty('question', 'Test Poll 1');
+                expect(response.body).toHaveProperty('title', 'Test Poll 1');
                 expect(response.body.options).toEqual(['A', 'B', 'C']);
                 expect(response.body).toHaveProperty('created_by', creatingUser._id.toString());
             })
@@ -191,7 +191,7 @@ describe('Poll Routes', () => {
                 })
                 expect(foundResponse).toEqual(true)
                 expect(response.body).toHaveProperty('_id', newPoll._id.toString());
-                expect(response.body).toHaveProperty('question', 'Test Poll 1');
+                expect(response.body).toHaveProperty('title', 'Test Poll 1');
                 expect(response.body.options).toEqual(['A', 'B', 'C']);
                 expect(response.body).toHaveProperty('created_by', creatingUser._id.toString());
             })
@@ -250,7 +250,7 @@ describe('Poll Routes', () => {
             .expect(response => {
                 expect(response.body.available == false)
                 expect(response.body).toHaveProperty('_id', newPoll._id.toString());
-                expect(response.body).toHaveProperty('question', 'Test Poll 1');
+                expect(response.body).toHaveProperty('title', 'Test Poll 1');
                 expect(response.body.options).toEqual(['A', 'B', 'C']);
                 expect(response.body).toHaveProperty('created_by', creatingUser._id.toString());
                 expect(response.body.responses.length).toEqual(1);
@@ -266,7 +266,7 @@ describe('Poll Routes', () => {
             .expect(response => {
                 expect(response.body.available == true)
                 expect(response.body).toHaveProperty('_id', newPoll._id.toString());
-                expect(response.body).toHaveProperty('question', 'Test Poll 1');
+                expect(response.body).toHaveProperty('title', 'Test Poll 1');
                 expect(response.body.options).toEqual(['A', 'B', 'C']);
                 expect(response.body).toHaveProperty('created_by', creatingUser._id.toString());
                 expect(response.body.responses.length).toEqual(1);
@@ -303,7 +303,7 @@ describe('Poll Routes', () => {
 
     it('valid POST on /', async () => {
         const body = {
-            question: "question?",
+            title: "question?",
             correct_option: 1,
             options: ['A', 'B', 'C']
         }
@@ -313,7 +313,7 @@ describe('Poll Routes', () => {
             .send(body)
             .expect(201)
             .expect(response => {
-                expect(response.body).toHaveProperty('question', body.question);
+                expect(response.body).toHaveProperty('title', body.title);
                 expect(response.body).toHaveProperty('correct_option', body.correct_option);
                 expect(response.body).toHaveProperty('options', body.options);
                 expect(response.body.available).toEqual(false);
@@ -327,9 +327,9 @@ describe('Poll Routes', () => {
     });
 
     it('invalid POST on /', async () => {
-        // Cannot create poll with long question
+        // Cannot create poll with long title
         const body = {
-            question: Array(500).fill('a').toString(),
+            title: Array(500).fill('a').toString(),
             correct_option: 1,
             options: ['A', 'B', 'C']
         };
@@ -340,7 +340,7 @@ describe('Poll Routes', () => {
             .expect(400);
         
         // Cannot create poll with long option text
-        body.question = 'Test';
+        body.title = 'Test';
         body.options = [Array(200).fill('a').toString()];
         await agent
             .post('/api/poll')
@@ -348,15 +348,15 @@ describe('Poll Routes', () => {
             .expect(400);
 
         // Cannot create poll with empty options
-        body.question = 'Test';
+        body.title = 'Test';
         body.options = ['', ''];
         await agent
             .post('/api/poll')
             .send(body)
             .expect(400);
 
-        // Cannot create poll with empty question
-        body.question = '';
+        // Cannot create poll with empty title
+        body.title = '';
         body.options = ['A', 'B'];
         await agent
             .post('/api/poll')
@@ -364,7 +364,7 @@ describe('Poll Routes', () => {
             .expect(400);       
             
         // Cannot create poll with no options
-        body.question = '';
+        body.title = '';
         body.options = [];
         await agent
             .post('/api/poll')
@@ -372,7 +372,7 @@ describe('Poll Routes', () => {
             .expect(400);       
             
         // Cannot create poll with invalid correct_option
-        body.question = 'Test';
+        body.title = 'Test';
         body.options = ['A','B'];
         body.correct_option = 4; //not within bounds of options
         await agent
@@ -381,7 +381,7 @@ describe('Poll Routes', () => {
             .expect(400);      
             
         // Cannot create poll with incorrect variable type(s)
-        body.question = 1;
+        body.title = 1;
         body.options = ['A','B'];
         body.correct_option = 1;
         await agent
@@ -389,20 +389,21 @@ describe('Poll Routes', () => {
             .send(body)
             .expect(400);   
             
-        body.question = 'Test';
+        body.title = 'Test';
         body.options = [1.3, 2.6];
         body.correct_option = 4; 
         await agent
             .post('/api/poll')
             .send(body)
             .expect(400);    
-            body.question = 'Test';
-            body.options = ['A','B'];
-            body.correct_option = 'no';
-            await agent
-                .post('/api/poll')
-                .send(body)
-                .expect(400);               
+
+        body.title = 'Test';
+        body.options = ['A','B'];
+        body.correct_option = 'no';
+        await agent
+            .post('/api/poll')
+            .send(body)
+            .expect(400);               
     });
 
     it('valid DELETE on /:id', async () => {

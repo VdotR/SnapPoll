@@ -8,13 +8,18 @@ import '../css/CreatePoll.css';
 
 function CreatePoll() {
     const navigate = useNavigate();
-    const [question, setQuestion] = useState('');
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
     const [options, setOptions] = useState(['']);
     const [correctOption, setCorrectOption] = useState(-1);
     const { pushAlert } = useUserContext();
 
-    const handleQuestionChange = (event) => {
-        setQuestion(event.target.value);
+    const handleTitleChange = (event) => {
+        setTitle(event.target.value);
+    };
+
+    const handleDescriptionChange = (event) => {
+        setDescription(event.target.value);
     };
 
     const handleOptionChange = (index, event) => {
@@ -56,7 +61,7 @@ function CreatePoll() {
 
     const handleSubmit = async () => {
         try {
-            const response = await createPollRequest(question, correctOption, options);
+            const response = await createPollRequest(title, description, correctOption, options);
 
             if (response.status === 201) {
                 const newPoll = await response.json();
@@ -78,17 +83,26 @@ function CreatePoll() {
     };
 
     return (
-        <Page title='Create a new poll' centerTitle={true}>
+        <Page title='Create a New Poll' centerTitle={true}>
             <form id='create-poll-form'>
-                <div className='option'>
-                    <input style={{ visibility: 'hidden' }} type="checkbox" className='option-check' />
+                <div className='option-inputs'>
                     <input
                         type="text"
-                        value={question}
-                        placeholder='Question'
-                        onChange={handleQuestionChange}
+                        value={title}
+                        placeholder='Title'
+                        onChange={handleTitleChange}
                         className='option-text'
                     />
+                    <input
+                        type="text"
+                        value={description}
+                        placeholder='Description (optional)'
+                        onChange={handleDescriptionChange}
+                        className='option-text'
+                    />
+                </div>
+                <div className='option'>
+                    <input style={{ visibility: 'hidden' }} type="checkbox" className='option-check' />
                     <button onClick={(e) => handleRemoveOption(e, index)} style={{ visibility: 'hidden' }} className="option-delete"><FaRegTrashAlt type="button" /></button>
                 </div>
 

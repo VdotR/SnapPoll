@@ -311,7 +311,7 @@ describe('User Routes', () => {
                 expect(Array.isArray(response.body)).toBe(true);
                 expect(response.body.length).toBe(1);
                 expect(response.body[0]).toHaveProperty('_id', poll_1._id.toString());
-                expect(response.body[0]).toHaveProperty('question', 'Test Poll 1');
+                expect(response.body[0]).toHaveProperty('title', 'Test Poll 1');
                 expect(response.body[0]).toHaveProperty('options', ['A', 'B', 'C']);
                 expect(response.body[0]).toHaveProperty('correct_option', 0);
                 expect(response.body[0]).toHaveProperty('available', true);

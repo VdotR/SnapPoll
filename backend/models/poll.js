@@ -19,20 +19,29 @@ const responseSchema = new Schema({
     updatedAt: { type: Date, default: Date.now, required: true }
 });
 
-const MAX_QUESTION_LENGTH = 200;
+const MAX_TITLE_LENGTH = 80;
+const MAX_DESCRIPTION_LENGTH = 250;
 const MAX_OPTION_LENGTH = 80;
 
 const pollSchema = new Schema({
-    question: { 
+    title: { 
         type: String, 
-        required: [true, 'Question is required.'],
         validate: {
             validator: function(v) {
-                return v.length <= MAX_QUESTION_LENGTH;
+                return v.length <= MAX_TITLE_LENGTH;
             },
-            message: `Question must be less than ${MAX_QUESTION_LENGTH} characters.`
+            message: `Title must be less than ${MAX_TITLE_LENGTH} characters.`
         }, 
         required: true
+    },
+    description: { 
+        type: String, 
+        validate: {
+            validator: function(v) {
+                return v.length <= MAX_DESCRIPTION_LENGTH;
+            },
+            message: `Description must be less than ${MAX_DESCRIPTION_LENGTH} characters.`
+        }
     },
     options: {
         type: [String],

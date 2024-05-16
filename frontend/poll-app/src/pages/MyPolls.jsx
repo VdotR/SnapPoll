@@ -23,7 +23,7 @@ function MyPolls() {
     
     // Table column names
     const dateCol = "date_created"
-    const tableCols = ["question", dateCol, "responses", "available"];
+    const tableCols = ["title", dateCol, "responses", "available"];
 
     // Replace underscore with space and capitalize each word 
     function toName(str) {
@@ -67,7 +67,7 @@ function MyPolls() {
         clearPollRequest(poll._id).then(res => {
             if (!res.ok) throw new Error();
         })
-            .then(() => pushAlert(`Cleared poll \"${truncate(poll.question)}\"`))
+            .then(() => pushAlert(`Cleared poll \"${truncate(poll.title)}\"`))
             .then(() => setPolls(prevPolls => prevPolls.map(p => {
                 if (p._id === poll._id) {
                     // Return a new object with the updated available property
@@ -82,11 +82,11 @@ function MyPolls() {
         deletePollRequest(poll._id)
             .then((response) => {
                 if (response.status === 200) {
-                    pushAlert(`Deleted poll \"${truncate(poll.question)}\"`);
+                    pushAlert(`Deleted poll \"${truncate(poll.title)}\"`);
                 }
             })
             .then(() => fetchPolls(userId))
-            .catch((error) => { pushAlert(`Error deleting poll \"${truncate(poll.question)}\"`) });
+            .catch((error) => { pushAlert(`Error deleting poll \"${truncate(poll.title)}\"`) });
     }
 
     // Toggle poll availability
@@ -110,7 +110,7 @@ function MyPolls() {
                 }
                 return p;
             }));
-            pushAlert(`${action === false ? 'Closed' : 'Opened'} poll \"${truncate(poll.question)}\"`);
+            pushAlert(`${action === false ? 'Closed' : 'Opened'} poll \"${truncate(poll.title)}\"`);
         } catch (err) {
             pushAlert("Failed to change vote availability.", 'error');
         }
@@ -153,12 +153,12 @@ function MyPolls() {
         let dateString = currentDate.toLocaleDateString();
         let timeString = currentDate.toLocaleTimeString();
 
-        // Create a question string based on current date and time
-        const question = `Quick Poll ${dateString} ${timeString}`;
+        // Create a title string based on current date and time
+        const title = `Quick Poll ${dateString} ${timeString}`;
         const correct_option = -1;
         const options = ["A", "B", "C", "D", "E"];
         try {
-            const response = await createPollRequest(question, correct_option, options);
+            const response = await createPollRequest(title, '', correct_option, options);
             if (!response.ok) {
                 throw new Error();
             }
@@ -195,7 +195,7 @@ function MyPolls() {
                         <tbody>
                             {currentPolls.map(poll => {
                                 return <tr onClick={(e) => handleRowClick(e, poll._id)} key={poll._id}>
-                                    <td className='truncate'>{poll.question}</td>
+                                    <td className='truncate'>{poll.title}</td>
                                     <td className='table-date'> {
                                         new Date(poll.date_created).toLocaleString('en-US', {
                                             year: 'numeric',
@@ -211,13 +211,13 @@ function MyPolls() {
                                     <td><input type='checkbox' onChange={() => toggleAvailable(poll)} checked={poll.available}></input></td>
                                     <td className='table-action'><Dialog
                                         title='Confirm clear poll'
-                                        text={getDialogText(`clear the responses for "${truncate(poll.question)}"`)}
+                                        text={getDialogText(`clear the responses for "${truncate(poll.title)}"`)}
                                         onConfirm={() => clearPoll(poll)}
                                         target={<FaEraser />}
                                     /></td>
                                     <td className='table-action'><Dialog
                                         title='Confirm poll deletion'
-                                        text={getDialogText(`delete the poll "${truncate(poll.question)}"`)}
+                                        text={getDialogText(`delete the poll "${truncate(poll.title)}"`)}
                                         onConfirm={() => deletePoll(poll)}
                                         target={<FaTrashAlt />}
                                     /></td>
