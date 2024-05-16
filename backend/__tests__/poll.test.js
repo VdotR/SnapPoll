@@ -7,9 +7,9 @@ describe('Poll Model', () => {
     let server;
     let mongoServer;
 
-    const savePoll = async (question, options, correct_option, created_by) => {
+    const savePoll = async (title, options, correct_option, created_by) => {
         const poll = new Poll({
-            question: question,
+            title: title,
             correct_option: correct_option,
             options: options,
             created_by: created_by
@@ -52,7 +52,7 @@ describe('Poll Model', () => {
 
         let poll; 
         poll = await savePoll('non empty string', ['A', 'B'], 1, userId);
-        expect(poll).toHaveProperty('question', 'non empty string');
+        expect(poll).toHaveProperty('title', 'non empty string');
         expect(poll.options).toEqual(['A', 'B']);
         expect(poll).toHaveProperty('correct_option', 1);
         expect(poll.created_by.toString()).toBe(userId);
@@ -65,7 +65,7 @@ describe('Poll Model', () => {
     it('does not save invalid polls', async () => {
         const userId = '6631cb7ff596a04bc0550f7a';
 
-        await expect(savePoll('', ['A', 'B'], 1, userId)).rejects.toThrow(); //empty question
+        await expect(savePoll('', ['A', 'B'], 1, userId)).rejects.toThrow(); //empty title
         await expect(savePoll('non empty string', ['A', 'B'], 1, '123')).rejects.toThrow(); //invalid created_by
         await expect(savePoll('non empty string', ['A', 'B'], 1, undefined)).rejects.toThrow(); //no created_by
         await expect(savePoll('non empty string', [], -1, userId)).rejects.toThrow(); //empty options

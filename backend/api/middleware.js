@@ -8,13 +8,17 @@ function checkSession(req, res, next) {
 }
 
 function checkCreateValidPoll(req, res, next) {
-    const { question, options, correct_option } = req.body;
+    const { title, description, options, correct_option } = req.body;
     
-    // Check if question is a string
-    if (typeof question !== 'string') {
-        return res.status(400).send({ message: 'Question must be a string.' });
+    // Check if title is a string
+    if (typeof title !== 'string') {
+        return res.status(400).send({ message: 'Title must be a string.' });
     }
-    
+
+    if (description && typeof description !== 'string') {
+        return res.status(400).send({ message: 'Description must be a string.' });
+    }
+
     // Check if options is an array of strings
     if (!Array.isArray(options) || !options.every(option => typeof option === 'string')) {
         return res.status(400).send({ message: 'Options must be an array of strings.' });

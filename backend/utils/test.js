@@ -23,7 +23,8 @@ async function createTestPoll(creatingUser, answeringUser=null, count=1) {
     let polls = []
     for (let i = 0; i < count; i++) {
         const poll = new Poll({
-            question: `Test Poll ${i+1}`,
+            title: `Test Poll ${i+1}`,
+            description: 'Hello World',
             options: ['A', 'B', 'C'],
             correct_option: 0,
             created_by: creatingUser._id,

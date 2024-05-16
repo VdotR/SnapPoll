@@ -311,7 +311,7 @@ describe('User Routes', () => {
                 expect(Array.isArray(response.body)).toBe(true);
                 expect(response.body.length).toBe(1);
                 expect(response.body[0]).toHaveProperty('_id', poll_1._id.toString());
-                expect(response.body[0]).toHaveProperty('question', 'Test Poll 1');
+                expect(response.body[0]).toHaveProperty('title', 'Test Poll 1');
                 expect(response.body[0]).toHaveProperty('options', ['A', 'B', 'C']);
                 expect(response.body[0]).toHaveProperty('correct_option', 0);
                 expect(response.body[0]).toHaveProperty('available', true);
@@ -426,6 +426,28 @@ describe('User Routes', () => {
 
         // Check if token has been updated
         expect(oldToken).not.toEqual(user_verified.token);
+    });
+
+    it("Check verify api does not do anything if user already validated", async () => {
+        newUser = await createTestUser(1);
+        let newUserId = newUser._id;
+        let oldToken = newUser.token;
+        await newUser.save();
+
+        // verify api call 
+        await agent
+            .patch(`/api/user/verify/${newUser.token}`)
+            .send({ })
+            .expect(404);
+
+        // Get user, should be verified
+        let user_verified = await User.findOne({ _id: newUserId })
+
+        // Check if user is verified
+        expect(user_verified.verified).toBe(true);
+
+        // Check if token has not been updated
+        expect(oldToken).toEqual(user_verified.token);
     });
 
     it("Check nonexisting token does nothing", async () => {

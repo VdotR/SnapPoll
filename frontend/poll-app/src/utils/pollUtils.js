@@ -9,7 +9,7 @@ export async function getPollRequest(pollId) {
 
 }
 
-export async function createPollRequest(question, correct_option, options) {
+export async function createPollRequest(title, description, correct_option, options) {
     return fetch(`${basePollAPIUrl}`, {
         method: 'POST',
         credentials: config.API_REQUEST_CREDENTIALS_SETTING,
@@ -17,7 +17,8 @@ export async function createPollRequest(question, correct_option, options) {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            question,
+            title,
+            description,
             correct_option,
             options
         }),

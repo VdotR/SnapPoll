@@ -122,7 +122,7 @@ function PollDetails() {
                 return;
             }
             fetchPoll(poll_id); // make request for shortId
-            pushAlert(`${action === false ? 'Closed' : 'Opened'} poll \"${truncate(poll.question)}\"`);
+            pushAlert(`${action === false ? 'Closed' : 'Opened'} poll \"${truncate(poll.title)}\"`);
         } catch (error) {
             console.error('Error:', error);
         }
@@ -132,7 +132,7 @@ function PollDetails() {
         clearPollRequest(poll._id).then(res => {
             if (!res.ok) throw new Error();
         })
-        .then(() => pushAlert(`Cleared poll \"${truncate(poll.question)}\"`))
+        .then(() => pushAlert(`Cleared poll \"${truncate(poll.title)}\"`))
         .then(() => setPoll(currentPoll => ({ ...currentPoll, responses: [] })))
         .then (() => {
             const newCounts = Object.keys(counts).reduce((acc, option) => {
@@ -153,7 +153,7 @@ function PollDetails() {
     const clearBtn = <button><FaEraser /><span>Clear</span></button>;
 
     return (
-        <Page title={`Responses for \"${poll == null? '...' : truncate(poll.question)}\"`}>
+        <Page title={`Responses for \"${poll == null? '...' : truncate(poll.title)}\"`}>
             {poll == null?  <Loading /> : <>
                 <div className='poll-details'>
                     <div className='responses-plot'>
@@ -167,7 +167,7 @@ function PollDetails() {
                             <button onClick={() => fetchPoll(poll_id)}><FaRedo /></button>
                             <Dialog 
                                 title={"Confirm clear poll"}
-                                text={getDialogText(`clear the responses for "${truncate(poll.question)}"`)}
+                                text={getDialogText(`clear the responses for "${truncate(poll.title)}"`)}
                                 target={clearBtn}
                                 onConfirm={() => clearPoll(poll)}
                             />
@@ -180,10 +180,10 @@ function PollDetails() {
                                 <span>Show correct option</span>
                             </span>}           
                             {poll.available && <Dialog
-                                title={"Vote now at <domain>/vote"}
+                                title={`Vote now at ${config.FRONTEND_BASE_URL}/vote`}
                                 text={<>
                                     {poll.shortId}
-                                    <QRCode value={`http://localhost:5173/vote/${poll.shortId}`} />
+                                    <QRCode value={`${config.FRONTEND_BASE_URL}/vote/${poll.shortId}`} />
                                 </>}
                                 target={presentBtn}
                                 big

@@ -16,7 +16,7 @@ function FindAvailablePoll() {
     const { userId, username, pushAlert } = useUserContext();
     const [isLoading, setIsLoading] = useState(true);
     const dateCol = "date_answered"
-    const tableCols = ["question", dateCol, "available", "chosen_answer"];
+    const tableCols = ["title", dateCol, "available", "chosen_answer"];
     const [currentPage, setCurrentPage] = useState(1); // Start with page 1
     const [numPages, setNumPages] = useState(1);
     const pollsPerPage = 5;
@@ -160,7 +160,7 @@ function FindAvailablePoll() {
                         const userResponse = poll.responses.find(response => response.user === userId);
                         return (
                             <tr onClick={(e) => handleRowClick(e, poll._id, poll.available)} key={poll._id}>
-                                <td><span>{poll.question}</span></td>
+                                <td><span>{poll.title}</span></td>
                                 <td> {
                                     new Date(userResponse.updatedAt).toLocaleString('en-US', {
                                         year: 'numeric',

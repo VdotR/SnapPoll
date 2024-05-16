@@ -1,3 +1,12 @@
+h2 {
+  text-align: center; /* Center the title */
+}
+
+h3 {
+  font-weight: normal; /* Make the description not bold */
+  text-align: center; /* Optional: Center the description if needed */
+}
+
 .voteOptionsContainer {
   display: flex;
   flex-direction: column;

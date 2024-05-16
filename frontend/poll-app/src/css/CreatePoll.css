@@ -5,6 +5,12 @@
   margin-bottom: 1rem;
 }
 
+.option-inputs {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; 
+}
+
 .option input {
   margin-bottom: 0;
 }

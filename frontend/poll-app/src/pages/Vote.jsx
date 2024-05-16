@@ -69,7 +69,8 @@ function Vote() {
         <Page>
             {pollDetails ? (
                 <div>
-                    <h2>{pollDetails.question}</h2>
+                    <h2>{pollDetails.title}</h2>
+                    <h3>{pollDetails.description}</h3>                    
                     <div className="voteOptionsContainer"> {/* Apply the container class */}
                         {pollDetails.options.map((option, index) => (
                             <button

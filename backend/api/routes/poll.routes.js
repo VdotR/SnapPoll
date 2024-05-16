@@ -98,17 +98,18 @@ router.patch('/:id/available', checkSession, async (req, res) => {
 
 
 
-//Create a new poll with user-specified question and options.
+//Create a new poll with user-specified title and options.
 //Adds new poll to User created_poll_id
 // Constants
 
 router.post('/', checkSession, checkCreateValidPoll, async (req, res) => {
     // Destructure the required fields from req.body
-    const { question, correct_option, options } = req.body;
+    const { title, description, correct_option, options } = req.body;
 
     try {
         const poll = new Poll({
-            question: question,
+            title: title,
+            description: description,
             correct_option: correct_option,
             options: options,
             created_by: req.session.userId
