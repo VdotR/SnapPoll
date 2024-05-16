@@ -428,6 +428,28 @@ describe('User Routes', () => {
         expect(oldToken).not.toEqual(user_verified.token);
     });
 
+    it("Check verify api does not do anything if user already validated", async () => {
+        newUser = await createTestUser(1);
+        let newUserId = newUser._id;
+        let oldToken = newUser.token;
+        await newUser.save();
+
+        // verify api call 
+        await agent
+            .patch(`/api/user/verify/${newUser.token}`)
+            .send({ })
+            .expect(404);
+
+        // Get user, should be verified
+        let user_verified = await User.findOne({ _id: newUserId })
+
+        // Check if user is verified
+        expect(user_verified.verified).toBe(true);
+
+        // Check if token has not been updated
+        expect(oldToken).toEqual(user_verified.token);
+    });
+
     it("Check nonexisting token does nothing", async () => {
         // verify api call 
         await agent

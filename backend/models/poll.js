@@ -36,6 +36,7 @@ const pollSchema = new Schema({
     },
     description: { 
         type: String, 
+        default : '',
         validate: {
             validator: function(v) {
                 return v.length <= MAX_DESCRIPTION_LENGTH;
