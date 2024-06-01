@@ -42,6 +42,7 @@ router.post('/login/', checkAreAllStrings, async (req, res) => {
             return res.status(403).send('User not verified. Please check your mailbox for verification email.');
         }
 
+        
         req.session.userId = user._id; // Create a session
         req.session.username = user.username;
         res.send('Login successful');

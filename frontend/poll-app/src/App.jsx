@@ -28,6 +28,7 @@ function App() {
   } = useUserContext();
 
   function pageifLoggedIn(path, page) {
+    console.log("logged in " + isLoggedIn)
     // return isLoggedIn ? page : <Login />
     if (isLoggedIn) {
       return page;

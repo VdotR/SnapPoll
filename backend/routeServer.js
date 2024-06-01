@@ -26,7 +26,7 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: process.env.NODE_ENV === 'production', // Need to setup local ssl
     httpOnly: true,
     maxAge: parseInt(process.env.SESSION_MAX_AGE) || 1210000000 // 2 weeks by default or from env
   }
