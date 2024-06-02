@@ -12,6 +12,9 @@ require('dotenv').config();
 const pollRoutes = require('./routes/poll.routes');
 const userRoutes = require('./routes/user.routes');
 
+
+app.get("/", (req, res) => res.send("Express on Vercel"));
+
 // Middleware
 app.use(helmet());
 app.use(express.urlencoded({ extended: true, limit: "2kb" }));
@@ -55,4 +58,4 @@ function startServer(mongoUri, port = defaultPort) {
 
 startServer(process.env.CONNECTION_STRING);
 
-module.exports = { app, startServer };
+module.exports = app;
