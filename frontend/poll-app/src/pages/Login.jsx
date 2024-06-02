@@ -40,7 +40,7 @@ function Login({ redirected }) {
     async function handleLogin() {
         try {
             const res = await loginUserRequest(userIdentifier, password);
-            
+  
             // Login failed
             if (res.status === 401) {
                 pushAlert("Username/Email and password do not match", 'error');
@@ -53,6 +53,7 @@ function Login({ redirected }) {
 
             // Login success, change global state
             setIsLoggedIn(true);
+            console.log(isLoggedIn)
             popAlert();
         }
         catch (err) {
